@@ -30,20 +30,6 @@ export function Preloader({ onReveal, onDone }: Props) {
   const onRevealRef = useRef(onReveal);
   onRevealRef.current = onReveal;
 
-  // Fast-forward: satu putaran video = loaderDurationSeconds (3 detik)
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const applyRate = () => {
-      if (Number.isFinite(v.duration) && v.duration > 0) {
-        v.playbackRate = v.duration / site.loaderDurationSeconds;
-      }
-    };
-    v.addEventListener("loadedmetadata", applyRate);
-    applyRate();
-    return () => v.removeEventListener("loadedmetadata", applyRate);
-  }, []);
-
   exitRef.current = () => {
     onRevealRef.current(); // site muncul di belakang curtain
     setPhase("done"); // AnimatePresence menjalankan exit (slide up)
@@ -152,7 +138,7 @@ export function Preloader({ onReveal, onDone }: Props) {
             <div className="w-[min(320px,62vw)] overflow-hidden rounded-lg border border-line bg-panel">
               <video
                 ref={videoRef}
-                src={site.videoUrl}
+                src={site.loaderVideoUrl}
                 muted
                 loop
                 autoPlay

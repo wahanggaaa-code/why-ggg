@@ -20,10 +20,10 @@ export const site = {
   location: "Jakarta, ID",
   email: "halo@whyggg.dev",
   year: "2026",
-  videoUrl:
-    "https://github.com/wahanggaaa-code/why-ggg/releases/download/Asset01/Geometric_crystal_forming_animation_1080p_202609061649.2.mp4",
-  /** Satu putaran video preloader diputar selama N detik (fast-forward). */
-  loaderDurationSeconds: 3,
+  /** Video hero (full speed, 720p). */
+  videoUrl: "/videos/crystal-720p.mp4",
+  /** Video preloader — sudah fast-forward: 1 loop = ~3 detik (480p). */
+  loaderVideoUrl: "/videos/crystal-3s-480p.mp4",
 
   marquee: [
     "Open for work",
