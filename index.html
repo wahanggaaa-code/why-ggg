@@ -28,6 +28,13 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   html,body{height:100%}
+  /* a11y & polish */
+  section{ scroll-margin-top:72px; }
+  a:focus-visible, button:focus-visible{ outline:2px solid #e9e9ea; outline-offset:3px; border-radius:2px; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *, *::before, *::after{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
   body{
     background:#060607;
     color:#e9e9ea;
@@ -272,6 +279,7 @@
 </style>
 </head>
 <body>
+<noscript><style>#loader{display:none !important}</style></noscript>
 
 <div id="loader">
   <div id="videoWrap">
@@ -285,8 +293,8 @@
   <div id="grain"></div>
 
   <header>
-    <a class="logo" href="#hero" aria-label="Back to top"><img src="logo.png" alt="WHY GGG" style="height:28px; width:auto; display:block; filter: brightness(1) contrast(1);" /></a>
-    <nav class="hide-m">
+    <a class="logo" href="#hero" aria-label="Back to top"><img src="logo.png" alt="WHY GGG" width="340" height="334" style="height:28px; width:auto; display:block; filter: brightness(1) contrast(1);" /></a>
+    <nav aria-label="Navigasi utama">
       <a href="#hero">Home</a>
       <a href="#manifesto">About</a>
       <a href="#work">Work</a>
@@ -296,7 +304,7 @@
 
   <!-- HERO — lamalama style — FLUID FULL BLEED BEHIND TEXT -->
   <section id="hero">
-    <div class="hero-bg"><video muted autoplay loop playsinline preload="auto"><source src="fluid.mp4" type="video/mp4"></video></div>
+    <div class="hero-bg"><video muted autoplay loop playsinline preload="auto" poster="fluid-poster.webp"><source src="fluid.mp4" type="video/mp4"></video></div>
     <div class="hero-content">
       <h1 class="hero-title">
         <span class="line">A <em>creative</em> digital</span>
@@ -311,7 +319,7 @@
   </section>
 
   <!-- MANIFESTO -->
-  <section id="manifesto">
+  <section id="manifesto" aria-label="Manifesto">
     <div class="manifesto-big" id="manifestoReveal">
       I make things that feel <em>honest</em> and keep me <em>curious</em>. No pitch deck — just following what sticks.
     </div>
@@ -321,7 +329,7 @@
   </section>
 
   <!-- WORK — 01 ARCHIVE single carousel -->
-  <section id="work">
+  <section id="work" aria-label="Arsip karya">
     <div class="work-head">
       <span class="archive-title" data-reveal>01 ARCHIVE</span>
     </div>
@@ -355,7 +363,7 @@
   </section>
 
   <!-- CLOSING — personal, no pill, no client CTA -->
-  <section id="closing">
+  <section id="closing" aria-label="Kontak">
     <div class="closing-kicker">[ Say hi ]</div>
     <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap;">
       <div class="closing-title">Building<br>quietly.</div>
