@@ -170,6 +170,8 @@
   .archive-track{ display:flex; gap:16px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:10px; }
   .archive-track::-webkit-scrollbar{ display:none; }
   .archive-card{ flex:0 0 clamp(340px, 38vw, 460px); scroll-snap-align:start; background:#0e0e10; border:1px solid rgba(255,255,255,0.06); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; }
+  .js .archive-card{ opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s cubic-bezier(0.22,0.61,0.36,1); }
+  .js .archive-card.revealed{ opacity:1; transform:none; }
   .archive-media{ height:240px; display:grid; grid-template-columns:1.4fr 0.6fr; gap:1px; background:rgba(255,255,255,0.06); }
   .archive-media .ph{ background:#111114; display:flex; align-items:center; justify-content:center; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9e; }
   .archive-media .ph.dark{ background:#0a0a0c; }
@@ -186,7 +188,7 @@
   /* Gallery inside Landing Page — 5 editorial images, swipe, click enlarge 100px + blur */
   .gallery-track{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; height:240px; background:transparent; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding-right:16px; }
   .gallery-track::-webkit-scrollbar{ display:none; }
-  .gallery-slide{ flex:0 0 70%; scroll-snap-align:start; overflow:hidden; background:#111114; position:relative; cursor:zoom-in; border:1px solid rgba(255,255,255,0.06); }
+  .gallery-slide{ flex:0 0 70%; scroll-snap-align:start; overflow:hidden; background:#111114; position:relative; cursor:zoom-in; border:1px solid rgba(255,255,255,0.06); transition:transform .35s cubic-bezier(0.22,0.61,0.36,1), filter .35s ease; will-change:transform,filter; }
   .gallery-slide img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease; }
   .gallery-slide:hover img{ transform:scale(1.02); }
   .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; }
@@ -202,6 +204,13 @@
   .lightbox-nav{ position:absolute; inset:0; z-index:1; display:flex; justify-content:space-between; align-items:center; padding:0 20px; pointer-events:none; }
   .lightbox-nav button{ pointer-events:auto; width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.08); color:#e9e9ea; font-size:18px; cursor:pointer; backdrop-filter:blur(8px); }
   .lightbox-counter{ position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:2; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; color:#9a9a9e; background:rgba(0,0,0,0.4); padding:6px 12px; border-radius:999px; }
+  /* lightbox directional slide */
+  .lightbox-body img{ will-change:transform,opacity; }
+  .lightbox-body img.in-right{ animation:lbInRight .42s cubic-bezier(0.22,0.61,0.36,1) both; }
+  .lightbox-body img.in-left{ animation:lbInLeft .42s cubic-bezier(0.22,0.61,0.36,1) both; }
+  @keyframes lbInRight{ from{ transform:translateX(9%) scale(0.98); opacity:0 } to{ transform:none; opacity:1 } }
+  @keyframes lbInLeft{ from{ transform:translateX(-9%) scale(0.98); opacity:0 } to{ transform:none; opacity:1 } }
+  .lightbox-figure{ transition:transform .3s cubic-bezier(0.22,0.61,0.36,1); will-change:transform; }
   /* legacy (kept for compatibility) */
   .work-row{ display:flex; justify-content:space-between; align-items:center; padding:36px 0; cursor:pointer; }
   .work-left{ display:flex; align-items:baseline; gap:20px; }
@@ -402,7 +411,7 @@
 </div>
 
 <script>
-
+  document.documentElement.classList.add('js');
 
   // 21st.dev — scroll word reveal on manifesto (no extra text)
   (function(){
@@ -552,6 +561,40 @@
     update();
   })();
 
+  // Carousel polish — reveal on scroll + slide focus (scale/dim by distance from center)
+  (function(){
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cards = document.querySelectorAll('.archive-card');
+    if(cards.length && 'IntersectionObserver' in window && !reduced){
+      const io = new IntersectionObserver((es)=>{
+        es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('revealed'); io.unobserve(en.target); } });
+      }, {threshold:0.18});
+      cards.forEach(c=> io.observe(c));
+    } else {
+      cards.forEach(c=> c.classList.add('revealed'));
+    }
+    const track = document.getElementById('galleryTrack');
+    if(!track || reduced) return;
+    const slides = [...track.querySelectorAll('.gallery-slide')];
+    let raf = null;
+    function apply(){
+      raf = null;
+      const r = track.getBoundingClientRect();
+      const center = r.left + r.width/2;
+      slides.forEach(s=>{
+        const b = s.getBoundingClientRect();
+        const c = b.left + b.width/2;
+        const d = Math.min(1, Math.abs(c-center)/r.width);
+        s.style.transform = 'scale(' + (1 - d*0.08).toFixed(3) + ')';
+        s.style.filter = 'brightness(' + (1 - d*0.35).toFixed(3) + ')';
+      });
+    }
+    function onScroll(){ if(!raf) raf = requestAnimationFrame(apply); }
+    track.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    apply();
+  })();
+
   // Gallery lightbox — enlarge + focus blur + swipe + mono desc + slightly up
   (function(){
     const sources = ["aethelgard-hero.webp","archive-cover.webp","lexier-cover.webp","lexier-poster.webp","st-06.webp"];
@@ -594,8 +637,18 @@
       const main = document.getElementById('main');
       if(main) main.style.filter = '';
     }
-    function prev(){ idx = (idx - 1 + sources.length) % sources.length; lbImg.src = sources[idx]; lbImg.alt = alts[idx]||''; updateCounter(); updateDesc(); }
-    function next(){ idx = (idx + 1) % sources.length; lbImg.src = sources[idx]; lbImg.alt = alts[idx]||''; updateCounter(); updateDesc(); }
+    const figure = lb.querySelector('.lightbox-figure');
+    function setSrc(i){ idx = i; lbImg.src = sources[idx]; lbImg.alt = alts[idx]||''; updateCounter(); updateDesc(); }
+    function nav(dir){
+      const n = (idx + dir + sources.length) % sources.length;
+      lbImg.classList.remove('in-left','in-right');
+      void lbImg.offsetWidth; // restart animation
+      setSrc(n);
+      lbImg.classList.add(dir > 0 ? 'in-right' : 'in-left');
+    }
+    function prev(){ nav(-1); }
+    function next(){ nav(1); }
+    function resetFigure(){ if(figure){ figure.style.transition=''; figure.style.transform=''; } }
     track.querySelectorAll('.gallery-slide img').forEach(img=>{
       img.addEventListener('click', ()=>{
         const i = parseInt(img.getAttribute('data-idx')||'0',10);
@@ -612,28 +665,36 @@
       if(e.key==='ArrowLeft') prev();
       if(e.key==='ArrowRight') next();
     });
-    // swipe on lightbox
+    // swipe on lightbox — drag mengikuti jari + slide berarah
     let sx=0, sy=0, dx=0;
     const lbBody = lb.querySelector('.lightbox-body');
     if(lbBody){
       lbBody.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+      lbBody.addEventListener('touchmove', e=>{
+        if(figure){ figure.style.transition='none'; figure.style.transform = 'translateX(' + ((e.touches[0].clientX - sx)*0.35) + 'px)'; }
+      }, {passive:true});
       lbBody.addEventListener('touchend', e=>{
         dx = e.changedTouches[0].clientX - sx;
         const dy = e.changedTouches[0].clientY - sy;
+        resetFigure();
         if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){
           if(dx < 0) next(); else prev();
         }
       }, {passive:true});
-      // pointer swipe for desktop drag
+      // pointer swipe for desktop drag (follow + release)
       let isDown=false, startX=0;
       lbBody.addEventListener('pointerdown', e=>{ isDown=true; startX=e.clientX; lbBody.setPointerCapture(e.pointerId); });
+      lbBody.addEventListener('pointermove', e=>{
+        if(!isDown) return;
+        if(figure){ figure.style.transition='none'; figure.style.transform = 'translateX(' + ((e.clientX - startX)*0.35) + 'px)'; }
+      });
       lbBody.addEventListener('pointerup', e=>{
         if(!isDown) return; isDown=false;
         const d = e.clientX - startX;
+        resetFigure();
         if(Math.abs(d) > 50){ if(d < 0) next(); else prev(); }
       });
     }
-    // gallery track: snap update dots? single card so ignore
   })();
 
   const video = document.getElementById('crystalVideo');
