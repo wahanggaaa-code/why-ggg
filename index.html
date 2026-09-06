@@ -102,6 +102,7 @@
   /* HERO ala lamalama.com — editorial, pill video inline */
   #hero{
     position:relative; z-index:2;
+    margin-top:-56px; /* video naik menutup area header */
     min-height:88vh; display:flex; flex-direction:column; justify-content:center;
     padding:0; overflow:hidden; border-bottom:none;
   }
@@ -258,6 +259,7 @@
     header, #manifesto, #work, #closing, footer{ padding-left:24px; padding-right:24px; }
     .hero-content{ padding-left:24px; padding-right:24px; padding-top:80px; padding-bottom:60px; }
     header{ padding: 0 24px; height:52px; }
+    #hero{ margin-top:-52px; }
     header nav{ display:flex; gap:14px; font-size:9px; }
     #manifesto{ grid-template-columns:1fr; gap:24px; padding: 60px 24px; }
     .work-row{ flex-direction:column; align-items:flex-start; gap:16px; }
