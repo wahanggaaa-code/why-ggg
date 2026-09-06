@@ -255,7 +255,7 @@
     #manifesto{ grid-template-columns:1fr; gap:24px; padding: 60px 24px; }
     .work-row{ flex-direction:column; align-items:flex-start; gap:16px; }
     .work-preview{ grid-template-columns:1fr; }
-    .archive-card{ flex:0 0 85vw; }
+    .archive-card{ flex:0 0 100%; }
     .archive-media{ height:180px; }
     .gallery-track{ height:180px; gap:10px; padding-right:12px; }
     .gallery-slide{ flex:0 0 72%; }
@@ -657,8 +657,9 @@
   }
   function handleMeta(){
     const d=video.duration;
-    if(d && isFinite(d) && d>0) video.playbackRate = d/3;
-    else video.playbackRate = 3;
+    // fast-forward: video ±1.6s + animasi keluar ±1.4s = total loading ≈ 3 detik
+    if(d && isFinite(d) && d>0) video.playbackRate = d/1.6;
+    else video.playbackRate = 3.2;
     video.play().catch(()=>{});
   }
   function startLoader(){
