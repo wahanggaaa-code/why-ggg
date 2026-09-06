@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0a0a0b;
+  --color-panel: #111113;
+  --color-paper: #f4f1ea;
+  --color-mute: #8e8b85;
+  --color-accent: #9d8cff;
+  --color-line: rgba(244, 241, 234, 0.14);
+
+  --font-display: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --animate-marquee: marquee 26s linear infinite;
+  --animate-bob: bob 1.6s ease-in-out infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(6px);
+    }
+  }
+}
+
+html {
+  background: var(--color-ink);
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-ink);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #26262a;
+  border-radius: 8px;
+  border: 2px solid var(--color-ink);
+}
+
+/* Text with outline only (marquee alternating style) */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 241, 234, 0.4);
+}
+
+/* Lenis recommended styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
