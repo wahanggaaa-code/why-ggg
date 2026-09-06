@@ -91,12 +91,6 @@
   header nav a:hover{ color:#e9e9ea; }
   header nav a::before{ content:"["; margin-right:4px; opacity:0.4; }
   header nav a::after{ content:"]"; margin-left:4px; opacity:0.4; }
-  header .meta{
-    display:flex; align-items:center; gap:20px; color:#9a9a9e;
-  }
-  header .meta .cta{ display:none; }
-  header .meta .time{ display:flex; align-items:center; gap:8px; }
-  header .meta .dot{ width:4px; height:4px; border-radius:50%; background:#9a9a9e; }
 
   /* HERO ala lamalama.com — editorial, pill video inline */
   #hero{
@@ -108,11 +102,6 @@
   .hero-bg video{ width:100%; height:100%; object-fit:cover; display:block; filter: brightness(0.72) saturate(0.95) contrast(1.05); }
   .hero-bg::after{ content:""; position:absolute; inset:0; background: linear-gradient(to bottom, rgba(6,6,7,0.22) 0%, rgba(6,6,7,0.38) 50%, rgba(6,6,7,0.72) 78%, rgba(6,6,7,0.94) 92%, #060607 100%); }
   .hero-content{ position:relative; z-index:1; padding: 96px 40px 80px; }
-  .hero-kicker{
-    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e;
-    margin-bottom:32px; display:flex; align-items:center; gap:12px;
-  }
-  .hero-kicker::before{ content:""; width:28px; height:1px; background:#1a1a1e; }
   .hero-title{
     font-family:"General Sans",sans-serif; font-weight:600;
     font-size: clamp(42px, 7.2vw, 108px);
@@ -192,7 +181,6 @@
   .gallery-slide{ flex:0 0 70%; scroll-snap-align:start; overflow:hidden; background:#111114; position:relative; cursor:zoom-in; border:1px solid rgba(255,255,255,0.06); }
   .gallery-slide img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease; }
   .gallery-slide:hover img{ transform:scale(1.02); }
-  .gallery-hint{ position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.55); color:#e9e9ea; font-family:\"JetBrains Mono\",monospace; font-size:9px; letter-spacing:0.12em; padding:4px 8px; border-radius:999px; pointer-events:none; }
   .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; }
   .lightbox.open{ display:flex; }
   .lightbox-backdrop{ position:absolute; inset:0; background:rgba(6,6,7,0.82); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
@@ -205,7 +193,7 @@
   .lightbox-desc{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.08em; line-height:1.6; color:#e9e9ea; text-align:center; max-width:520px; padding:0 16px; opacity:0.9; }
   .lightbox-nav{ position:absolute; inset:0; z-index:1; display:flex; justify-content:space-between; align-items:center; padding:0 20px; pointer-events:none; }
   .lightbox-nav button{ pointer-events:auto; width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.08); color:#e9e9ea; font-size:18px; cursor:pointer; backdrop-filter:blur(8px); }
-  .lightbox-counter{ position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:2; font-family:\"JetBrains Mono\",monospace; font-size:10px; letter-spacing:0.14em; color:#9a9a9e; background:rgba(0,0,0,0.4); padding:6px 12px; border-radius:999px; }
+  .lightbox-counter{ position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:2; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; color:#9a9a9e; background:rgba(0,0,0,0.4); padding:6px 12px; border-radius:999px; }
   /* legacy (kept for compatibility) */
   .work-row{ display:flex; justify-content:space-between; align-items:center; padding:36px 0; cursor:pointer; }
   .work-left{ display:flex; align-items:baseline; gap:20px; }
@@ -299,12 +287,11 @@
   <header>
     <a class="logo" href="#hero" aria-label="Back to top"><img src="logo.png" alt="WHY GGG" style="height:28px; width:auto; display:block; filter: brightness(1) contrast(1);" /></a>
     <nav class="hide-m">
-      <a href="#">Home</a>
-      <a href="#">About</a>
-      <a href="#">Work</a>
-      <a href="#">Contact</a>
+      <a href="#hero">Home</a>
+      <a href="#manifesto">About</a>
+      <a href="#work">Work</a>
+      <a href="#closing">Contact</a>
     </nav>
-    <div class="meta" aria-hidden="true"></div>
   </header>
 
   <!-- HERO — lamalama style — FLUID FULL BLEED BEHIND TEXT -->
@@ -345,11 +332,11 @@
         <article class="archive-card">
           <div class="archive-media" style="padding:0; display:block; overflow:hidden; background:transparent;">
             <div class="gallery-track" id="galleryTrack">
-              <div class="gallery-slide"><img src="aethelgard-hero.jpg" alt="The Hidden Archive — Landing Page" data-idx="0" loading="lazy"></div>
-              <div class="gallery-slide"><img src="archive-cover.webp" alt="The Architecture of Silence" data-idx="1" loading="lazy"></div>
-              <div class="gallery-slide"><img src="lexier-cover.webp" alt="Lexier Cover" data-idx="2" loading="lazy"></div>
-              <div class="gallery-slide"><img src="lexier-poster.png" alt="Lexier Poster" data-idx="3" loading="lazy"></div>
-              <div class="gallery-slide"><img src="st-06.png" alt="Brush Script" data-idx="4" loading="lazy"></div>
+              <div class="gallery-slide"><img src="aethelgard-hero.webp" alt="The Hidden Archive — Landing Page" width="1280" height="1067" data-idx="0" loading="lazy" decoding="async"></div>
+              <div class="gallery-slide"><img src="archive-cover.webp" alt="The Architecture of Silence" width="1312" height="816" data-idx="1" loading="lazy" decoding="async"></div>
+              <div class="gallery-slide"><img src="lexier-cover.webp" alt="Lexier Cover" width="1408" height="768" data-idx="2" loading="lazy" decoding="async"></div>
+              <div class="gallery-slide"><img src="lexier-poster.webp" alt="Lexier Poster" width="896" height="1200" data-idx="3" loading="lazy" decoding="async"></div>
+              <div class="gallery-slide"><img src="st-06.webp" alt="Brush Script" width="960" height="1280" data-idx="4" loading="lazy" decoding="async"></div>
             </div>
           </div>
           <div class="archive-info">
@@ -378,13 +365,12 @@
       <a href="mailto:hi@whyggg.com" style="color:#e9e9ea; text-decoration:none;">hi@whyggg.com</a>
       <span style="opacity:0.3;">•</span>
       <a href="#" style="color:#9a9a9e; text-decoration:none;">DISCORD</a>
-      <a href="#" style="color:#9a9a9e; text-decoration:none;">GitHub</a>
+      <a href="https://github.com/wahanggaaa-code" target="_blank" rel="noopener" style="color:#9a9a9e; text-decoration:none;">GitHub</a>
     </div>
   </section>
 
   <footer>
     <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
-    <span aria-hidden="true"></span>
   </footer>
 </div>
 
@@ -558,7 +544,7 @@
 
   // Gallery lightbox — enlarge + focus blur + swipe + mono desc + slightly up
   (function(){
-    const sources = ["aethelgard-hero.jpg","archive-cover.webp","lexier-cover.webp","lexier-poster.png","st-06.png"];
+    const sources = ["aethelgard-hero.webp","archive-cover.webp","lexier-cover.webp","lexier-poster.webp","st-06.webp"];
     const alts = ["The Hidden Archive","The Architecture of Silence","Lexier Cover","Lexier Poster","Brush Script"];
     const descs = [
       "AETHELGARD — THE HIDDEN ARCHIVE / Edition 001 Spring Archive. A journal of rare things and quiet discoveries. EST. 2026",
