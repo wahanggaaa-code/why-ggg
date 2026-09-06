@@ -13,6 +13,12 @@ export type Project = {
   gradient: string;
 };
 
+/**
+ * Base URL asset — otomatis "/" saat dev, "/why-ggg/" saat build
+ * untuk GitHub Pages (via VITE_BASE). Jangan pakai path absolut manual.
+ */
+const base = import.meta.env.BASE_URL;
+
 export const site = {
   handle: "why-ggg",
   name: "Wahang",
@@ -21,9 +27,9 @@ export const site = {
   email: "halo@whyggg.dev",
   year: "2026",
   /** Video hero (full speed, 720p). */
-  videoUrl: "/videos/crystal-720p.mp4",
+  videoUrl: `${base}videos/crystal-720p.mp4`,
   /** Video preloader — sudah fast-forward: 1 loop = ~3 detik (480p). */
-  loaderVideoUrl: "/videos/crystal-3s-480p.mp4",
+  loaderVideoUrl: `${base}videos/crystal-3s-480p.mp4`,
 
   marquee: [
     "Open for work",
