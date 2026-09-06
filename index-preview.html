@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WHY ✴︎ GGG — Personal Landing</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23060607'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='13' fill='%23e9e9ea'%3E✴%3C/text%3E%3C/svg%3E">
+<link rel="preload" as="video" href="crystal.mp4" type="video/mp4">
+<style>
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:#060607;
+    color:#e9e9ea;
+    font-family:"General Sans",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:#e9e9ea;color:#060607}
+  ::-webkit-scrollbar{width:0;height:0}
+
+  /* LOADER — 150x150 kotak, tirai kiri→kanan */
+  #loader{
+    position:fixed; inset:0; z-index:50;
+    background:#060607;
+    display:flex; align-items:center; justify-content:center;
+    transform: translateX(0);
+    will-change: transform;
+    transition: transform 1.15s cubic-bezier(0.76,0,0.24,1);
+    box-shadow: 40px 0 80px rgba(0,0,0,0.9);
+  }
+  #loader::before{
+    content:""; position:absolute; top:0; right:0; width:1px; height:100%;
+    background: rgba(255,255,255,0.08);
+  }
+  #loader.out{ transform: translateX(100%); pointer-events:none; }
+  #videoWrap{
+    position:relative; overflow:hidden;
+    background:#060607;
+    width:150px; height:150px;
+    transform: scale(1); opacity:1;
+    transition: transform 0.65s cubic-bezier(0.76,0,0.24,1), opacity 0.55s ease, filter 0.55s ease;
+    animation: loaderIn 0.6s cubic-bezier(0.76,0,0.24,1) both;
+  }
+  @keyframes loaderIn{ from{ transform: scale(0.94); opacity:0; } to{ transform: scale(1); opacity:1; } }
+  #videoWrap.hide{ opacity:0; transform: scale(0.82); filter: brightness(0.5) blur(2px); }
+  #videoWrap video{ width:100%; height:100%; object-fit:cover; display:block; background:#060607; filter: brightness(0.95) contrast(1.02) saturate(0.96); }
+
+  /* MAIN — seamless full halaman, no batas section */
+  #main{
+    position:relative;
+    min-height:100svh;
+    background:#060607;
+    overflow:visible;
+  }
+  #grain{ pointer-events:none; position:fixed; inset:0; z-index:1; opacity:0.06; mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  header{
+    position:sticky; top:0; z-index:10;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:22px 40px; background:rgba(6,6,7,0.8); backdrop-filter:blur(12px);
+    border-bottom:1px solid #1a1a1e;
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+  }
+  header .left{ display:flex; align-items:center; gap:40px; color:#e9e9ea; }
+  header .live{ display:flex; align-items:center; gap:8px; color:#9a9a9e; }
+  header .live i{ width:6px; height:6px; border-radius:50%; background:#00ff88; animation:pulse 1.6s infinite; }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  header .center{ color:#9a9a9e; display:flex; gap:16px; align-items:center; }
+  header .center .sep{ width:1px; height:12px; background:#1a1a1e; }
+  header .cta{ display:inline-flex; align-items:center; gap:8px; border:1px solid #1a1a1e; border-radius:999px; padding:8px 16px; color:#e9e9ea; text-decoration:none; }
+
+  /* HERO ala lamalama.com — editorial, pill video inline */
+  #hero{
+    position:relative; z-index:2;
+    padding: 80px 40px 60px;
+    border-bottom:1px solid #1a1a1e;
+  }
+  .hero-kicker{
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e;
+    margin-bottom:32px; display:flex; align-items:center; gap:12px;
+  }
+  .hero-kicker::before{ content:""; width:28px; height:1px; background:#1a1a1e; }
+  .hero-title{
+    font-family:"General Sans",sans-serif; font-weight:600;
+    font-size: clamp(42px, 7.2vw, 108px);
+    line-height:0.88; letter-spacing:-0.05em; color:#e9e9ea;
+  }
+  .hero-title .line{ display:block; }
+  .hero-title em{
+    font-family:"Instrument Serif", Georgia, serif; font-weight:400; font-style:italic;
+    color:#9a9a9e; letter-spacing:-0.03em;
+  }
+  .pill{
+    display:inline-block; vertical-align:middle;
+    width: clamp(110px, 14vw, 220px); height: clamp(48px, 6vw, 84px);
+    border-radius:999px; overflow:hidden; background:#111114;
+    border:1px solid rgba(255,255,255,0.07);
+    margin: 0 10px; transform: translateY(-6px);
+  }
+  .pill video{ width:100%; height:100%; object-fit:cover; filter: brightness(0.95) saturate(0.96); }
+  .hero-desc{
+    max-width: 560px; margin-top:36px;
+    font-family:"JetBrains Mono",monospace; font-size:12px; line-height:1.7; color:#9a9a9e;
+  }
+  .hero-meta{
+    margin-top:48px; display:flex; gap:24px; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9e;
+  }
+  .hero-meta span{ display:flex; align-items:center; gap:8px; }
+  .hero-meta i{ width:5px; height:5px; border-radius:50%; background:#e9e9ea; }
+
+  /* MANIFESTO — lamalama style: huge statement without batas */
+  #manifesto{
+    padding: 80px 40px;
+    display:grid; grid-template-columns: 1.2fr 0.8fr; gap:60px;
+    border-bottom:1px solid #1a1a1e;
+  }
+  .manifesto-big{
+    font-family:"General Sans",sans-serif; font-weight:500;
+    font-size: clamp(28px, 3.4vw, 44px); line-height:1.1; letter-spacing:-0.03em;
+    color:#e9e9ea;
+  }
+  .manifesto-big em{ font-family:"Instrument Serif",serif; font-style:italic; color:#9a9a9e; font-weight:400; }
+  .manifesto-side{
+    font-family:"JetBrains Mono",monospace; font-size:12px; line-height:1.7; color:#9a9a9e;
+    padding-top:8px;
+  }
+  .manifesto-side b{ color:#e9e9ea; font-weight:500; }
+
+  /* WORK — seamless list like lamalama featured work, no kotak batas */
+  #work{
+    padding: 0 40px;
+  }
+  .work-head{
+    padding: 32px 0 24px; display:flex; justify-content:space-between; align-items:center;
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e;
+    border-bottom:1px solid #1a1a1e;
+  }
+  .work-head .count{ color:#e9e9ea; }
+  .work-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 36px 0; border-bottom:1px solid #1a1a1e;
+    cursor:pointer;
+  }
+  .work-row:last-child{ border-bottom:1px solid #1a1a1e; }
+  .work-left{ display:flex; align-items:baseline; gap:20px; }
+  .work-num{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.1em; color:#9a9a9e; }
+  .work-title{
+    font-family:"General Sans",sans-serif; font-weight:600; font-size: clamp(24px, 3vw, 42px);
+    letter-spacing:-0.04em; line-height:0.95; color:#e9e9ea;
+  }
+  .work-title em{ font-family:"Instrument Serif",serif; font-style:italic; font-weight:400; color:#9a9a9e; }
+  .work-right{ display:flex; align-items:center; gap:16px; }
+  .work-tags{ display:flex; gap:8px; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a9e; }
+  .work-tags span{ border:1px solid #1a1a1e; border-radius:999px; padding:6px 10px; }
+  .work-plus{
+    width:32px; height:32px; border-radius:50%; border:1px solid #1a1a1e;
+    display:flex; align-items:center; justify-content:center; font-size:14px; color:#9a9a9e;
+  }
+  .work-row:hover .work-plus{ border-color:rgba(233,233,234,0.2); color:#e9e9ea; }
+  .work-preview{
+    display:grid; grid-template-columns: 1.4fr 0.6fr; gap:16px; padding: 0 0 36px; opacity:0.9;
+  }
+  .work-preview .ph{
+    height:220px; background:#111114; border:1px solid #1a1a1e; border-radius:16px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9e;
+  }
+  .work-preview .ph.dark{ background:#0e0e10; }
+
+  /* CLOSING — full halaman seamless */
+  #closing{
+    padding: 80px 40px 60px;
+    display:flex; flex-direction:column; gap:24px;
+  }
+  .closing-kicker{ font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e; }
+  .closing-title{
+    font-family:"General Sans",sans-serif; font-weight:600; font-size: clamp(36px, 6vw, 88px);
+    line-height:0.9; letter-spacing:-0.05em;
+  }
+  .closing-title em{ font-family:"Instrument Serif",serif; font-style:italic; font-weight:400; color:#9a9a9e; }
+  .closing-cta{
+    margin-top:12px; display:inline-flex; align-items:center; gap:12px;
+    font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+    color:#060607; background:#e9e9ea; border-radius:999px; padding:16px 24px; text-decoration:none; width:fit-content;
+  }
+
+  footer{
+    position:relative; z-index:2;
+    border-top:1px solid #1a1a1e;
+    padding:26px 40px; display:flex; justify-content:space-between; align-items:center; gap:24px;
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e;
+  }
+
+  @media(max-width:900px){
+    header, #hero, #manifesto, #work, #closing, footer{ padding-left:24px; padding-right:24px; }
+    header .center{ display:none; }
+    #manifesto{ grid-template-columns:1fr; gap:24px; padding: 60px 24px; }
+    .work-row{ flex-direction:column; align-items:flex-start; gap:16px; }
+    .work-preview{ grid-template-columns:1fr; }
+    .pill{ transform: translateY(-2px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="videoWrap">
+    <video id="crystalVideo" muted autoplay playsinline preload="auto">
+      <source src="crystal.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<div id="main">
+  <div id="grain"></div>
+
+  <header>
+    <div class="left"><span style="color:#e9e9ea">WHY ✴︎ GGG</span> <span class="live"><i></i> Available — 2026</span></div>
+    <div class="center"><span>Singapore • Jakarta</span> <span class="sep"></span> <span id="mainTime">--:--</span></div>
+    <a class="cta" href="mailto:hello@whyggg.com">Contact — Hello@whyggg.com</a>
+  </header>
+
+  <!-- HERO — lamalama style -->
+  <section id="hero">
+    <div class="hero-kicker">[ We are WHY GGG ]</div>
+    <h1 class="hero-title">
+      <span class="line">A <em>creative</em> digital</span>
+      <span class="line">land that <span class="pill"><video muted autoplay loop playsinline preload="auto"><source src="crystal.mp4" type="video/mp4"></video></span> hits</span>
+      <span class="line"><em>harder</em>, works</span>
+      <span class="line">smarter —</span>
+      <span class="line">or not at all.</span>
+    </h1>
+    <p class="hero-desc">We craft brands, products and experiences that hit harder, work smarter and connect deeper. Placeholder dulu — full halaman tanpa batas section, seamless dari atas sampai bawah.</p>
+    <div class="hero-meta"><span><i></i> Personal Landing</span><span><i></i> 2026 — SG/JKT</span><span><i></i> General Sans + JetBrains Mono</span></div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section id="manifesto">
+    <div class="manifesto-big">
+      We partner with <em>brands that dare</em> to lead and help them grow through <em>digital</em>. No section box — just flow.
+    </div>
+    <div class="manifesto-side">
+      <b>Placeholder dulu.</b> Section ini nyambung seamless tanpa batas kotak — full halaman terasa satu kesatuan kayak lamalama. Nanti bisa diisi about, values, atau manifesto kamu. Background tetap <b>#060607</b> biar video `150×150` nyatu.
+    </div>
+  </section>
+
+  <!-- WORK — seamless list -->
+  <section id="work">
+    <div class="work-head"><span>[ Featured work — placeholder ]</span><span class="count">03 / 03</span></div>
+
+    <div class="work-row">
+      <div class="work-left"><span class="work-num">01</span><div class="work-title">Jack & <em>AI</em></div></div>
+      <div class="work-right"><div class="work-tags"><span>Branding</span><span>Experience</span></div><div class="work-plus">+</div></div>
+    </div>
+    <div class="work-preview">
+      <div class="ph">Pill Preview — 157KB Crystal Loop</div>
+      <div class="ph dark">No batas section — seamless</div>
+    </div>
+
+    <div class="work-row">
+      <div class="work-left"><span class="work-num">02</span><div class="work-title">Moov <em>Movement</em></div></div>
+      <div class="work-right"><div class="work-tags"><span>Corporate</span></div><div class="work-plus">+</div></div>
+    </div>
+    <div class="work-preview">
+      <div class="ph dark">Seamless grid — full halaman</div>
+      <div class="ph">Placeholder image</div>
+    </div>
+
+    <div class="work-row">
+      <div class="work-left"><span class="work-num">03</span><div class="work-title">Gardeners <em>United</em></div></div>
+      <div class="work-right"><div class="work-tags"><span>Portfolio</span></div><div class="work-plus">+</div></div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section id="closing">
+    <div class="closing-kicker">[ Let’s talk ]</div>
+    <div class="closing-title">We go <em>all in</em><br>or not at all.</div>
+    <a class="closing-cta" href="mailto:hello@whyggg.com">Start a project — hello@whyggg.com →</a>
+  </section>
+
+  <footer>
+    <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
+    <span style="display:flex;gap:16px"><span>SG/JKT</span><span style="opacity:0.3">•</span><span id="footTime">--:--</span></span>
+  </footer>
+</div>
+
+<script>
+  const video = document.getElementById('crystalVideo');
+  const loader = document.getElementById('loader');
+  const videoWrap = document.getElementById('videoWrap');
+  function updateClock(){
+    const t = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta', hour:'2-digit', minute:'2-digit', hour12:false}).format(new Date());
+    const el1=document.getElementById('mainTime'), el2=document.getElementById('footTime');
+    if(el1) el1.textContent=t; if(el2) el2.textContent=t;
+  }
+  updateClock(); setInterval(updateClock,60000);
+  function handleMeta(){
+    const d=video.duration; video.playbackRate = (d&&isFinite(d)&&d>0)? d/3 : 3; video.play().catch(()=>{});
+  }
+  video.addEventListener('loadedmetadata',handleMeta);
+  video.addEventListener('canplay',handleMeta);
+  video.load(); video.play().catch(()=>{});
+  let t1,t2;
+  function startLoader(){
+    loader.classList.remove('out'); videoWrap.classList.remove('hide');
+    video.currentTime=0; video.load(); video.play().catch(()=>{});
+    t1=setTimeout(()=> videoWrap.classList.add('hide'),3000);
+    t2=setTimeout(()=> loader.classList.add('out'),3700);
+  }
+  startLoader();
+  // replay via footer click? keep simple
+</script>
+</body>
+</html>
