@@ -223,6 +223,32 @@
   .work-preview .ph{ height:220px; background:#111114; border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9e; }
   .work-preview .ph.dark{ background:#0e0e10; }
 
+  /* 02 LOG — micro journal */
+  #log{ padding:0 40px; }
+  .log-list{ border-top:1px solid rgba(255,255,255,0.06); }
+  .log-row{ display:grid; grid-template-columns:120px 1fr auto; gap:20px; align-items:baseline; padding:20px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .log-date{ font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.14em; color:#9a9a9e; }
+  .log-text{ font-family:"General Sans",sans-serif; font-weight:500; font-size:15px; letter-spacing:-0.01em; color:#e9e9ea; }
+  .log-text b{ font-weight:700; }
+  .log-tag{ font-family:"JetBrains Mono",monospace; font-size:9px; letter-spacing:0.12em; text-transform:lowercase; color:#9a9a9e; background:rgba(255,255,255,0.06); border-radius:999px; padding:5px 10px; }
+  .js .rv{ opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s cubic-bezier(0.22,0.61,0.36,1); }
+  .js .rv.revealed{ opacity:1; transform:none; }
+
+  /* 03 ABOUT */
+  #about{ padding:80px 40px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:60px; }
+  .about-side .row{ display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .about-side .row span:first-child{ color:#9a9a9e; }
+  .about-side .row span:last-child{ color:#e9e9ea; text-align:right; }
+  .principles{ margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+  .principles div{ font-family:"General Sans",sans-serif; font-weight:500; font-size:16px; color:#e9e9ea; }
+  .principles i{ font-family:"JetBrains Mono",monospace; font-style:normal; font-size:10px; color:#9a9a9e; margin-right:12px; }
+
+  /* COLOPHON */
+  #colophon{ padding:60px 40px 32px; border-top:1px solid rgba(255,255,255,0.06); display:grid; grid-template-columns:repeat(4,1fr); gap:28px; }
+  .colophon h4{ font-family:"JetBrains Mono",monospace; font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#9a9a9e; margin:0 0 10px; }
+  .colophon p{ font-family:"JetBrains Mono",monospace; font-size:11px; line-height:1.7; color:#e9e9ea; margin:0; }
+  .colophon p em{ color:#9a9a9e; font-style:normal; }
+
   /* CLOSING — full halaman seamless */
   #closing{
     padding: 80px 40px 60px;
@@ -271,6 +297,11 @@
     #hero{ margin-top:-52px; }
     header nav{ display:flex; gap:14px; font-size:9px; }
     #manifesto{ grid-template-columns:1fr; gap:24px; padding: 60px 24px; }
+    #log, #about, #colophon{ padding-left:24px; padding-right:24px; }
+    #about{ grid-template-columns:1fr; gap:28px; padding-top:60px; }
+    .log-row{ grid-template-columns:1fr; gap:6px; }
+    .log-tag{ justify-self:start; }
+    #colophon{ grid-template-columns:1fr 1fr; gap:20px; }
     .work-row{ flex-direction:column; align-items:flex-start; gap:16px; }
     .work-preview{ grid-template-columns:1fr; }
     .archive-card{ flex:0 0 100%; }
@@ -307,7 +338,7 @@
     <a class="logo" href="#hero" aria-label="Back to top"><img src="logo.png" alt="WHY GGG" width="340" height="334" style="height:28px; width:auto; display:block; filter: brightness(1) contrast(1);" /></a>
     <nav aria-label="Navigasi utama">
       <a href="#hero">Home</a>
-      <a href="#manifesto">About</a>
+      <a href="#about">About</a>
       <a href="#work">Work</a>
       <a href="#closing">Contact</a>
     </nav>
@@ -373,6 +404,39 @@
     </div>
   </section>
 
+  <!-- 02 LOG / NOW -->
+  <section id="log" aria-label="Log">
+    <div class="work-head">
+      <span class="archive-title" data-reveal>02 LOG</span>
+      <span class="count">NOW — SEP 2026</span>
+    </div>
+    <div class="log-list">
+      <div class="log-row rv"><span class="log-date">06 SEP 2026</span><span class="log-text">Loader rewrite — <b>video dulu, tirai kemudian.</b> Tiga detik, no more.</span><span class="log-tag">motion</span></div>
+      <div class="log-row rv"><span class="log-date">28 AGU 2026</span><span class="log-text">Aethelgard spring archive, <b>edition 001</b> shipped.</span><span class="log-tag">editorial</span></div>
+      <div class="log-row rv"><span class="log-date">12 AGU 2026</span><span class="log-text">Lexier poster series 01–05. <b>Warm paper, pure black.</b></span><span class="log-tag">type</span></div>
+      <div class="log-row rv"><span class="log-date">30 JUL 2026</span><span class="log-text">Brush script studies. Ink, splatter, repeat.</span><span class="log-tag">type</span></div>
+      <div class="log-row rv"><span class="log-date">04 JUL 2026</span><span class="log-text">This site, rebuilt on <b>#060607</b>. One file, no framework.</span><span class="log-tag">web</span></div>
+    </div>
+  </section>
+
+  <!-- 03 ABOUT -->
+  <section id="about" aria-label="About">
+    <div class="manifesto-big rv">I'm <em>WHY GGG</em> — an independent maker. I design, code, and animate small honest things, then ship them quietly.</div>
+    <div class="manifesto-side rv">
+      <div class="about-side">
+        <div class="row"><span>BASED</span><span>Singapore / internet</span></div>
+        <div class="row"><span>FOCUS</span><span>editorial · creative code · motion</span></div>
+        <div class="row"><span>STACK</span><span>one HTML file · vanilla JS</span></div>
+        <div class="row"><span>CURRENTLY</span><span>building quietly</span></div>
+      </div>
+      <div class="principles">
+        <div><i>01</i>Honest over polished.</div>
+        <div><i>02</i>Curious over certain.</div>
+        <div><i>03</i>Ship small, ship often.</div>
+      </div>
+    </div>
+  </section>
+
   <!-- CLOSING — personal, no pill, no client CTA -->
   <section id="closing" aria-label="Kontak">
     <div class="closing-kicker">[ Say hi ]</div>
@@ -386,6 +450,14 @@
       <a href="#" style="color:#9a9a9e; text-decoration:none;">DISCORD</a>
       <a href="https://github.com/wahanggaaa-code" target="_blank" rel="noopener" style="color:#9a9a9e; text-decoration:none;">GitHub</a>
     </div>
+  </section>
+
+  <!-- COLOPHON -->
+  <section id="colophon" aria-label="Colophon">
+    <div class="colophon"><h4>Type</h4><p>General Sans & JetBrains Mono — <em>self-hosted, swap.</em></p></div>
+    <div class="colophon"><h4>Color</h4><p>#060607 on #e9e9ea — <em>nothing else.</em></p></div>
+    <div class="colophon"><h4>Build</h4><p>One index.html. <em>No framework, no tracker.</em></p></div>
+    <div class="colophon"><h4>Media</h4><p>WebP + H.264 — <em>hand-compressed.</em></p></div>
   </section>
 
   <footer>
@@ -564,7 +636,7 @@
   // Carousel polish — reveal on scroll + slide focus (scale/dim by distance from center)
   (function(){
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cards = document.querySelectorAll('.archive-card');
+    const cards = document.querySelectorAll('.archive-card, .rv');
     if(cards.length && 'IntersectionObserver' in window && !reduced){
       const io = new IntersectionObserver((es)=>{
         es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('revealed'); io.unobserve(en.target); } });
