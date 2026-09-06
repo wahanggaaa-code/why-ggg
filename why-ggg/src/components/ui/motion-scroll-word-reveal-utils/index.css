@@ -1,0 +1,101 @@
+/* 21st.dev — motion-scroll-word-reveal — customized for WHY GGG #060607 */
+.scroll-word-reveal-frame {
+  position: relative;
+  width: 100%;
+  /* container is the viewport scroller — we use window scroll, so frame is just wrapper */
+}
+
+.scroll-word-reveal {
+  position: relative;
+  width: 100%;
+  min-height: 260vh; /* enough scroll distance for reveal */
+  background: #060607;
+}
+
+.scroll-word-reveal__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #060607;
+}
+
+.scroll-word-reveal__layout {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.scroll-word-reveal__progress {
+  position: relative;
+  width: 1px;
+  height: 320px;
+  background: #1a1a1e;
+  overflow: hidden;
+  border-radius: 999px;
+  align-self: center;
+}
+
+.scroll-word-reveal__progress span {
+  position: absolute;
+  inset: 0;
+  background: #e9e9ea;
+  transform-origin: top;
+  will-change: transform;
+}
+
+.scroll-word-reveal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scroll-word-reveal__kicker {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9a9a9e;
+  margin: 0;
+}
+
+.scroll-word-reveal__heading {
+  font-family: "General Sans", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(32px, 5.2vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: #e9e9ea;
+  margin: 0;
+  max-width: 18ch;
+}
+
+.scroll-word-reveal__heading span {
+  display: inline;
+  will-change: opacity;
+}
+
+@media (max-width: 900px) {
+  .scroll-word-reveal {
+    min-height: 220vh;
+  }
+  .scroll-word-reveal__layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 32px 24px;
+  }
+  .scroll-word-reveal__progress {
+    display: none;
+  }
+  .scroll-word-reveal__heading {
+    font-size: clamp(28px, 8vw, 42px);
+  }
+}

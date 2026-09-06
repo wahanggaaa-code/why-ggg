@@ -1,0 +1,32 @@
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-feature-settings: "ss01" 1;
+}
+
+html { scroll-behavior: smooth; }
+html, body {
+  background: #060607;
+  color: #e9e9ea;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* hide scrollbar */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+::selection {
+  background: #e9e9ea;
+  color: #060607;
+}

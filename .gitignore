@@ -1,0 +1,8 @@
+node_modules
+.why-ggg
+.cache
+.local
+.why*
+*.log
+.wrangler
+.env
