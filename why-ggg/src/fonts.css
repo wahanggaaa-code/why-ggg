@@ -1,0 +1,43 @@
+/* Self-hosted — WHY GGG #060607 — Vite bundled, served from /fonts/ */
+@font-face{
+  font-family:"General Sans";
+  src:url("/fonts/GeneralSans-Regular.woff2") format("woff2");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"General Sans";
+  src:url("/fonts/GeneralSans-Medium.woff2") format("woff2");
+  font-weight:500;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"General Sans";
+  src:url("/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  font-weight:600;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"General Sans";
+  src:url("/fonts/GeneralSans-Bold.woff2") format("woff2");
+  font-weight:700;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"JetBrains Mono";
+  src:url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"JetBrains Mono";
+  src:url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
+  font-weight:500;
+  font-style:normal;
+  font-display:swap;
+}

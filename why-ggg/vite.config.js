@@ -4,6 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/', // Cloudflare custom domain = root. Ganti '/why-ggg/' kalau pakai GitHub Project Pages
   plugins: [react()],
   resolve: {
     alias: {
@@ -24,5 +25,9 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 4173,
+    allowedHosts: true,
+    headers: {
+      'X-Frame-Options': 'ALLOWALL',
+    }
   }
 })
