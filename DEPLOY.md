@@ -22,15 +22,19 @@ Satu sumber kebenaran: **vanilla `index.html`** (tanpa build). Kedua branch `mai
 Settings → **Pages** → Build and deployment → Source: **Deploy from a branch** →
 Branch: **`gh-pages`**, folder `/` → Save.
 
-## Setup Cloudflare Pages (production)
-1. Cloudflare Dashboard → **Workers & Pages** → Create → **Pages** → Connect to Git.
-2. Pilih repo `wahanggaaa-code/why-ggg`.
-3. Konfigurasi build:
-   - Production branch: **`main`**
-   - Framework preset: **None**
-   - Build command: *(kosongkan)*
-   - Build output directory: **`/`**
-4. (Opsional) Tambahkan domain custom di tab **Custom domains**.
+## Setup Cloudflare Workers (production)
+Project ini **Workers + Assets** (bukan Pages). Konfigurasi di dashboard:
+1. Workers & Pages → connect repo `wahanggaaa-code/why-ggg`.
+2. Production branch: **`main`**.
+3. Build command: *(kosong / None)*.
+4. Deploy command: `npx wrangler deploy` · Version command: `npx wrangler versions upload`.
+5. **WAJIB** salah satu agar build tidak gagal:
+   - set env var `NODE_VERSION = 22`, **atau**
+   - pin deploy/version command ke `npx wrangler@3 ...` (kompatibel Node lama).
+6. Repo harus punya `wrangler.toml` (sudah ada, `[assets] directory="./"`).
+
+> Mengubah settings TIDAK memicu build. Setelah mengubah, **push commit baru** atau
+> klik **Retry deployment** agar build jalan.
 
 ## Setelah domain custom live
 Karena path relatif, situs jalan di domain apa pun. Tapi perbarui referensi absolut:
