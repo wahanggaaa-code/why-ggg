@@ -48,3 +48,7 @@ Thumbs.db
 .sudo_as_admin_successful
 uploads/
 tmp/
+node_modules/
+test/
+*.webm
+debug.js
