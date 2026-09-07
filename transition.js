@@ -36,11 +36,22 @@
 
   /* ---------- shaders ---------- */
   // N_COLS: number of vertical columns forming the staircase skyline.
-  // STAGGER: how far the leading-edge "V" spans (0 = flat edge, 1 = max slope).
-  // JITTER: amplitude of per-column random height offset (0..1 fraction of column size).
+  // STAGGER: how far the leading edge slopes across the screen (0=flat, ~0.5=stair).
+  // JITTER: amplitude of per-column height variation (block size).
   var N_COLS = 50.0;
   var STAGGER = 0.35;
   var JITTER = 0.25;
+
+  // p mapping: edgeY = p - colFrac*STAGGER + (j-0.5)*JITTER
+  //   uv.y in [0,1], 0=bottom, 1=top.
+  //   covered = 1 where uv.y > edgeY (above edge = inside veil, which fills
+  //             from top of screen down to the stair edge).
+  //   p LARGE  => edgeY below bottom (edgeY <= -JITTER) => NOT covered (page visible).
+  //   p SMALL  => edgeY above top  (edgeY >= 1+STAGGER+JITTER) => FULLY covered.
+  // Cover (outgoing): p sweeps one-way from P_OPEN (visible) down to P_CLOSED (covered).
+  // Reveal (incoming): p sweeps one-way from P_CLOSED (covered) back up to P_OPEN (visible).
+  var P_OPEN   = 1.15 + STAGGER + JITTER;     // ~1.75 — edge below bottom, page visible
+  var P_CLOSED = -0.15 - JITTER;             // ~-0.40 — edge above top, fully covered
 
   var vs =
     'precision highp float;\n' +
@@ -62,14 +73,17 @@
     '  float p = uProgress;\n' +
     '\n' +
     '  float colId = floor(clamp(uv.x, 0.0, 0.9999) * N_COLS);\n' +
-    '  float colFrac = colId / (N_COLS - 1.0);\n' +
+    '  float colFrac = colId / (N_COLS - 1.0);  // 0 left, 1 right\n' +
     '\n' +
-    '  float baseEdge = p - colFrac * STAGGER;\n' +
+    '  // Left leads: left col has LOWER edge, so it fills with veil first.\n' +
+    '  // Edge sweeps down-and-right as p decreases (cover) or up-and-left as p increases (reveal).\n' +
+    '  float baseEdge = p - (1.0 - colFrac) * STAGGER;\n' +
     '  float j = texture2D(uJitter, vec2((colId + 0.5)/N_COLS, 0.5)).r;\n' +
     '  float offset = (j - 0.5) * JITTER;\n' +
     '  float edgeY = baseEdge + offset;\n' +
     '\n' +
-    '  // Covered where uv.y (1=top, 0=bottom) is above the edge.\n' +
+    '  // Pixel is inside the veil if its Y (1=top, 0=bottom) is ABOVE edgeY\n' +
+    '  // (veil fills from the top of the screen down to the stair edge).\n' +
     '  float covered = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
     '\n' +
     '  vec3 col = vec3(0.788, 0.776, 0.804);\n' +
@@ -196,29 +210,32 @@
   }
 
   /* ---------- animate ---------- */
-  var busy=false, raf=0, covered=false;
-  function animate(dur, fromP, toP, onCover, onDone){
+  var busy=false, raf=0;
+  // phase: 'cover' (sweeping down to hide page) or 'reveal' (sweeping up to show new page)
+  function animate(dur, fromP, toP, phase, onDone){
     if(!gl || !prg){
       ov.style.background=VEIL;
-      ov.style.transition='opacity '+dur+'ms';
-      ov.style.opacity = (toP>fromP)?'1':'0';
-      ov.style.pointerEvents = (toP>0.5)?'auto':'none';
-      if(toP>fromP) document.body.style.overflow='hidden';
-      setTimeout(function(){
-        if(toP>=1 && onCover){ onCover(); return; }
-        if(toP<=0){ ov.style.pointerEvents='none'; document.body.style.overflow=''; onDone&&onDone(); }
-      }, dur);
+      if(phase==='cover'){
+        ov.style.opacity='1';
+        ov.style.pointerEvents='auto';
+        document.body.style.overflow='hidden';
+        setTimeout(function(){ onDone&&onDone(); }, dur);
+      } else {
+        ov.style.opacity='0';
+        ov.style.pointerEvents='none';
+        ov.style.background='transparent';
+        document.body.style.overflow='';
+        setTimeout(function(){ onDone&&onDone(); }, dur);
+      }
       return;
     }
     resize();
     ov.style.opacity='1';
-    ov.style.background='transparent';
     ov.style.pointerEvents='auto';
     document.body.style.overflow='hidden';
-    covered=false;
+    if(phase==='cover') ov.style.background='transparent';
     var t0=performance.now();
     var uP=gl.getUniformLocation(prg,'uProgress');
-    var uT=gl.getUniformLocation(prg,'uTime');
     var uD=gl.getUniformLocation(prg,'uJitter');
     gl.useProgram(prg);
     mkQd(gl,prg);
@@ -231,35 +248,28 @@
     function frame(now){
       var el=now-t0, t=Math.min(1,el/dur);
       var e = ease(t);
-      // p goes from fromP to toP. For cover: 0 -> (1+STAGGER) so the last
-      // (rightmost) column clears the bottom edge by the end. For reveal we
-      // come back from (1+STAGGER) -> 0.
-      var span = 1.0 + STAGGER;
       var p = fromP + (toP-fromP)*e;
 
       gl.viewport(0,0,cv.width,cv.height);
       gl.clearColor(0,0,0,0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform1f(uP, p);
-      gl.uniform1f(uT, el*0.001);
       gl.drawArrays(gl.TRIANGLES,0,6);
-
-      if(toP>fromP && t>=1 && !covered){
-        covered=true;
-        ov.style.background=VEIL;
-        setTimeout(function(){ onCover && onCover(); }, 50);
-      }
 
       if(t<1){
         raf=requestAnimationFrame(frame);
       } else {
-        if(toP<=0){
+        if(phase==='cover'){
+          // Fully covered — set solid bg so there is zero gap before navigation.
+          ov.style.background=VEIL;
+        } else {
+          // Reveal finished — hide overlay, restore scroll.
           ov.style.opacity='0';
           ov.style.background='transparent';
           ov.style.pointerEvents='none';
           document.body.style.overflow='';
-          onDone && onDone();
         }
+        onDone && onDone();
       }
     }
     cancelAnimationFrame(raf);
@@ -285,8 +295,9 @@
     busy=true;
     ensure();
     try{ sessionStorage.setItem('__wgl_a','1'); }catch(e){}
-    // Cover: sweep down, p -0.1 -> 1+STAGGER so full coverage, slower for smoothness
-    animate(1100, -0.1, 1.0+STAGGER, function(){
+    // ONE-WAY cover: edge sweeps from fully-open (page visible) down to
+    // fully-closed (veil covers everything), then we navigate.
+    animate(1100, P_OPEN, P_CLOSED, 'cover', function(){
       window.location.href = url;
     });
   }
@@ -315,14 +326,15 @@
       gl.clearColor(VEIL_RGB[0],VEIL_RGB[1],VEIL_RGB[2],1);
       gl.clear(gl.COLOR_BUFFER_BIT);
       var uP=gl.getUniformLocation(prg,'uProgress');
-      var uT=gl.getUniformLocation(prg,'uTime');
       var uD=gl.getUniformLocation(prg,'uJitter');
       gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,jTex);gl.uniform1i(uD,0);
-      gl.uniform1f(uP,1.0+STAGGER);gl.uniform1f(uT,0);
+      // Start fully covered (edge at/below screen bottom)
+      gl.uniform1f(uP, P_CLOSED);
       gl.drawArrays(gl.TRIANGLES,0,6);
 
       function reveal(){
-        animate(1100, 1.0+STAGGER, -0.1, null, function(){ busy=false; });
+        // ONE-WAY reveal: edge sweeps from fully-closed back up to fully-open.
+        animate(1100, P_CLOSED, P_OPEN, 'reveal', function(){ busy=false; });
       }
       requestAnimationFrame(function(){ requestAnimationFrame(reveal); });
     } else {
