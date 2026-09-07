@@ -1,0 +1,4 @@
+DEPLOY.md
+wrangler.toml
+.assetsignore
+.gitignore
