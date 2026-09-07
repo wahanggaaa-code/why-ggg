@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wahanggaaa-code.github.io/why-ggg/sitemap.xml
