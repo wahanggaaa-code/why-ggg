@@ -421,7 +421,7 @@
 
   <!-- 03 ABOUT -->
   <section id="about" aria-label="About">
-    <div class="manifesto-big rv">I'm <em>WHY GGG</em> — an independent maker. I design, code, and animate small honest things, then ship them quietly.</div>
+    <div class="manifesto-big" id="aboutReveal">I'm <em>WHY GGG</em> — an independent maker. I design, code, and animate small honest things, then ship them quietly.</div>
     <div class="manifesto-side rv">
       <div class="about-side">
         <div class="row"><span>BASED</span><span>Singapore / internet</span></div>
@@ -485,47 +485,50 @@
 <script>
   document.documentElement.classList.add('js');
 
-  // 21st.dev — scroll word reveal on manifesto (no extra text)
+  // 21st.dev — scroll word reveal (manifesto + about)
   (function(){
-    const el = document.getElementById('manifestoReveal');
-    if(!el) return;
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
-    const nodes=[];
-    while(walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node=>{
-      const txt = node.textContent;
-      if(!txt.trim()) return;
-      const frag = document.createDocumentFragment();
-      txt.split(/(\s+)/).forEach(part=>{
-        if(/\s+/.test(part)) frag.appendChild(document.createTextNode(part));
-        else if(part){
-          const s=document.createElement('span');
-          s.className='mrw'; s.textContent=part; s.style.opacity='0.15'; s.style.transition='opacity 0.12s';
-          frag.appendChild(s);
-        }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function setup(el, section){
+      if(!el || !section || reduced) return;
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+      const nodes=[];
+      while(walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node=>{
+        const txt = node.textContent;
+        if(!txt.trim()) return;
+        const frag = document.createDocumentFragment();
+        txt.split(/(\s+)/).forEach(part=>{
+          if(/\s+/.test(part)) frag.appendChild(document.createTextNode(part));
+          else if(part){
+            const s=document.createElement('span');
+            s.className='mrw'; s.textContent=part; s.style.opacity='0.15'; s.style.transition='opacity 0.12s';
+            frag.appendChild(s);
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
       });
-      node.parentNode.replaceChild(frag, node);
-    });
-    const words = el.querySelectorAll('.mrw');
-    const REST=0.15, SPAN=0.85, WIN=0.22;
-    const section = document.getElementById('manifesto');
-    function onScroll(){
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const start = vh*0.75;
-      const end = -section.offsetHeight + vh*0.25;
-      const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
-      const count = words.length;
-      words.forEach((w,i)=>{
-        const s = count<=1?0:(i/(count-1))*SPAN;
-        const e = Math.min(1, s+WIN);
-        let op = progress<=s?REST : progress>=e?1 : REST+(1-REST)*((progress-s)/(e-s));
-        w.style.opacity = op;
-      });
+      const words = el.querySelectorAll('.mrw');
+      const REST=0.15, SPAN=0.85, WIN=0.22;
+      function onScroll(){
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const start = vh*0.75;
+        const end = -section.offsetHeight + vh*0.25;
+        const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
+        const count = words.length;
+        words.forEach((w,i)=>{
+          const s = count<=1?0:(i/(count-1))*SPAN;
+          const e = Math.min(1, s+WIN);
+          let op = progress<=s?REST : progress>=e?1 : REST+(1-REST)*((progress-s)/(e-s));
+          w.style.opacity = op;
+        });
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      window.addEventListener('resize', onScroll);
+      onScroll();
     }
-    window.addEventListener('scroll', onScroll, {passive:true});
-    window.addEventListener('resize', onScroll);
-    onScroll();
+    setup(document.getElementById('manifestoReveal'), document.getElementById('manifesto'));
+    setup(document.getElementById('aboutReveal'), document.getElementById('about'));
   })();
 
   // 21st.dev — scroll word reveal untuk 01 ARCHIVE (hapus di Landing Page)
