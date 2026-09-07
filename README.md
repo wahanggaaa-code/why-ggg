@@ -12,8 +12,3 @@ Live: https://why-ggg.wahanggaaa.workers.dev/
 1. Revisi di branch `gh-pages` (preview GitHub Pages).
 2. Merge ke `main`.
 3. Push `main` → auto-deploy (Cloudflare build / GitHub Actions).
-
-## Lokal
-```bash
-python3 -m http.server 8080   # preview
-```
