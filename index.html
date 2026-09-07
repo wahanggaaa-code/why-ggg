@@ -11,13 +11,13 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="WHY ✴︎ GGG — Personal Landing">
 <meta property="og:description" content="Building quietly. ALL IN OR NOTHING — Personal archive, editorial landing 05 works.">
-<meta property="og:image" content="og-image.jpg">
+<meta property="og:image" content="https://why-ggg.wahanggaaa.workers.dev/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="WHY ✴︎ GGG — Personal Landing">
 <meta name="twitter:description" content="Building quietly. ALL IN OR NOTHING">
-<meta name="twitter:image" content="og-image.jpg">
+<meta name="twitter:image" content="https://why-ggg.wahanggaaa.workers.dev/og-image.jpg">
 <!-- SEO: ganti canonical bila domain custom Cloudflare sudah live -->
 <link rel="canonical" href="https://why-ggg.wahanggaaa.workers.dev/">
 <script type="application/ld+json">
@@ -161,6 +161,7 @@
     font-family:"General Sans",sans-serif; font-weight:500;
     font-size: clamp(28px, 3.4vw, 44px); line-height:1.1; letter-spacing:-0.03em;
     color:#e9e9ea;
+    margin:0;
   }
   .manifesto-big em{ font-family:"General Sans",sans-serif; font-style:normal; color:#e9e9ea; font-weight:700; }
   .manifesto-side{
@@ -271,6 +272,7 @@
   .closing-title{
     font-family:"General Sans",sans-serif; font-weight:600; font-size: clamp(36px, 6vw, 88px);
     line-height:0.9; letter-spacing:-0.05em;
+    margin:0;
   }
   .closing-title em{ font-family:"General Sans",sans-serif; font-style:normal; font-weight:700; color:#e9e9ea; }
   .closing-cta{
@@ -375,9 +377,9 @@
 
   <!-- MANIFESTO -->
   <section id="manifesto" aria-label="Manifesto">
-    <div class="manifesto-big" id="manifestoReveal">
+    <h2 class="manifesto-big" id="manifestoReveal">
       I make things that feel <em>honest</em> and keep me <em>curious</em>. No pitch deck — just following what sticks.
-    </div>
+    </h2>
     <div class="manifesto-side">
       <b>Personal archive.</b> No briefs, no pitches — just daily making. Notes on tools, failures, and small wins. Built on <b>#060607</b>.
     </div>
@@ -386,7 +388,7 @@
   <!-- WORK — 01 ARCHIVE single carousel -->
   <section id="work" aria-label="Arsip karya">
     <div class="work-head">
-      <span class="archive-title scramble">01 ARCHIVE</span>
+      <h2 class="archive-title scramble" style="margin:0;">01 ARCHIVE</h2>
     </div>
 
     <div class="archive-wrap">
@@ -420,7 +422,7 @@
   <!-- 02 LOG / NOW -->
   <section id="log" aria-label="Log">
     <div class="work-head">
-      <span class="archive-title scramble">02 LOG</span>
+      <h2 class="archive-title scramble" style="margin:0;">02 LOG</h2>
       <span class="count">NOW — SEP 2026</span>
     </div>
     <div class="log-list">
@@ -438,7 +440,7 @@
 
   <!-- 03 ABOUT -->
   <section id="about" aria-label="About">
-    <div class="manifesto-big" id="aboutReveal">I'm <em>WHY GGG</em> — an independent maker. I design, code, and animate small honest things, then ship them quietly.</div>
+    <h2 class="manifesto-big" id="aboutReveal">I'm <em>WHY GGG</em> — an independent maker. I design, code, and animate small honest things, then ship them quietly.</h2>
     <div class="manifesto-side rv">
       <div class="about-side">
         <div class="row"><span>BASED</span><span>Singapore / internet</span></div>
@@ -458,7 +460,7 @@
   <section id="closing" aria-label="Kontak">
     <div class="closing-kicker">[ Say hi ]</div>
     <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap;">
-      <div class="closing-title">Building<br>quietly.</div>
+      <h2 class="closing-title">Building<br>quietly.</h2>
       <div style="font-family:'General Sans',sans-serif; font-weight:600; font-size:clamp(36px,6vw,88px); letter-spacing:-0.05em; line-height:0.9; color:#e9e9ea; text-align:right;">ALL IN OR<br>NOTHING</div>
     </div>
     <div class="closing-links" style="margin-top:16px; display:flex; gap:18px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a9e;">
@@ -483,7 +485,7 @@
 </div>
 
 <!-- Lightbox — enlarge + focus blur + swipe (outside #main to avoid blur) -->
-<div id="lightbox" class="lightbox" aria-hidden="true">
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Galeri karya" aria-hidden="true">
   <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
   <button class="lightbox-close" id="lightboxClose" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <div class="lightbox-nav">
@@ -492,7 +494,7 @@
   </div>
   <div class="lightbox-body">
     <figure class="lightbox-figure">
-      <img id="lightboxImg" src="" alt="">
+      <img id="lightboxImg" src="aethelgard-hero.webp" alt="">
       <figcaption id="lightboxDesc" class="lightbox-desc"></figcaption>
     </figure>
   </div>
@@ -825,6 +827,11 @@
   const video = document.getElementById('crystalVideo');
   const loader = document.getElementById('loader');
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Hormati prefers-reduced-motion: hero video & loader video tidak autoplay animasi
+  if(prefersReduced){
+    const heroVid = document.querySelector('.hero-bg video');
+    if(heroVid){ heroVid.pause(); heroVid.setAttribute('aria-hidden','true'); }
+  }
   function dispatchHeroStart(){ window.dispatchEvent(new Event("hero-start")); }
   function trulyHideLoader(){
     loader.classList.add('gone');
@@ -878,7 +885,8 @@
     clearTimeout(window._loaderFallback);
     window._loaderFallback = setTimeout(()=>{ if(loader.style.display!=='none') triggerOut(); }, 3000);
   }
-  video.addEventListener('loadedmetadata', handleMeta);
+  // cukup satu event — 'canplay' memastikan metadata + data siap dalam sekali panggil
+  // ('loadedmetadata' + 'canplay' bareng memicu handleMeta & play() duaan)
   video.addEventListener('canplay', handleMeta);
   video.addEventListener('ended', triggerOut);
   video.addEventListener('error', triggerOut);
