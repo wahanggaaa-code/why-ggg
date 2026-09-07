@@ -512,8 +512,10 @@
       function onScroll(){
         const rect = section.getBoundingClientRect();
         const vh = window.innerHeight;
-        const start = vh*0.75;
-        const end = -section.offsetHeight + vh*0.25;
+        // mobile: range lebih pendek biar reveal tuntas sebelum scroll habis
+        const mob = window.innerWidth <= 900;
+        const start = mob ? vh*0.85 : vh*0.75;
+        const end   = mob ? vh*0.30 : (-section.offsetHeight + vh*0.25);
         const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
         const count = words.length;
         words.forEach((w,i)=>{
