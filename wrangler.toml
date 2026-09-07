@@ -1,0 +1,8 @@
+# WHY ✴︎ GGG — static site via Cloudflare Workers Assets
+# Nama harus sama dengan worker existing agar URL workers.dev tetap.
+name = "why-ggg"
+compatibility_date = "2024-09-25"
+
+# Sajikan seluruh root repo sebagai static assets (tanpa build step).
+[assets]
+directory = "./"
