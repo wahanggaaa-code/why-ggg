@@ -1,4 +1,4 @@
-/* BUILD v20260908f — EXACTLY like the reference video: a curtain pulled UP.
+/* BUILD v20260908g — EXACTLY like the reference video: a curtain pulled UP.
  *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
  *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
  *            through the TOP (swipe up). Cache-bust ?v=20260908b.
@@ -66,7 +66,7 @@
   var SPEED_MIN = 0.78;  // slowest column speed factor
   var SPEED_MAX = 1.00;  // fastest column speed factor
   var SPEED_SCALE = 1.0 / SPEED_MIN; // stretch clock so slowest finishes at uTime=1
-  var COVER_HOLD_MS = 100; // hold the fully-closed veil before navigating
+  var COVER_HOLD_MS = 60;  // hold the fully-closed veil before navigating
                            // (screen closes first, then the new-page transition)
 
   var COVER_MS  = 620;   // cover: veil rises from bottom to fill (swipe up)
