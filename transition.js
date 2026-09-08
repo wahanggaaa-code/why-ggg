@@ -7,14 +7,20 @@
  *   click internal link -> one-way stair "curtain" sweeps down over the page
  *   (soft warm gray veil, blocky skyline leading edge) -> navigate.
  *   Destination pre-paints the same veil in <head> (no white flash) and then
- *   sweeps the curtain back up to reveal the new page.
+ *   drops the curtain away to reveal the new page.
+ *
+ * Motion language (one whole journey, click -> new page visible):
+ *   - Cover  (leaving old page): the veil fills BELOW the stair edge and the
+ *     edge RISES from the bottom of the screen up over the top — the curtain
+ *     climbs UP until the screen is fully covered ("naik sampai tertutup").
+ *   - Reveal (entering new page): the same veil then FALLS — the stair edge
+ *     drops from above the top of the screen down below the bottom, so the
+ *     curtain sinks DOWN and leaves through the bottom ("turun sampai
+ *     terbuka"). Same stair pattern both ways, just mirror-flipped fill side.
  *
  * Refinements over the previous build:
- *   - Cover is a one-way fast sweep; reveal rises with a silky ease and a
- *     small pull-back near the top just before it finishes (see revealQ):
- *     "naik, lalu di penghujung turun sedikit, baru tuntas".
- *   - Reveal starts as soon as DOM+fonts are ready (capped), NOT on slow
- *     window 'load' — no dead time staring at a static veil.
+ *   - Cover is a one-way fast sweep; reveal starts as soon as DOM+fonts are
+ *     ready (capped), NOT on slow window 'load' — no dead static veil.
  *   - Same-page links (Home/logo/href="#" placeholders) are no longer
  *     treated as navigations (no pointless full reload + cover).
  *   - Browser back/forward & bfcache restores are handled (pageshow):
@@ -56,11 +62,16 @@
   var STAGGER = 0.34;   // diagonal slope of the leading edge
   var JITTER  = 0.22;   // blocky height variation between columns
 
-  // p (edge position) mapping:
-  //   covered = uv.y > edgeY ; edge sweeps from "open" (page visible) to
-  //   "closed" (fully covered) one-way; reveal is the reverse one-way.
-  var P_OPEN   = 1.15 + STAGGER + JITTER;
-  var P_CLOSED = -0.15 - JITTER;
+  // p (edge position) mapping — the veil fills BELOW the stair edge
+  // (covered = uv.y < edgeY), so direction reads:
+  //   COVER (leaving): edge starts below the bottom of the screen (page
+  //     visible) and RISES up over the top => curtain climbs UP until the
+  //     screen is fully covered ("naik sampai tertutup penuh").
+  //   REVEAL (entering): edge starts above the top of the screen (fully
+  //     covered) and FALLS below the bottom => curtain sinks DOWN until the
+  //     page is fully open ("turun sampai terbuka").
+  var P_OPEN   = -0.15;  // edge just below screen bottom -> page fully visible
+  var P_CLOSED =  1.60;  // edge far above screen top    -> fully covered
 
   var COVER_MS  = 540;   // outgoing sweep
   var REVEAL_MS = 680;   // incoming reveal
@@ -92,8 +103,9 @@
     '  float j = texture2D(uJitter, vec2((colId + 0.5)/N_COLS, 0.5)).r;\n' +
     '  float offset = (j - 0.5) * JITTER;\n' +
     '  float edgeY = baseEdge + offset;\n' +
-    // Covered = above the edge (veil fills from the top down to the skyline).
-    '  float covered = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
+    // Covered = BELOW the edge (the veil is the region under the stair
+    // skyline — it fills from the bottom of the screen up to the stairs).
+    '  float covered = smoothstep(edgeY + 0.005, edgeY - 0.005, uv.y);\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
@@ -231,35 +243,13 @@
   }
 
   /* ---------- easing ---------- */
-  // easeInCubic — cover *accelerates* toward the cut: it closes decisively
-  // instead of lingering in the near-white fully-covered state.
-  function easeInCubic(t){ return t*t*t; }
-  // easeOutCubic — reveal starts fast, settles gently.
+  // easeInQuad — cover: the curtain starts climbing almost immediately and
+  // accelerates into the fully-covered state (decisive close, no white
+  // linger at the end).
+  function easeInQuad(t){ return t*t; }
+  // easeOutCubic — reveal: the curtain starts falling away right away and
+  // the page is essentially open in the first half of the duration.
   function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
-
-  // REVEAL CURVE — "rise, then a small pull-back at the top, then finish".
-  // q is the reveal progress (0 = fully covered, 1 = fully open).
-  //   Phase A (rise):   q climbs 0 -> RISE_Q, stair edge sweeps up the screen.
-  //   Phase B (dip):    q pulls back to PULL_Q — just before the end the
-  //                     stairs briefly sweep back DOWN (a visible flick near
-  //                     the top), then...
-  //   Phase C (finish): q climbs PULL_Q -> 1 and the veil clears for good.
-  var RISE_T = 0.52;   // end of the main upward sweep (fraction of duration)
-  var RISE_Q = 0.80;   // how "open" the rise reaches before pulling back
-  var PULL_T = 0.74;   // end of the pull-back (fraction of duration)
-  var PULL_Q = 0.72;   // how far the stairs descend again (must stay < RISE_Q)
-  function revealQ(t){
-    if(t <= RISE_T){
-      var r = t / RISE_T;
-      return RISE_Q * easeOutCubic(r);
-    }
-    if(t <= PULL_T){
-      var r2 = (t - RISE_T) / (PULL_T - RISE_T);
-      return RISE_Q + (PULL_Q - RISE_Q) * easeInCubic(r2);
-    }
-    var r3 = (t - PULL_T) / (1 - PULL_T);
-    return PULL_Q + (1 - PULL_Q) * easeOutCubic(r3);
-  }
 
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
@@ -285,7 +275,7 @@
     ov.style.pointerEvents='auto';
     void ov.offsetWidth;
     ov.style.transition='transform 0.85s cubic-bezier(0.77,0,0.175,1)';
-    ov.style.transform='translateY(-102%)';
+    ov.style.transform='translateY(102%)';
     setTimeout(function(){
       ov.style.opacity='0';
       ov.style.background='transparent';
@@ -309,12 +299,12 @@
     drawAt(fromP);
 
     var t0=0;
+    // Both sweeps are one-way in p; the eased direction is chosen per phase.
+    var ease = phase==='cover' ? easeInQuad : easeOutCubic;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
-      var p = phase==='cover'
-        ? fromP + (toP-fromP)*easeInCubic(t)
-        : fromP + (toP-fromP)*revealQ(t);
+      var p=fromP+(toP-fromP)*ease(t);
       drawAt(p);
       if(t<1){
         cancelAnimationFrame(raf);
