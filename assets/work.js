@@ -45,7 +45,13 @@
     scrollArea.appendChild(d);
   }
 
-  var startY = centerIndex * H;
+  // deep-link: work.html#slug → langsung pusatkan projek yang diklik dari rail home
+  var ORDER = ['aethelgard-7e0', 'vroeger-koffiehuis', 'lexier', 'elan-fashion-editorial', 'vipera-emeraude', 'aelian', 'cerulean-chic', 'cheriel-landing', 'ocular-45z', 'glint-landing-58i'];
+  var slug = (location.hash || '').replace('#', '');
+  var startIdx = ORDER.indexOf(slug);
+  if (startIdx < 0) startIdx = 0;
+
+  var startY = (centerIndex + startIdx) * H;
   var targetScrollY = startY, currentScrollY = startY, lastScrollY = startY, velocity = 0;
   scrollArea.scrollTop = startY;
 
@@ -171,6 +177,12 @@
     for (var i = 0; i < pts.length; i++) pts[i].style.height = H + 'px';
   });
 
-  updateUIFirst(0);
+  // hash berubah tanpa reload (back/forward atau edit hash) → pusatkan ulang
+  window.addEventListener('hashchange', function () {
+    var i = ORDER.indexOf((location.hash || '').replace('#', ''));
+    if (i >= 0) scrollArea.scrollTop = (centerIndex + i) * H;
+  });
+
+  updateUIFirst(startIdx);
   renderLoop();
 })();
