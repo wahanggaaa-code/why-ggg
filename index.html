@@ -726,19 +726,24 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 .rail-fallback .rail{transform:none !important;}
 .rail-fallback .rslide{scroll-snap-align:center;}
 @media (prefers-reduced-motion: reduce){
-  .rail-pin{position:relative;height:auto;}
+  .rail-pin{position:relative;height:auto;justify-content:flex-start;}
+  .rail{padding-top:14px;}
   .rail-fallback{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
   .rail-hud,.rail-btns{display:none;}
 }
 /* ===== mobile ===== */
 @media(max-width:760px){
-  #work.archive{padding:44px 0 0;}
+  #manifesto{padding:60px 24px 20px;}
+  #work.archive{padding:6px 0 0;}
+  .aw-head{margin-bottom:12px;}
   .rail{gap:16px;}
+  .rail-pin{justify-content:flex-start;}
+  .rail{padding-top:76px;}
   .rslide{width:min(86vw,440px);}
   .rslide .rcap{padding:12px 14px 14px;gap:12px;}
   .rslide .rc-mid b{font-size:17px;}
   .rslide .rc-go{display:none;}
-  .rail-hud{right:16px;left:16px;bottom:12px;}
+  .rail-hud{right:16px;left:16px;bottom:14px;}
   .rail-prog{max-width:38vw;}
   .rail-hint span:not(.ar){display:none;}
   .rail-btns button{width:36px;height:36px;font-size:14px;}
@@ -747,7 +752,7 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 @media(max-height:520px){
   .rail-pin{height:auto;position:relative;}
   .rail-wrap{height:auto !important;}
-  .rail{transform:none !important;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px;}
+  .rail{transform:none !important;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding:10px 0 6px;}
   .rail::-webkit-scrollbar{display:none;}
   .rslide{flex:0 0 auto;width:70vw;scroll-snap-align:center;}
   .rail-hud{display:none;}
@@ -896,6 +901,50 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
   })();
 
   (function(){
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function setup(el, section){
+      if(!el || !section || reduced) return;
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+      const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node=>{
+        const txt = node.textContent;
+        if(!txt.trim()) return;
+        const frag = document.createDocumentFragment();
+        txt.split(/(\s+)/).forEach(part=>{
+          if(/\s+/.test(part)) frag.appendChild(document.createTextNode(part));
+          else if(part){
+            const s=document.createElement('span');
+            s.className='mrw'; s.textContent=part; s.style.opacity='0.15'; s.style.transition='opacity 0.12s';
+            frag.appendChild(s);
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
+      });
+      const words = el.querySelectorAll('.mrw');
+      const REST=0.15, SPAN=0.85, WIN=0.22;
+      function onScroll(){
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const mob = window.innerWidth <= 900;
+        const start = mob ? vh*0.85 : vh*0.75;
+        const end   = mob ? vh*0.30 : (-section.offsetHeight + vh*0.25);
+        const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
+        const count = words.length;
+        words.forEach((w,i)=>{
+          const s = count<=1 ? 0 : (i/(count-1))*SPAN;
+          const e = Math.min(1, s+WIN);
+          let op = progress<=s ? REST : progress>=e ? 1 : REST+(1-REST)*((progress-s)/(e-s));
+          w.style.opacity = op;
+        });
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      window.addEventListener('resize', onScroll);
+      onScroll();
+    }
+    setup(document.getElementById('manifestoReveal'), document.getElementById('manifesto'));
+  })();
+
+  (function(){
     const video = document.getElementById('crystalVideo');
     const loader = document.getElementById('loader');
     if(!video || !loader) return;
@@ -973,7 +1022,7 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
       if(maxX<=0){ wrap.style.height = '115vh'; range=1; H=window.innerHeight; return; }
       H = window.innerHeight;
       // jarak scroll vertikal = lebar yang harus digeser + ruang napas
-      const extra = Math.max(H*0.4, 140);
+      const extra = (window.innerWidth<=760) ? 90 : Math.max(H*0.4, 140);
       wrap.style.height = (H + maxX + extra) + 'px';
       range = (wrap.getBoundingClientRect().height - H);
       off = wrap.offsetTop;
