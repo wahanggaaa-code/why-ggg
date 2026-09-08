@@ -96,7 +96,7 @@ VT_NAMES = "\n".join(".%s{ view-transition-name:vt-%s; }" % (w['slug'], w['slug'
 
 RAIL_CSS = r"""
 /* ===== 01 ARCHIVE — Horizontal Scroll Rail (digerakkan scroll vertikal) ===== */
-#work.archive{padding:110px 0 0;}
+#work.archive{padding:clamp(30px,4.5vw,60px) 0 0;}
 .aw-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
   padding:0 clamp(20px,5vw,56px);margin-bottom:34px;}
 .aw-head .archive-title{margin:0;}
@@ -105,7 +105,7 @@ RAIL_CSS = r"""
 .aw-count b{color:#e9e9ea;font-size:26px;font-weight:500;letter-spacing:.04em;}
 .aw-count i{font-style:normal;opacity:.4;}
 .rail-wrap{position:relative;width:100%;}
-.rail-pin{position:sticky;top:0;height:100vh;overflow:hidden;
+.rail-pin{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;
   display:flex;flex-direction:column;justify-content:center;}
 .rail{display:flex;gap:clamp(20px,4vw,64px);padding:0 clamp(20px,5vw,56px);
   width:max-content;will-change:transform;}
@@ -138,8 +138,9 @@ RAIL_CSS = r"""
   transition:border-color .25s,background .25s;}
 .rail-btns button:hover{border-color:var(--acc,#f0d9a0);background:rgba(240,217,160,.08);}
 /* reduced-motion / fallback: rail jadi overflow scroll-snap biasa */
-.rail-fallback{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  scroll-snap-type:x mandatory;cursor:grab;}
+.rail-fallback{position:relative;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;cursor:grab;scrollbar-width:none;}
+.rail-fallback::-webkit-scrollbar{display:none;}
 .rail-fallback .rail{transform:none !important;}
 .rail-fallback .rslide{scroll-snap-align:center;}
 @media (prefers-reduced-motion: reduce){
@@ -147,10 +148,27 @@ RAIL_CSS = r"""
   .rail-fallback{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
   .rail-hud,.rail-btns{display:none;}
 }
+/* ===== mobile ===== */
 @media(max-width:760px){
-  #work.archive{padding:80px 0 0;}
-  .rslide{width:min(86vw,430px);}
-  .rail-hud{position:relative;right:auto;left:auto;bottom:auto;margin:18px 20px 0;justify-content:space-between;}
+  #work.archive{padding:44px 0 0;}
+  .rail{gap:16px;}
+  .rslide{width:min(86vw,440px);}
+  .rslide .rcap{padding:12px 14px 14px;gap:12px;}
+  .rslide .rc-mid b{font-size:17px;}
+  .rslide .rc-go{display:none;}
+  .rail-hud{right:16px;left:16px;bottom:12px;}
+  .rail-prog{max-width:38vw;}
+  .rail-hint span:not(.ar){display:none;}
+  .rail-btns button{width:36px;height:36px;font-size:14px;}
+  .aw-count b{font-size:20px;}
+}
+@media(max-height:520px){
+  .rail-pin{height:auto;position:relative;}
+  .rail-wrap{height:auto !important;}
+  .rail{transform:none !important;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px;}
+  .rail::-webkit-scrollbar{display:none;}
+  .rslide{flex:0 0 auto;width:70vw;scroll-snap-align:center;}
+  .rail-hud{display:none;}
 }
 """
 
@@ -218,14 +236,26 @@ def grain_div():
     m = re.search(r'<div id="grain">.*?</div>', BASE_INDEX, re.S)
     return m.group(0)
 
+def brand_svg(w=84):
+    m = re.search(r'<svg[\s\S]*?</svg>', brand_logo('.'))
+    svg = m.group(0)
+    return re.sub(r'\bwidth="[^"]*"\s*height="[^"]*"', 'width="%d" height="%d"' % (w, w), svg, count=1)
+
 def loader_html():
-    i = BASE_INDEX.index('<div id="loader">'); j = BASE_INDEX.index('</div>', i) + len('</div>')
-    # loader punya struktur dua div (loader > videoWrap), jadi ambil sampai penutup <div id=main>?
-    seg = BASE_INDEX[i:BASE_INDEX.index('<div id="main">', i)]
-    return seg.rstrip()
+    svg = brand_svg(84)
+    return ('<div id="loader">\n  <div id="videoWrap">\n'
+            '    <video id="crystalVideo" muted autoplay playsinline preload="auto" aria-hidden="true">\n'
+            '      <source src="crystal.mp4" type="video/mp4">\n    </video>\n'
+            '    <div id="introMark" aria-hidden="true">' + svg + '</div>\n'
+            '  </div>\n</div>')
 
 def hero_html():
     return frag(BASE_INDEX, '<section id="hero"', '<section id="manifesto"').rstrip()
+
+def manifesto_html():
+    i = BASE_INDEX.index('<section id="manifesto"')
+    j = BASE_INDEX.index('</section>', i) + len('</section>')
+    return BASE_INDEX[i:j].rstrip()
 
 def log_html():
     return frag(BASE_INDEX, '<section id="log"', '<section id="about"').rstrip()
@@ -278,15 +308,43 @@ def loader_js():
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const l = document.getElementById('loader');
     if(!l) return;
-    let seen=false; try{ seen = sessionStorage.getItem('__intro')==='1'; }catch(e){}
-    function hide(){ if(l.classList.contains('gone'))return; l.classList.add('out'); setTimeout(function(){ l.classList.add('gone'); },900); }
+    const vw = document.getElementById('videoWrap');
+    const vid = document.getElementById('crystalVideo');
+    let done=false, seen=false;
+    try{ seen = sessionStorage.getItem('__intro')==='1'; }catch(e){}
+    function markReady(){ if(vw) vw.classList.add('ready'); }
+    function hide(){ if(done) return; done=true; l.classList.add('out');
+      setTimeout(function(){ l.classList.add('gone'); }, 900); }
+    const t0 = performance.now();
+    function scheduleHide(ms){ const el=Math.max(0, ms-(performance.now()-t0)); setTimeout(hide, el); }
     if(reduced || seen){ l.classList.add('gone'); return; }
     try{ sessionStorage.setItem('__intro','1'); }catch(e){}
-    let hid=false;
-    function later(){ if(!hid){hid=true; hide();} }
-    window.addEventListener('load', function(){ setTimeout(later, 600); }, {once:true});
-    setTimeout(later, 3400);
+    // nyalakan video; bila gagal/terblokir, logo statis (#introMark) tetap tampil
+    function tryPlay(){
+      if(!vid){ markReady(); scheduleHide(900); return; }
+      let p = null;
+      try{ p = vid.play(); }catch(e){}
+      if(p && p.then){ p.then(function(){ markReady(); }).catch(function(){ /* fallback ke #introMark */ }); }
+      else { vid.addEventListener('playing', markReady, {once:true}); }
+      setTimeout(function(){ if(vid && !vid.paused && vid.currentTime>0) markReady(); }, 1100);
+    }
+    tryPlay();
+    // intro singkat & pasti berakhir (sekitar 1.6s) — tidak menunggu window 'load'
+    scheduleHide(1600);
+    setTimeout(function(){ scheduleHide(3000); }, 200);
   })();
+"""
+
+INTRO_CSS = r"""
+/* ===== Intro loader — logo statis selalu tampil, video sebagai lapisan ===== */
+#videoWrap video{opacity:0;transition:opacity .5s ease .15s;}
+#videoWrap.ready video{opacity:1;}
+#introMark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  transition:opacity .45s ease,visibility .45s;}
+#introMark svg{width:88px;height:auto;opacity:.92;animation:introBreathe 2.6s ease-in-out infinite;}
+@keyframes introBreathe{0%,100%{opacity:.5;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+#videoWrap.ready #introMark{opacity:0;visibility:hidden;}
+@media (prefers-reduced-motion: reduce){ #introMark svg{animation:none;} }
 """
 
 def rail_html():
@@ -380,9 +438,9 @@ def page_doc(title, head_css, inner_body, script, body_class=''):
             '\n<body%s>\n%s\n<script>\n%s</script>\n</body>\n</html>\n' % ((' class="'+body_class+'"') if body_class else '', inner_body, script))
 
 def home_page():
-    head_css = HOME_STYLE + '\n' + VT_CSS + '\n' + VT_NAMES + '\n' + RAIL_CSS
+    head_css = HOME_STYLE + '\n' + INTRO_CSS + '\n' + VT_CSS + '\n' + VT_NAMES + '\n' + RAIL_CSS
     main = ('<div id="main">\n  ' + grain_div() + '\n\n  ' + page_header('home') + '\n\n  '
-            + hero_html() + '\n\n  ' + rail_html() + '\n\n  ' + log_html() + '\n\n  '
+            + hero_html() + '\n\n  ' + manifesto_html() + '\n\n  ' + rail_html() + '\n\n  ' + log_html() + '\n\n  '
             + footer_html() + '\n</div>')
     loader = loader_html()
     script = js_reveal() + js_scramble() + loader_js() + rail_js()
