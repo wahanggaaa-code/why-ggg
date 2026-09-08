@@ -1,37 +1,28 @@
-/* BUILD v20260908a — direction: COVER starts from the BOTTOM and rises (naik nutup),
- * REVEAL falls from the TOP opening the page (turun buka). Cache-bust ?v=20260908a. */
-/* ========================================================================
- * WHY GGG — refined WebGL page transition (signature staircase / skyline)
+/* BUILD v20260908b — EXACTLY like the reference video: a curtain pulled UP.
+ *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
+ *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
+ *            through the TOP (swipe up). Cache-bust ?v=20260908b.
+ * ========================================================================
+ * WHY GGG — WebGL page transition (signature staircase / skyline)
  *
  * Pure vanilla WebGL, no deps, no page screenshots.
  *
- * Flow (ONE continuous effect, click -> new page visible):
- *   click internal link -> the stair "curtain" RISES from the bottom of the
- *   old page, climbing until the whole screen is covered (soft warm gray
- *   veil, blocky skyline top edge). The instant it is full, the page swaps
- *   and the same curtain immediately FALLS back down — the stairs descend
- *   from the top of the new page down out of the bottom, opening the page.
- *   It reads as one motion: naik memenuhi -> langsung turun membuka.
+ * Motion matches ref-transition.2.mp4 — the veil always travels UP:
+ *   COVER (click, old page): veil region is BELOW the stair edge (uSide=1).
+ *     The edge starts below the bottom of the screen and RISES; the veil
+ *     grows from the bottom up until the screen is fully covered.
+ *   REVEAL (new page): veil region is ABOVE the stair edge (uSide=0). The
+ *     edge again starts low (fully covered) and RISES; the veil shrinks and
+ *     exits through the TOP, so the new page appears from the BOTTOM of the
+ *     screen first — the same upward curtain motion as the reference.
  *
- * Motion language:
- *   - Cover  (leaving old page): veil fills BELOW the stair edge; the edge
- *     climbs from below the bottom of the screen up over the top, so the
- *     curtain RISES until fully covered ("tangga naik memenuhi halaman").
- *   - Reveal (entering new page): the same veil falls away — the stair edge
- *     drops from above the top of the screen down below the bottom, opening
- *     the page from top to bottom ("tangga turun membuka halaman").
- *
- * Refinements over the previous build:
- *   - Reveal starts as soon as DOM+fonts are ready (capped) with a minimal
- *     settle so the cover->reveal feels like one unbroken effect.
- *   - Same-page links (Home/logo/href="#" placeholders) are no longer
- *     treated as navigations (no pointless full reload + cover).
- *   - Browser back/forward & bfcache restores are handled (pageshow):
- *     a page restored while covered re-runs the reveal; a restored page that
- *     was already visible stays visible. No stuck veil.
- *   - After reveal, scrolls to the target #anchor if the URL has one.
- *   - Reduced-motion -> instant native navigation (no veil).
- *   - No-WebGL -> short CSS fade cover + slide-away reveal fallback.
+ * Refinements kept from the audit:
+ *   - Same-page links (Home/logo/href="#" placeholders) never navigate.
+ *   - Browser back/forward & bfcache restores handled (no stuck veil).
+ *   - After reveal, scrolls to target #anchor if present.
+ *   - Reduced-motion -> instant native navigation.
+ *   - No-WebGL -> CSS veil: slides up over the page (cover) then slides up
+ *     off the top (reveal).
  * ======================================================================== */
 (function(){
   'use strict';
@@ -65,19 +56,21 @@
   var STAGGER = 0.34;   // diagonal slope of the leading edge
   var JITTER  = 0.22;   // blocky height variation between columns
 
-  // p (edge position) mapping — the veil fills BELOW the stair edge
-  // (covered = uv.y < edgeY). ONE continuous effect:
-  //   COVER (leaving): edge starts below the bottom (page visible) and
-  //     RISES over the top => the curtain climbs UP until the screen is
-  //     fully covered ("tangga naik memenuhi halaman").
-  //   REVEAL (entering): edge starts above the top (fully covered) and
-  //     FALLS below the bottom => the curtain descends, opening the new
-  //     page from top to bottom ("langsung turun membuka halaman").
-  var P_OPEN   = -0.15;  // edge just below screen bottom -> fully visible
-  var P_CLOSED =  1.55;  // edge well above screen top    -> fully covered
+  // p (edge position) mapping — single RISING-edge model matching the
+  // reference video (a curtain pulled UP): both phases sweep the same way,
+  // only the veil side changes (uniform uSide in the shader):
+  //   COVER  (leaving, uSide=1): veil BELOW the edge -> the veil enters at
+  //     the BOTTOM of the old page and RISES to cover it fully (ref video,
+  //     frames ~4.0->4.7s). p: P_LOW -> P_HIGH.
+  //   REVEAL (entering, uSide=0): veil ABOVE the edge -> starts fully
+  //     covered, then the veil RISES out through the TOP; the new page is
+  //     revealed from the BOTTOM of the screen upward (ref video, frames
+  //     ~1.6->2.3s). p: P_LOW -> P_HIGH.
+  var P_LOW   = -0.15;  // edge below screen bottom: veil-below=open / veil-above=full
+  var P_HIGH  =  1.55;  // edge above screen top:    veil-below=full  / veil-above=open
 
-  var COVER_MS  = 640;   // cover: stairs rise from bottom to fill (naik nutup)
-  var REVEAL_MS = 840;   // reveal: stairs fall from top to open (turun buka)
+  var COVER_MS  = 620;   // cover: veil rises from bottom to fill (swipe up)
+  var REVEAL_MS = 780;   // reveal: veil rises out the top, page opens bottom-up
   var START_DELAY_MS = 40; // minimal settle so cover->reveal stays readable
   var SAFE_MAX_MS    = 1000; // absolute cap so a stuck load never blocks reveal
 
@@ -96,6 +89,7 @@
     'varying vec2 vUv;\n' +
     'uniform sampler2D uJitter;\n' +
     'uniform float uProgress;\n' +
+    'uniform float uSide;\n' +   // 1 = veil below edge (cover), 0 = veil above edge (reveal)
     '\n' +
     'void main(){\n' +
     '  vec2 uv = vUv;\n' +
@@ -111,8 +105,8 @@
     // NOTE: ascending smoothstep args + "1.0 - cov" — portable everywhere.
     // (Reversed smoothstep args are undefined in GLSL and some GPUs flipped
     // the covered side, making the wipe appear to start from the TOP.)
-    '  float cov = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
-    '  float covered = 1.0 - cov;\n' +
+    '  float above = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
+    '  float covered = mix(above, 1.0 - above, uSide);\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
@@ -185,7 +179,8 @@
   }
 
   /* ---------- overlay / GL state ---------- */
-  var ov, cv, gl, prg, jTex, uP, uJ, quadBound=false;
+  var ov, cv, gl, prg, jTex, uP, uJ, uSide, quadBound=false;
+  var sideSel = 1; // 1 = veil below edge (cover), 0 = veil above edge (reveal)
 
   function ensure(){
     if(ov) return;
@@ -207,6 +202,7 @@
         jTex=gl.createTexture();
         upT(gl,jTex,mkJit());
         uP=gl.getUniformLocation(prg,'uProgress');
+        uSide=gl.getUniformLocation(prg,'uSide');
         uJ=gl.getUniformLocation(prg,'uJitter');
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D,jTex);
@@ -235,6 +231,7 @@
     gl.bindTexture(gl.TEXTURE_2D,jTex);
     gl.uniform1i(uJ,0);
     gl.uniform1f(uP,p);
+    gl.uniform1f(uSide, sideSel);
     gl.drawArrays(gl.TRIANGLES,0,6);
   }
 
@@ -250,12 +247,10 @@
   }
 
   /* ---------- easing ---------- */
-  // easeInQuad — cover: the stairs start rising right after the click and
-  // accelerate into full cover (decisive, no dead time at the bottom).
+  // easeInQuad — both sweeps: the edge starts moving right away and
+  // accelerates, like a curtain being pulled up quickly (matches the ref
+  // video: slow entry at the bottom, fast finish at the top).
   function easeInQuad(t){ return t*t; }
-  // easeOutCubic — reveal: the stairs start falling away IMMEDIATELY so the
-  // cover->reveal reads as one continuous effect, then settle as they exit.
-  function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
 
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
@@ -263,9 +258,9 @@
   var raf=0;
 
   /* ---------- CSS fallbacks (no WebGL) ----------
-   * Mirrors the same direction language as the shader version:
-   *   cover  = veil slides UP from the bottom of the screen to cover (naik nutup)
-   *   reveal = veil slides DOWN out of the bottom, opening the page (turun buka)
+   * Mirrors the reference-video direction:
+   *   cover  = veil slides UP from the bottom of the screen to cover
+   *   reveal = veil slides UP off the top, page opens from the bottom
    */
   function fallbackCover(onDone){
     ov.style.transition='none';
@@ -285,8 +280,8 @@
     ov.style.transform='translateY(0)';
     ov.style.pointerEvents='auto';
     void ov.offsetWidth;
-    ov.style.transition='transform 0.8s cubic-bezier(0.77,0,0.175,1)';
-    ov.style.transform='translateY(102%)';   // drops down out of the bottom
+    ov.style.transition='transform 0.78s cubic-bezier(0.55,0,0.3,1)';
+    ov.style.transform='translateY(-102%)';  // rises up off the top (reveal bottom-up)
     setTimeout(function(){
       ov.style.opacity='0';
       ov.style.background='transparent';
@@ -310,7 +305,7 @@
     drawAt(fromP);
 
     var t0=0;
-    var ease = phase==='cover' ? easeInQuad : easeOutCubic;
+    var ease = easeInQuad;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
@@ -366,10 +361,12 @@
     ov.style.pointerEvents='auto';
 
     if(gl&&prg){
+      // Reveal = veil-above rising out of the top (like the ref video).
+      sideSel = 0;
       // First frame fully covered drawn synchronously above the removed veil.
-      drawAt(P_CLOSED);
+      drawAt(P_LOW);
       requestAnimationFrame(function(){
-        animate(REVEAL_MS, P_CLOSED, P_OPEN, 'reveal', function(){ busy=false; scrollToIntent(); });
+        animate(REVEAL_MS, P_LOW, P_HIGH, 'reveal', function(){ busy=false; scrollToIntent(); });
       });
     } else {
       fallbackReveal(function(){ busy=false; scrollToIntent(); });
@@ -398,7 +395,9 @@
     lockScroll(true);
     try{ sessionStorage.setItem('__wgl_a','1'); }catch(e){}
     covered=true;
-    animate(COVER_MS, P_OPEN, P_CLOSED, 'cover', function(){
+    // Cover = veil-below rising to fill from the bottom (like the ref video).
+    sideSel = 1;
+    animate(COVER_MS, P_LOW, P_HIGH, 'cover', function(){
       window.location.href = url;
     });
   }
