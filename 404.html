@@ -4,6 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>404 — WHY ✴︎ GGG</title>
+<script>
+  /* Pre-paint transition veil on arrival (see transition.js) — mencegah flash putih/hitam */
+  (function(){
+    try{
+      if(sessionStorage.getItem('__wgl_a')==='1'){
+        var s=document.createElement('style');
+        s.id='wgl-veil';
+        s.textContent='html{background:#c9c6cd !important}body::before{content:"";position:fixed;inset:0;z-index:2147482999;background:#c9c6cd;pointer-events:auto}';
+        (document.head||document.documentElement).appendChild(s);
+      }
+    }catch(e){}
+  })();
+</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Halaman tidak ditemukan — WHY GGG.">

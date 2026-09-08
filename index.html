@@ -4,6 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>WHY ✴︎ GGG — Personal Landing</title>
+<script>
+  /* Pre-paint transition veil on arrival (see transition.js) — mencegah flash putih/hitam */
+  (function(){
+    try{
+      if(sessionStorage.getItem('__wgl_a')==='1'){
+        var s=document.createElement('style');
+        s.id='wgl-veil';
+        s.textContent='html{background:#c9c6cd !important}body::before{content:"";position:fixed;inset:0;z-index:2147482999;background:#c9c6cd;pointer-events:auto}';
+        (document.head||document.documentElement).appendChild(s);
+      }
+    }catch(e){}
+  })();
+</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="WHY ✴︎ GGG — Personal Landing. Building quietly. ALL IN OR NOTHING. Editorial archive 05 works on #060607.">
@@ -405,7 +418,7 @@
   <!-- WORK — 01 ARCHIVE single carousel -->
   <section id="work" aria-label="Arsip karya">
     <div class="work-head">
-      <h2 class="archive-title scramble" data-reveal style="margin:0;">01 ARCHIVE</h2>
+      <h2 class="archive-title scramble" style="margin:0;">01 ARCHIVE</h2>
     </div>
 
     <div class="archive-wrap">
@@ -439,7 +452,7 @@
   <!-- 02 LOG / NOW -->
   <section id="log" aria-label="Log">
     <div class="work-head">
-      <h2 class="archive-title scramble" data-reveal style="margin:0;">02 LOG</h2>
+      <h2 class="archive-title scramble" style="margin:0;">02 LOG</h2>
       <span class="count">NOW — SEP 2026</span>
     </div>
     <div class="log-list">
@@ -760,9 +773,11 @@
     const backdrop = document.getElementById('lightboxBackdrop');
     if(!track || !lb || !lbImg) return;
     let idx = 0;
+    let lastFocus = null;
     function updateCounter(){ if(lbCounter) lbCounter.textContent = String(idx+1).padStart(2,'0') + ' / ' + String(sources.length).padStart(2,'0'); }
     function updateDesc(){ if(lbDesc) lbDesc.textContent = descs[idx] || ''; }
     function open(i){
+      lastFocus = document.activeElement;
       idx = Math.max(0, Math.min(sources.length-1, i));
       lbImg.src = sources[idx];
       lbImg.alt = alts[idx] || '';
@@ -772,6 +787,7 @@
       document.body.style.overflow = 'hidden';
       const main = document.getElementById('main');
       if(main) main.style.filter = 'blur(8px)';
+      if(btnClose) btnClose.focus();
     }
     function close(){
       lb.classList.remove('open');
@@ -779,6 +795,16 @@
       document.body.style.overflow = '';
       const main = document.getElementById('main');
       if(main) main.style.filter = '';
+      if(lastFocus && typeof lastFocus.focus === 'function'){ lastFocus.focus(); }
+      lastFocus = null;
+    }
+    function trapFocus(e){
+      const focusables = lb.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+      const list = [].filter.call(focusables, n => n.offsetParent !== null || n === document.activeElement);
+      if(!list.length) return;
+      const first = list[0], last = list[list.length-1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
     }
     const figure = lb.querySelector('.lightbox-figure');
     function setSrc(i){ idx = i; lbImg.src = sources[idx]; lbImg.alt = alts[idx]||''; updateCounter(); updateDesc(); }
@@ -792,10 +818,17 @@
     function prev(){ nav(-1); }
     function next(){ nav(1); }
     function resetFigure(){ if(figure){ figure.style.transition=''; figure.style.transform=''; } }
-    track.querySelectorAll('.gallery-slide img').forEach(img=>{
-      img.addEventListener('click', ()=>{
-        const i = parseInt(img.getAttribute('data-idx')||'0',10);
-        open(i);
+    // Keyboard-accessible: setiap slide punya peran tombol (Enter/Space = buka)
+    track.querySelectorAll('.gallery-slide').forEach(sl=>{
+      sl.setAttribute('tabindex','0');
+      sl.setAttribute('role','button');
+      const img = sl.querySelector('img');
+      const n = parseInt((img && img.getAttribute('data-idx'))||'0',10);
+      sl.setAttribute('aria-label','Perbesar karya ' + String(n+1).padStart(2,'0'));
+      const act = ()=>{ open(n); };
+      sl.addEventListener('click', act);
+      sl.addEventListener('keydown', e=>{
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); act(); }
       });
     });
     btnClose?.addEventListener('click', close);
@@ -804,9 +837,10 @@
     btnNext?.addEventListener('click', next);
     document.addEventListener('keydown', (e)=>{
       if(!lb.classList.contains('open')) return;
-      if(e.key==='Escape') close();
-      if(e.key==='ArrowLeft') prev();
-      if(e.key==='ArrowRight') next();
+      if(e.key==='Escape'){ close(); return; }
+      if(e.key==='ArrowLeft'){ prev(); return; }
+      if(e.key==='ArrowRight'){ next(); return; }
+      if(e.key==='Tab') trapFocus(e);
     });
     // swipe on lightbox — drag mengikuti jari + slide berarah
     let sx=0, sy=0, dx=0;
@@ -843,6 +877,9 @@
   const video = document.getElementById('crystalVideo');
   const loader = document.getElementById('loader');
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Datang via transisi antar-halaman (transition.js) — loader video tidak perlu diputar dobel.
+  let arrivedViaTransition = false;
+  try{ arrivedViaTransition = sessionStorage.getItem('__wgl_a')==='1'; }catch(_e){}
   // Hormati prefers-reduced-motion: hero video & loader video tidak autoplay animasi
   if(prefersReduced){
     const heroVid = document.querySelector('.hero-bg video');
@@ -885,6 +922,17 @@
     if(prefersReduced){
       dispatchHeroStart();
       trulyHideLoader();
+      return;
+    }
+    // Tiba lewat transisi WebGL (flag __wgl_a di-set oleh halaman asal):
+    // veil transisi sudah menutup & nanti membuka halaman — jangan tumpuk
+    // dengan loader video kedua. Sembunyikan dulu, baru stop video-nya.
+    if(arrivedViaTransition){
+      loader.classList.add('gone');
+      loader.style.display='none';
+      loader.setAttribute('aria-hidden','true');
+      try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(_e){}
+      dispatchHeroStart();
       return;
     }
     loader.classList.remove('out','gone');
