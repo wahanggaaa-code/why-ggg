@@ -1,94 +1,59 @@
 # Deploy & Workflow — WHY ✴︎ GGG
 
-Situs statis **vanilla** (HTML/CSS/JS) yang di-*generate* dari `tools/build-site.py`
-(sumber materi ada di `tools/base/`). Tidak ada build step modern — hasil generate
-langsung disajikan sebagai aset.
+Situs statis **vanilla** (HTML/CSS/JS) yang **dipelihara manual** di branch
+pengembangan. Tidak ada build step: file di root repo = file yang disajikan.
 
-> Arsitektur lama (staging `gh-pages` identik dengan `main`) **tidak dipakai lagi**.
-> Branch `gh-pages` sudah dihapus. Revisi kini hidup di branch pengembangan
-> `arsitektur-awwwards`.
+> ⚠️ `tools/build-site.py` adalah generator **legacy**. Sejak SEP 2026 ia punya guard:
+> menolak menulis `index.html` kecuali environment `ALLOW_INDEX_CLOBBER=1` diset.
+> Halaman-laman (`index/about/contact/work/404`) disunting langsung di root repo.
+> **Jangan jalankan generator ini untuk mengubah halaman** — edit file halamannya.
 
 ## Peta lingkungan
 
-| Lingkungan | Branch | Host | Peran |
-|---|---|---|---|
-| Pengembangan | `arsitektur-awwwards` | lokal / preview | Tempat semua revisi & kerja harian |
-| Production | `main` | Cloudflare Workers (Assets) + domain custom | Situs live |
+| Lingkungan | Branch | Peran |
+|---|---|---|
+| Pengembangan | `arsitektur-awwwards` | semua revisi & kerja harian |
+| Production | `main` | situs live (Cloudflare Workers Assets + domain custom) |
 
-> Aturan: **jangan commit/edit langsung di `main`**. Semua perubahan lahir di
-> `arsitektur-awwwards`, baru digabung ke `main` saat mau rilis.
+Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
+`arsitektur-awwwards` → `main` atas keputusan pemilik repo.
 
 ## Siklus kerja harian
 
-1. Kerjakan di cabang `arsitektur-awwwards`.
-2. Ubah **sumber**, bukan hasil:
-   - struktur/isi halaman & gaya: `tools/base/` (index.html, about.html, 404.html),
-   - data proyek & logika: `tools/build-site.py` (daftar `WORK`, CSS/JS),
-   - aset media: langsung di root repo (`crystal.mp4`, `fluid.mp4`, `*.webp`, `fonts/`, `logo.png`).
-3. Regenerasi seluruh halaman:
-   ```bash
-   python3 tools/build-site.py
-   ```
-   Hasil menimpa: `index.html`, `about.html`, `contact.html`, `work/*.html`, `404.html`.
-4. Commit & push:
-   ```bash
-   git add -A
-   git commit -m "..."
-   git push origin arsitektur-awwwards
-   ```
-   (Preview lokal: `python3 -m http.server 8080` dari root repo.)
+1. Kerja di `arsitektur-awwwards`.
+2. Edit file halaman/asset langsung:
+   - desain & logika home: `assets/home.css`, `assets/home.js`
+   - halaman work: `work.html`, `assets/work.css`, `assets/work.js`
+   - konten halaman: `index.html`, `about.html`, `contact.html`, `404.html`
+   - thumbnail projek: `assets/proj/<slug>.webp`
+3. Uji lokal: `python3 -m http.server 8080`.
+   Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
+   transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
+4. Commit + push ke `arsitektur-awwwards`.
 
-## Rilis ke production (main → Cloudflare)
+## Deploy ke production
 
-1. `git checkout main`
-2. `git merge arsitektur-awwwards`
-3. `git push origin main`
-4. Cloudflare auto-deploy `main` (±1 menit) — URL workers.dev / domain custom otomatis terbarui.
+```bash
+# 1) merge pengembangan ke main (keputusan pemilik)
+git checkout main && git merge arsitektur-awwwards && git push origin main
 
-> Jika ingin menengok halaman sebelum rilis: GitHub Pages bisa dibuat dari branch
-> apa pun secara manual (Settings → Pages → Source branch `arsitektur-awwwards`),
-> tapi itu opsional & tidak lagi jadi bagian alur wajib.
+# 2) deploy Workers Assets dari root repo (branch main)
+npx wrangler deploy
+```
 
-## Setup Cloudflare Workers + Assets (production)
+- Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
+- `.assetsignore` memastikan file non-publik (mis. `tools/`) tidak ikut ter-deploy;
+  `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
+- URL live: https://why-ggg.wahanggaaa.workers.dev/ (＋ domain custom via dashboard).
+- Rollback: `npx wrangler deployments list` → `npx wrangler rollback <version-id>`.
 
-Konfigurasi di dashboard Cloudflare (bukan lewat file ini):
-1. Workers & Pages → connect repo `wahanggaaa-code/why-ggg`.
-2. Production branch: **`main`**.
-3. Build command: *(kosong / None)* — repo sudah menyajikan file statis.
-4. Deploy command: `npx wrangler deploy` · Version command: `npx wrangler versions upload`.
-5. **WAJIB** salah satu agar build tidak gagal:
-   - set env var `NODE_VERSION = 22`, **atau**
-   - pin perintah ke `npx wrangler@3 ...` (kompatibel Node lama).
-6. Repo harus punya `wrangler.toml` (sudah ada: `[assets] directory = "./"`).
+## Catatan operasional
 
-> Mengubah settings TIDAK memicu build. Setelah mengubah, **push commit baru** atau
-> klik **Retry deployment** agar build jalan.
-
-## Setelah domain custom live
-
-Karena semua path relatif, situs jalan di domain mana pun. Tapi perbarui referensi
-absolut saat ganti domain:
-- `index.html`: `<link rel="canonical">` dan JSON-LD `url` / `sameAs`
-- `sitemap.xml`: `<loc>`
-- `robots.txt`: baris `Sitemap:`
-
-## Menambah karya baru (01 ARCHIVE)
-
-1. Buka `tools/build-site.py` → daftar `WORK`.
-2. Tambah satu `dict` (slug unik, nama file `img`, judul, tag, tahun, blurb, story).
-3. Taruh gambar di root repo.
-4. Jalankan `python3 tools/build-site.py`.
-   Halaman `work/<slug>.html`, kartu rail, counter total, dan nama View-Transition
-   `vt-<slug>` terbentuk otomatis.
-
-## Menambah entri LOG (rutin)
-
-1. Edit bagian `#log` di `tools/base/index.html` (baris **paling atas** dari daftar).
-2. Jalankan `python3 tools/build-site.py`.
-
-## Keamanan
-
-- Jangan pernah commit token/secret ke repo.
-- Push memakai token sementara (fine-grained / classic dengan scope `repo`), lalu
-  **segera revoke** di GitHub Settings → Developer settings → Tokens.
-- Repo bersifat publik: hindari menyimpan informasi pribadi di history.
+- **View Transitions** cross-document (blur fokus) aktif di semua halaman via CSS
+  inline `#vtCss`; header ikut morph (`view-transition-name: vt-nav`).
+- Deep-link carousel work: `work.html#<slug>` (slug = nama file webp di `assets/proj/`).
+- Semua library (GSAP, ScrollTrigger, Lenis, font) **self-hosted** — tanpa CDN.
+- Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);
+  `crystal.mp4` tetap di-preload karena dipakai loader home.
+- Keamanan: pernah ada PAT GitHub muncul di riwayat chat/sesi — **rotasi token** bila
+  masih aktif; gunakan token ber-scope repo hanya via environment/CLI, jangan di file.
