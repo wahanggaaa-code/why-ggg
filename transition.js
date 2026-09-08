@@ -1,4 +1,4 @@
-/* BUILD v20260908c — EXACTLY like the reference video: a curtain pulled UP.
+/* BUILD v20260908d — EXACTLY like the reference video: a curtain pulled UP.
  *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
  *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
  *            through the TOP (swipe up). Cache-bust ?v=20260908b.
@@ -51,26 +51,16 @@
   try{ arriving = sessionStorage.getItem('__wgl_a') === '1'; }catch(e){}
 
   /* ---------- geometry / timings ---------- */
-  // Clean staircase geometry — FEW, BIG, EVEN steps (no wave/hill look, no
-  // per-column jitter "chasing" each other). The leading edge is a real
-  // staircase: STEP_COUNT wide flat treads that rise by STEP_RISE each, from
-  // BASE (lowest step, at the left) up to BASE+total rise (highest step).
-  var STEP_COUNT = 6.0;   // number of big steps ("anak tangga") across width
-  var STEP_BASE  = 0.06;  // height of the lowest step (left side)
-  var STEP_RISE  = 0.12;  // height increase between consecutive steps
-  var STEP_H_MAX = STEP_BASE + STEP_RISE * (STEP_COUNT - 1.0); // 0.66
-
-  // p (edge position) mapping — single RISING-edge model matching the
-  // reference video (a curtain pulled UP): both phases sweep the same way
-  // and the step SHAPE stays fixed (it just slides upward), so no step ever
-  // "chases" another. Only the veil side changes (uniform uSide):
-  //   COVER  (leaving, uSide=1): veil BELOW the edge -> veil enters at the
-  //     BOTTOM of the old page and RISES to cover it fully.
-  //   REVEAL (entering, uSide=0): veil ABOVE the edge -> starts fully
-  //     covered, then rises out through the TOP; the new page is revealed
-  //     from the BOTTOM of the screen upward.
-  var P_LOW   = -(STEP_H_MAX) - 0.08;           // staircase fully below screen -> open/full
-  var P_HIGH  = (1.0 - STEP_BASE) + 0.08;       // staircase fully above screen  -> full/open
+  // RACING STEPS — NOT a smooth wave, NOT a uniform staircase. Several wide
+  // columns ("anak tangga") each rise at its OWN randomised speed, so they
+  // visibly race: fast columns finish first and wait at the top while slower
+  // ones catch up ("balapan"). Same race plays in cover and in reveal (only
+  // the veil side flips via uniform uSide).
+  var N_COLS   = 12.0;   // number of racing steps across the width
+  var P_LOW    = -0.15;  // an edge at/below the screen bottom
+  var P_HIGH   =  1.15;  // an edge at/above the screen top
+  var SPEED_MIN = 0.45;  // slowest column speed factor
+  var SPEED_MAX = 1.55;  // fastest column speed factor
 
   var COVER_MS  = 620;   // cover: veil rises from bottom to fill (swipe up)
   var REVEAL_MS = 780;   // reveal: veil rises out the top, page opens bottom-up
@@ -85,29 +75,34 @@
     'void main(){ vUv = aPos; gl_Position = vec4(aPos*2.0-1.0, 0.0, 1.0); }\n';
 
   var fs =
-    '#define STEP_COUNT ' + STEP_COUNT.toFixed(1) + '\n' +
-    '#define STEP_BASE '  + STEP_BASE.toFixed(3)  + '\n' +
-    '#define STEP_RISE '  + STEP_RISE.toFixed(3)  + '\n' +
+    '#define N_COLS ' + N_COLS.toFixed(1) + '\n' +
     'precision highp float;\n' +
     'varying vec2 vUv;\n' +
-    'uniform float uProgress;\n' +
-    'uniform float uSide;\n' +   // 1 = veil below edge (cover), 0 = veil above edge (reveal)
+    'uniform float uTime;\n' +     // 0..1 across the phase duration
+    'uniform float uSide;\n' +     // 1 = veil below edge (cover), 0 = veil above edge (reveal)
+    '\n' +
+    'float hash(vec2 q){ return fract(sin(dot(q, vec2(12.9898, 78.233))) * 43758.5453); }\n' +
+    'float easeInQuad(float x){ return x * x; }\n' +
     '\n' +
     'void main(){\n' +
     '  vec2 uv = vUv;\n' +
-    '  float p = uProgress;\n' +
-    // Which big step is this pixel in? Every pixel in the same step shares
-    // the SAME height -> wide flat treads (big steps, no wave, no chasing).
-    '  float stepId = floor(clamp(uv.x, 0.0, 0.9999) * STEP_COUNT);\n' +
-    '  float h = STEP_BASE + stepId * STEP_RISE;\n' +
-    '  float edgeY = p + h;\n' +
+    // Which racing step is this pixel in? Every pixel in one step shares the
+    // same speed -> the step edge stays a clean vertical wall (not a wave).
+    '  float k = floor(clamp(uv.x, 0.0, 0.9999) * N_COLS);\n' +
+    '  float kf = k / (N_COLS - 1.0);\n' +
+    // Deterministic, stable per-column speed (random heights of finishing).
+    '  float r = hash(vec2(kf * 13.17, 7.33));\n' +
+    '  float sp = ' + SPEED_MIN.toFixed(3) + ' + ' + (SPEED_MAX-SPEED_MIN).toFixed(3) + ' * r;\n' +
+    // Column-local progress: fast columns clamp at 1 early (they win the race
+    // and wait), slow columns are still catching up -> visible chasing.
+    '  float tt = clamp(sp * uTime, 0.0, 1.0);\n' +
+    '  float edgeY = mix(' + P_LOW.toFixed(3) + ', ' + P_HIGH.toFixed(3) + ', easeInQuad(tt));\n' +
     // Portable coverage (ascending smoothstep + mix), veil side via uSide:
     '  float above = smoothstep(edgeY - 0.004, edgeY + 0.004, uv.y);\n' +
     '  float covered = mix(above, 1.0 - above, uSide);\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
-
   /* ---------- helpers ---------- */
   function mkGL(cv){
     var gl=null;
@@ -137,7 +132,7 @@
   }
 
   /* ---------- overlay / GL state ---------- */
-  var ov, cv, gl, prg, uP, uSide, quadBound=false;
+  var ov, cv, gl, prg, uTime, uSide, quadBound=false;
   var sideSel = 1; // 1 = veil below edge (cover), 0 = veil above edge (reveal)
 
   function ensure(){
@@ -157,7 +152,7 @@
         bindQuad(gl,prg);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        uP=gl.getUniformLocation(prg,'uProgress');
+        uTime=gl.getUniformLocation(prg,'uTime');
         uSide=gl.getUniformLocation(prg,'uSide');
         quadBound=true;
       }
@@ -170,7 +165,7 @@
     cv.width =Math.floor(window.innerWidth*dpr);
     cv.height=Math.floor(window.innerHeight*dpr);
   }
-  function drawAt(p){
+  function drawT(t){
     if(!gl||!prg) return;
     gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(0,0,0,0);
@@ -179,7 +174,7 @@
     if(!quadBound){ bindQuad(gl,prg); quadBound=true; }
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.uniform1f(uP,p);
+    gl.uniform1f(uTime, t);
     gl.uniform1f(uSide, sideSel);
     gl.drawArrays(gl.TRIANGLES,0,6);
   }
@@ -196,10 +191,6 @@
   }
 
   /* ---------- easing ---------- */
-  // easeInQuad — both sweeps: the edge starts moving right away and
-  // accelerates, like a curtain being pulled up quickly (matches the ref
-  // video: slow entry at the bottom, fast finish at the top).
-  function easeInQuad(t){ return t*t; }
 
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
@@ -241,7 +232,10 @@
   }
 
   /* ---------- animation ---------- */
-  function animate(dur, fromP, toP, phase, onDone){
+  // Both phases drive a single progress t = 0..1 (uTime). Each column runs
+  // that t through its OWN speed in the shader, which is what creates the
+  // racing/chasing feel.
+  function animate(dur, phase, onDone){
     if(!gl||!prg){ if(phase==='cover') fallbackCover(onDone); else fallbackReveal(onDone); return; }
 
     resize();
@@ -251,20 +245,18 @@
     ov.style.transition='none';
 
     // Paint the starting frame synchronously so there is never a transparent gap.
-    drawAt(fromP);
+    drawT(0);
 
     var t0=0;
-    var ease = easeInQuad;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
-      var p=fromP+(toP-fromP)*ease(t);
-      drawAt(p);
+      drawT(t);
       if(t<1){
         cancelAnimationFrame(raf);
         raf=requestAnimationFrame(frame);
       } else {
-        drawAt(toP);
+        drawT(1);
         if(phase==='cover'){
           // Let the browser actually present the final full veil, then leave.
           covered=true;
@@ -313,9 +305,9 @@
       // Reveal = veil-above rising out of the top (like the ref video).
       sideSel = 0;
       // First frame fully covered drawn synchronously above the removed veil.
-      drawAt(P_LOW);
+      drawT(0);
       requestAnimationFrame(function(){
-        animate(REVEAL_MS, P_LOW, P_HIGH, 'reveal', function(){ busy=false; scrollToIntent(); });
+        animate(REVEAL_MS, 'reveal', function(){ busy=false; scrollToIntent(); });
       });
     } else {
       fallbackReveal(function(){ busy=false; scrollToIntent(); });
@@ -346,7 +338,7 @@
     covered=true;
     // Cover = veil-below rising to fill from the bottom (like the ref video).
     sideSel = 1;
-    animate(COVER_MS, P_LOW, P_HIGH, 'cover', function(){
+    animate(COVER_MS, 'cover', function(){
       window.location.href = url;
     });
   }
