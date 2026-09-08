@@ -1,20 +1,18 @@
-/* BUILD v20260908j — EXACTLY like the reference video: a curtain pulled UP.
- *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
- *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
- *            through the TOP (swipe up). Cache-bust ?v=20260908b.
- * ========================================================================
- * WHY GGG — WebGL page transition (signature staircase / skyline)
+
+/* ========================================================================
+ * WHY GGG — WebGL page transition (signature racing staircase / skyline)
  *
  * Pure vanilla WebGL, no deps, no page screenshots.
  *
- * Motion matches ref-transition.2.mp4 — the veil always travels UP:
- *   COVER (click, old page): veil region is BELOW the stair edge (uSide=1).
- *     The edge starts below the bottom of the screen and RISES; the veil
- *     grows from the bottom up until the screen is fully covered.
- *   REVEAL (new page): veil region is ABOVE the stair edge (uSide=0). The
- *     edge again starts low (fully covered) and RISES; the veil shrinks and
- *     exits through the TOP, so the new page appears from the BOTTOM of the
- *     screen first — the same upward curtain motion as the reference.
+ * BUILD v20260908j — curtain pulled UP with RACING steps (kept close):
+ *   COVER (click, old page): veil BELOW the stair edge (uSide=1). Columns
+ *     rise from the BOTTOM of the screen at slightly different speeds,
+ *     racing each other but staying near one another, then the screen
+ *     closes FULLY (held ~60ms) before the new page is loaded.
+ *   REVEAL (new page): veil ABOVE the stair edge (uSide=0). The same close
+ *     race repeats; the page opens from the BOTTOM of the screen upward as
+ *     the columns exit through the TOP.
+ * Cache-bust query used in pages: transition.js?v=20260908j
  *
  * Refinements kept from the audit:
  *   - Same-page links (Home/logo/href="#" placeholders) never navigate.
@@ -198,8 +196,6 @@
     }
   }
 
-  /* ---------- easing ---------- */
-
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
   var covered=false;   // this document is currently fully under the veil
@@ -327,8 +323,8 @@
   function scheduleEnter(){
     if(!covered) return;
     // Start reveal as soon as the DOM is parsed + a tiny settle — never wait
-    // on fonts/media, so there is no long static veil between the "naik"
-    // (cover) and "turun" (reveal) halves of the one effect.
+    // on fonts/media, so there is no long static veil between the cover
+    // (fully closed) and the reveal (opening) halves of the one effect.
     var fired=false, safeT=0;
     function fire(){ if(fired) return; fired=true; clearTimeout(safeT); beginReveal(); }
     function start(){ setTimeout(fire, START_DELAY_MS); }
