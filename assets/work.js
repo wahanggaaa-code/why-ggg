@@ -66,6 +66,39 @@
     mouseY = (e.clientY / window.innerHeight) * 2 - 1;
   }, { passive: true });
 
+  /* ---------- drag pakai mouse (desktop): seret vertikal = pindah kartu ---------- */
+  var finePtr = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+  if (finePtr) {
+    var dragging = false, dragMoved = false, dragY = 0, dragTop = 0;
+    window.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      dragging = true; dragMoved = false;
+      dragY = e.clientY; dragTop = scrollArea.scrollTop;
+      if (settling) { gsap.killTweensOf(scrollArea); settling = false; }
+      lastInput = performance.now();
+      document.body.classList.add('w-drag');
+      e.preventDefault(); // blokir native image-drag & seleksi teks saat menyeret
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!dragging || e.pointerType !== 'mouse') return;
+      if (Math.abs(e.clientY - dragY) > 4) dragMoved = true;
+      scrollArea.scrollTop = dragTop + (dragY - e.clientY);
+      lastInput = performance.now();
+    }, { passive: true });
+    var dragEnd = function () {
+      if (!dragging) return;
+      dragging = false;
+      lastInput = performance.now();
+      document.body.classList.remove('w-drag');
+    };
+    window.addEventListener('pointerup', dragEnd, { passive: true });
+    window.addEventListener('pointercancel', dragEnd, { passive: true });
+    // telan klik yang lahir dari drag agar kartu tak ikut terpicu
+    document.addEventListener('click', function (e) {
+      if (dragMoved) { dragMoved = false; e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  }
+
   function lerp(a, b, t) { return a + (b - a) * t; }
   function lerpKF(a, b, t) {
     var cp = [];
@@ -167,6 +200,7 @@
 
   /* ---------- render loop ---------- */
   var running = false;
+  var TEXT_VMAX = 28; // teks UI ditahan saat fling cepat (px/frame) agar tak strobe
   function renderLoop() {
     if (!running) return;
     W = window.innerWidth; H = window.innerHeight;
@@ -209,7 +243,8 @@
     }
 
     var active = ((Math.round(progress) % N) + N) % N;
-    if (active !== currentIndex) updateUI(active);   // responsif: tanpa gate velocity
+    // throttle: saat fling cepat teks ditahan (tetap blur), tukar sekali saat tenang
+    if (active !== currentIndex && velocity < TEXT_VMAX) updateUI(active);
 
     requestAnimationFrame(renderLoop);
   }
@@ -248,9 +283,23 @@
     for (var i = 0; i < pts.length; i++) pts[i].style.height = H + 'px';
     sizeBase();
   });
+  // deep-link: meluncur halus via jalur loop terpendek (bisa diinterupsi input baru)
   window.addEventListener('hashchange', function () {
     var i = ORDER.indexOf((location.hash || '').replace('#', ''));
-    if (i >= 0) scrollArea.scrollTop = (centerIndex + i) * H;
+    if (i < 0) return;
+    var p = Math.round(scrollArea.scrollTop / H);
+    var act = ((p % N) + N) % N;
+    var d = i - act;
+    if (d > N / 2) d -= N;
+    if (d < -N / 2) d += N;
+    if (d === 0) return;
+    if (settling) gsap.killTweensOf(scrollArea);
+    settling = true;
+    gsap.to(scrollArea, {
+      scrollTop: (p + d) * H, duration: 0.9, ease: 'power3.inOut',
+      onUpdate: function () { lastInput = performance.now(); },
+      onComplete: function () { settling = false; }
+    });
   });
 
   /* ---------- klik kartu: yang mengintip = pusatkan dulu; pusat = buka situs ---------- */

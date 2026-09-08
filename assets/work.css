@@ -46,3 +46,8 @@ html.no-wn #wapp{position:static}
 @media (prefers-reduced-motion:reduce){
   .parallax-wrap{transition:none}
 }
+/* drag mouse (desktop): kursor grab; saat menyeret jadi grabbing + tanpa seleksi */
+@media (pointer:fine){
+  #wapp{cursor:grab}
+  body.w-drag,body.w-drag #wapp,body.w-drag #wapp *{cursor:grabbing !important;user-select:none !important}
+}
