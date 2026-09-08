@@ -3,10 +3,8 @@
 Situs statis **vanilla** (HTML/CSS/JS) yang **dipelihara manual** di branch
 pengembangan. Tidak ada build step: file di root repo = file yang disajikan.
 
-> ⚠️ `tools/build-site.py` adalah generator **legacy**. Sejak SEP 2026 ia punya guard:
-> menolak menulis `index.html` kecuali environment `ALLOW_INDEX_CLOBBER=1` diset.
-> Halaman-laman (`index/about/contact/work/404`) disunting langsung di root repo.
-> **Jangan jalankan generator ini untuk mengubah halaman** — edit file halamannya.
+> Semua halaman (`index/about/contact/work/404`) disunting langsung di root repo —
+> tidak ada build step dan tidak ada generator.
 
 ## Peta lingkungan
 
@@ -42,7 +40,7 @@ npx wrangler deploy
 ```
 
 - Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
-- `.assetsignore` memastikan file non-publik (mis. `tools/`) tidak ikut ter-deploy;
+- `.assetsignore` memastikan file non-publik (`DEPLOY.md`, `wrangler.toml`, `.git`, `.wrangler`, `.gitignore`) tidak ikut ter-deploy;
   `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
 - URL live: https://why-ggg.wahanggaaa.workers.dev/ (＋ domain custom via dashboard).
 - Rollback: `npx wrangler deployments list` → `npx wrangler rollback <version-id>`.

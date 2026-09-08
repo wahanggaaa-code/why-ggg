@@ -32,8 +32,6 @@ assets/
 vendor/                    # gsap, ScrollTrigger, lenis (self-hosted)
 fonts/                     # General Sans + JetBrains Mono (woff2, self-hosted)
 crystal.mp4  fluid.mp4  og-image.jpg
-tools/build-site.py        # generator LEGACY — punya guard: MENOLAK menulis index.html
-                           # kecuali env ALLOW_INDEX_CLOBBER=1. Jangan mengandalkan ini.
 wrangler.toml  .assetsignore  DEPLOY.md
 ```
 
