@@ -74,10 +74,10 @@
   var P_OPEN   = -0.15;  // edge just below screen bottom -> fully visible
   var P_CLOSED =  1.55;  // edge well above screen top    -> fully covered
 
-  var COVER_MS  = 560;   // cover: stairs rise to fill the screen
-  var REVEAL_MS = 760;   // reveal: stairs fall to open the new page
-  var START_DELAY_MS = 30; // minimal settle so cover->reveal feels continuous
-  var SAFE_MAX_MS    = 1300; // absolute cap so a stuck load never blocks reveal
+  var COVER_MS  = 640;   // cover: stairs rise from bottom to fill (naik nutup)
+  var REVEAL_MS = 840;   // reveal: stairs fall from top to open (turun buka)
+  var START_DELAY_MS = 40; // minimal settle so cover->reveal stays readable
+  var SAFE_MAX_MS    = 1000; // absolute cap so a stuck load never blocks reveal
 
   /* ---------- shaders ---------- */
   var vs =
@@ -256,16 +256,21 @@
   var covered=false;   // this document is currently fully under the veil
   var raf=0;
 
-  /* ---------- CSS fallbacks (no WebGL) ---------- */
+  /* ---------- CSS fallbacks (no WebGL) ----------
+   * Mirrors the same direction language as the shader version:
+   *   cover  = veil slides UP from the bottom of the screen to cover (naik nutup)
+   *   reveal = veil slides DOWN out of the bottom, opening the page (turun buka)
+   */
   function fallbackCover(onDone){
-    ov.style.transition='opacity 0.22s ease';
-    ov.style.opacity='0';
+    ov.style.transition='none';
     ov.style.background=VEIL;
-    ov.style.transform='';
-    void ov.offsetWidth;
     ov.style.opacity='1';
+    ov.style.transform='translateY(101%)';   // parked just below the screen
     ov.style.pointerEvents='auto';
-    setTimeout(function(){ onDone&&onDone(); }, 340);
+    void ov.offsetWidth;
+    ov.style.transition='transform 0.62s cubic-bezier(0.55,0,0.3,1)';
+    ov.style.transform='translateY(0)';      // rises up over the page
+    setTimeout(function(){ onDone&&onDone(); }, 680);
   }
   function fallbackReveal(onDone){
     ov.style.transition='none';
@@ -275,7 +280,7 @@
     ov.style.pointerEvents='auto';
     void ov.offsetWidth;
     ov.style.transition='transform 0.8s cubic-bezier(0.77,0,0.175,1)';
-    ov.style.transform='translateY(102%)';
+    ov.style.transform='translateY(102%)';   // drops down out of the bottom
     setTimeout(function(){
       ov.style.opacity='0';
       ov.style.background='transparent';
@@ -367,21 +372,14 @@
 
   function scheduleEnter(){
     if(!covered) return;
-    // Start as soon as DOM is parsed & fonts ready (capped), never on a slow
-    // window 'load'. Nothing waits on media.
+    // Start reveal as soon as the DOM is parsed + a tiny settle — never wait
+    // on fonts/media, so there is no long static veil between the "naik"
+    // (cover) and "turun" (reveal) halves of the one effect.
     var fired=false, safeT=0;
     function fire(){ if(fired) return; fired=true; clearTimeout(safeT); beginReveal(); }
-    function afterFonts(){
-      setTimeout(fire, START_DELAY_MS);
-    }
-    function domReady(){
-      if(document.fonts && document.fonts.ready && document.fonts.ready.then){
-        var done=false, t=setTimeout(function(){ done=true; afterFonts(); }, 150);
-        document.fonts.ready.then(function(){ if(done) return; clearTimeout(t); done=true; afterFonts(); });
-      } else afterFonts();
-    }
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', domReady, {once:true});
-    else domReady();
+    function start(){ setTimeout(fire, START_DELAY_MS); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+    else start();
     window.addEventListener('load', fire, {once:true,passive:true});
     safeT=setTimeout(fire, SAFE_MAX_MS);
   }
