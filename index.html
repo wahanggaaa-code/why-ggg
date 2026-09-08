@@ -756,6 +756,7 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 </style>
 </head>
 <body>
+<noscript><style>#loader{display:none !important}</style></noscript>
 <div id="loader">
   <div id="videoWrap">
     <video id="crystalVideo" muted autoplay playsinline preload="auto">
@@ -895,35 +896,62 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
   })();
 
   (function(){
-    // Intro selalu tampil SETIAP halaman utama dibuka/di-refresh (tanpa gate "sekali lihat").
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const l = document.getElementById('loader');
-    if(!l) return;
-    if(reduced){ l.classList.add('gone'); return; }
-    const vw = document.getElementById('videoWrap');
-    const vid = document.getElementById('crystalVideo');
-    let done=false, ok=false;
-    const t0 = performance.now();
-    function hide(){
-      if(done) return; done=true;
-      l.classList.add('out');
-      if(vw) vw.classList.add('out');
-      setTimeout(function(){ l.classList.add('gone'); }, 850);
+    const video = document.getElementById('crystalVideo');
+    const loader = document.getElementById('loader');
+    if(!video || !loader) return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function trulyHideLoader(){
+      loader.classList.add('gone');
+      loader.style.display='none';
+      loader.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+      document.documentElement.style.overflow='';
     }
-    function at(ms){ const el=Math.max(0, ms-(performance.now()-t0)); setTimeout(hide, el); }
-    function startPlay(){
-      if(!vid){ at(900); return; }
-      function playing(){ if(!ok){ ok=true; at(1900); } }
-      let p=null;
-      try{ p = vid.play(); }catch(e){}
-      if(p && p.then){ p.then(playing).catch(function(){ at(900); }); }
-      else { vid.addEventListener('playing', playing, {once:true}); }
-      // video diam-diam sudah jalan tanpa event -> tetap selesaikan
-      setTimeout(function(){ if(vid && !vid.paused && vid.currentTime>0) playing(); }, 800);
-      // pengaman anti-lengket: intro pasti selesai walau video gagal total
-      setTimeout(function(){ if(!ok) at(700); }, 2600);
+    function triggerOut(){
+      if(loader.classList.contains('out') || loader.classList.contains('gone')) return;
+      const wrap = document.getElementById('videoWrap');
+      // STEP 1: video hilang dulu (0.6s fade+scale) — jangan ikut tirai
+      if(wrap && !wrap.classList.contains('out')){
+        wrap.classList.add('out');
+        setTimeout(()=>{
+          loader.classList.add('out');
+          setTimeout(trulyHideLoader, 800);
+        }, 650);
+        return;
+      }
+      loader.classList.add('out');
+      setTimeout(trulyHideLoader, 800);
     }
-    startPlay();
+    function handleMeta(){
+      const d = video.duration;
+      // dipercepat: video +-1.6s, total loading sekitar 3 detik (pola main)
+      if(d && isFinite(d) && d>0) video.playbackRate = d/1.6;
+      else video.playbackRate = 3.2;
+      video.play().catch(()=>{});
+    }
+    function startLoader(){
+      if(prefersReduced){ trulyHideLoader(); return; }
+      loader.classList.remove('out','gone');
+      const wrap = document.getElementById('videoWrap');
+      if(wrap) wrap.classList.remove('out');
+      loader.style.display='flex';
+      loader.style.removeProperty('transform');
+      loader.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+      document.documentElement.style.overflow='hidden';
+      try{ video.currentTime=0; }catch(_e){}
+      video.load();
+      video.play().catch(()=>{});
+      clearTimeout(window._loaderFallback);
+      window._loaderFallback = setTimeout(()=>{ if(loader.style.display!=='none') triggerOut(); }, 3000);
+    }
+    video.addEventListener('canplay', handleMeta);
+    video.addEventListener('ended', triggerOut);
+    video.addEventListener('error', triggerOut);
+    loader.addEventListener('transitionend', (e)=>{
+      if(e.propertyName==='transform' && loader.classList.contains('out')) trulyHideLoader();
+    });
+    startLoader();
   })();
 
   (function(){
