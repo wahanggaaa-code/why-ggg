@@ -4,6 +4,7 @@
    - fly-by kamera saat transisi: kartu keluar menekuk ke arah kamera (translateZ+rotateY liar),
      kartu masuk muncul dari kedalaman
    - teks info & counter ganti INSTAN saat indeks aktif berubah (tanpa nunggu scroll settle)
+   - fling governor: momentum sentuh/lempar diganti luncuran berpagu maks 2.5 section
    Tanpa GSAP / reduced-motion → html.no-wn → fallback grid CSS. */
 (function () {
   'use strict';
@@ -55,12 +56,56 @@
   scrollArea.scrollTop = startY;
 
   var mouseX = 0, mouseY = 0, curRX = 0, curRY = 0, lastInput = 0, settling = false;
-  ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach(function (ev) {
+  var lastTouchT = -1e9, tSamples = []; // feel mobile: cap waktu & sampel kecepatan sentuh
+  var coarsePtr = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  ['wheel', 'touchmove', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) {
     window.addEventListener(ev, function () {
       lastInput = performance.now();
+      if (ev === 'touchstart' || ev === 'touchmove') lastTouchT = performance.now();
       if (settling) { gsap.killTweensOf(scrollArea); settling = false; }
     }, { passive: true });
   });
+  // sampel kecepatan lepas-jari (jendela ~120ms) untuk governor fling
+  window.addEventListener('touchmove', function () {
+    var now = performance.now();
+    tSamples.push([now, scrollArea.scrollTop]);
+    while (tSamples.length > 2 && now - tSamples[0][0] > 120) tSamples.shift();
+  }, { passive: true });
+  window.addEventListener('touchend', function (e) {
+    if (e.touches && e.touches.length) return; // masih ada jari lain
+    var n = tSamples.length;
+    if (n >= 2) {
+      var a = tSamples[0], b = tSamples[n - 1], dt = (b[0] - a[0]) / 1000;
+      if (dt > 0.015) flingTakeover((b[1] - a[1]) / dt);
+    }
+    tSamples.length = 0;
+  }, { passive: true });
+  // fling governor: momentum liar diganti luncuran berpagu (maks 2.5 section, snap presisi)
+  function flingTakeover(v) {
+    var dir = v > 0 ? 1 : -1, sp = Math.abs(v);
+    if (sp < 900) return; // bukan fling -> soft-settle biasa
+    var target = Math.round((scrollArea.scrollTop + dir * Math.min(sp * 0.45, H * 2.5)) / H) * H;
+    if (target === Math.round(scrollArea.scrollTop / H) * H) return;
+    if (settling) gsap.killTweensOf(scrollArea);
+    settling = true; // blokir soft-settle sejak dini
+    lastInput = performance.now();
+    // bunuh momentum native dulu (overflow hidden 2 frame), baru luncurkan tween —
+    // tanpa ini momentum impl-thread melawan tween dan bikin yoyo
+    scrollArea.style.overflowY = 'hidden';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        scrollArea.style.overflowY = '';
+        if (!settling) return; // input baru masuk di tengah jalan -> batal
+        gsap.to(scrollArea, {
+          scrollTop: target,
+          duration: 0.45 + (Math.abs(target - scrollArea.scrollTop) / H) * 0.22,
+          ease: 'power3.out',
+          onUpdate: function () { lastInput = performance.now(); },
+          onComplete: function () { settling = false; }
+        });
+      });
+    });
+  }
   window.addEventListener('mousemove', function (e) {
     mouseX = (e.clientX / window.innerWidth) * 2 - 1;
     mouseY = (e.clientY / window.innerHeight) * 2 - 1;
@@ -84,12 +129,21 @@
       if (Math.abs(e.clientY - dragY) > 4) dragMoved = true;
       scrollArea.scrollTop = dragTop + (dragY - e.clientY);
       lastInput = performance.now();
+      var mNow = performance.now();
+      tSamples.push([mNow, scrollArea.scrollTop]);
+      while (tSamples.length > 2 && mNow - tSamples[0][0] > 120) tSamples.shift();
     }, { passive: true });
     var dragEnd = function () {
       if (!dragging) return;
       dragging = false;
       lastInput = performance.now();
       document.body.classList.remove('w-drag');
+      var mN = tSamples.length; // lemparan mouse ikut meluncur (momentum)
+      if (mN >= 2) {
+        var mA = tSamples[0], mB = tSamples[mN - 1], mDt = (mB[0] - mA[0]) / 1000;
+        if (mDt > 0.015) flingTakeover((mB[1] - mA[1]) / mDt);
+      }
+      tSamples.length = 0;
     };
     window.addEventListener('pointerup', dragEnd, { passive: true });
     window.addEventListener('pointercancel', dragEnd, { passive: true });
@@ -200,26 +254,33 @@
 
   /* ---------- render loop ---------- */
   var running = false;
-  var TEXT_VMAX = 28; // teks UI ditahan saat fling cepat (px/frame) agar tak strobe
+  var TEXT_VMAX = 1600; // px/detik — teks UI ditahan saat fling agar tak strobe
+  var lastFrameT = performance.now(), lastBlur = -1; // feel: clock & bucket blur
   function renderLoop() {
     if (!running) return;
     W = window.innerWidth; H = window.innerHeight;
+    var nowT = performance.now();
+    var dtF = Math.min(0.05, Math.max(0.001, (nowT - lastFrameT) / 1000));
+    lastFrameT = nowT;
+    var damp = function (r) { return 1 - Math.pow(1 - r, dtF * 60); };
+    // sentuh = sudah mulus dari sananya -> ikuti jari dengan ketat; wheel tetap mentega
+    var trackRate = (nowT - lastTouchT < 900) ? 0.45 : 0.17;
     targetScrollY = scrollArea.scrollTop;
-    currentScrollY = lerp(currentScrollY, targetScrollY, 0.17);
-    velocity = Math.abs(currentScrollY - lastScrollY);
+    currentScrollY = lerp(currentScrollY, targetScrollY, damp(trackRate));
+    velocity = Math.abs(currentScrollY - lastScrollY) / dtF; // px/detik
     lastScrollY = currentScrollY;
 
-    if (velocity > 0.5) gsap.set(uiLayer, { filter: 'blur(' + Math.min(velocity * 0.2, 10) + 'px)' });
-    else gsap.set(uiLayer, { filter: 'blur(0px)' });
+    var blurPx = velocity > 30 ? Math.min(velocity / 300, 10) : 0;
+    if (Math.abs(blurPx - lastBlur) > 0.4) { lastBlur = blurPx; gsap.set(uiLayer, { filter: 'blur(' + blurPx.toFixed(1) + 'px)' }); }
 
-    curRY = lerp(curRY, mouseX * 10, 0.05);
-    curRX = lerp(curRX, -mouseY * 10, 0.05);
+    curRY = lerp(curRY, mouseX * 10, damp(0.05));
+    curRX = lerp(curRX, -mouseY * 10, damp(0.05));
 
     var progress = currentScrollY / H;
     var KF = keyframes();
 
     // soft-settle one-shot: saat inersia & input tenang, glissade halus ke indeks terdekat
-    if (!settling && velocity < 0.3 && performance.now() - lastInput > 160) {
+    if (!settling && velocity < 25 && performance.now() - lastInput > 120) {
       var nearest = Math.round(progress);
       var gap = nearest * H - scrollArea.scrollTop;
       if (Math.abs(gap) > 1 && Math.abs(gap) < H * 0.5) {
@@ -230,8 +291,13 @@
 
     for (var idx = 0; idx < N; idx++) {
       var p = poseFor(idx, progress, KF);
+      var sEl = slides[idx];
+      if (p.o <= 0.01) { // tak terlihat -> sembunyikan & lewati (hemat GPU HP)
+        if (!sEl._hid) { sEl._hid = true; sEl.style.opacity = '0'; sEl.style.visibility = 'hidden'; }
+        continue;
+      } else if (sEl._hid) { sEl._hid = false; sEl.style.visibility = 'visible'; }
       var isC = Math.abs(idx - (((progress % N) + N) % N) < 0.5) || Math.abs(idx - (((progress % N) + N) % N) + N) < 0.5 || Math.abs(idx - (((progress % N) + N) % N) - N) < 0.5;
-      applyPose(slides[idx], wraps[idx], p, isC);
+      applyPose(sEl, wraps[idx], p, isC);
       slides[idx].style.zIndex = Math.round(100 - Math.abs(((idx - (((progress % N) + N) % N) + N * 1.5) % N) - N / 2) * 10);
     }
 
@@ -244,7 +310,10 @@
 
     var active = ((Math.round(progress) % N) + N) % N;
     // throttle: saat fling cepat teks ditahan (tetap blur), tukar sekali saat tenang
-    if (active !== currentIndex && velocity < TEXT_VMAX) updateUI(active);
+    if (active !== currentIndex && velocity < TEXT_VMAX) {
+      updateUI(active);
+      if (coarsePtr && navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+    }
 
     requestAnimationFrame(renderLoop);
   }
