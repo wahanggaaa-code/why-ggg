@@ -21,12 +21,16 @@
   }
   function maxX() { return Math.max(0, rail.scrollWidth - window.innerWidth); }
 
-  /* ============ LOADER — crystal video, videoWrap out, tirai naik (signature) ============ */
+  /* ============ LOADER — crystal video, videoWrap out, tirai naik (signature) ============
+     Hanya muncul saat home dimuat langsung / refresh / back-forward.
+     Bila tiba lewat transisi antar-halaman (flag __wgl_a dari transition.js),
+     loader dilewati supaya curtain reveal "racing steps" tampil penuh seperti semula. */
   var loader = $('#loader'), videoWrap = $('#videoWrap'), crystal = $('#crystalVideo');
-  var loaderDone = false;
+  var loaderDone = false, vtArriving = false;
+  try { vtArriving = sessionStorage.getItem('__wgl_a') === '1'; } catch (e) {}
   function loaderOut() {
     if (loaderDone) return; loaderDone = true;
-    if (reduced || !loader) {
+    if (reduced || !loader || vtArriving) {
       if (loader) loader.classList.add('gone');
       reveal(); return;
     }
@@ -37,7 +41,10 @@
     }, 380);
     setTimeout(function () { loader.classList.add('gone'); }, 1400);
   }
-  if (loader && crystal && !reduced) {
+  if (vtArriving && loader) {
+    loader.classList.add('gone');                          /* transisi ambil alih arrival */
+    reveal();
+  } else if (loader && crystal && !reduced) {
     var started = false;
     function startCrystal() {
       if (started) return; started = true;
@@ -248,7 +255,7 @@
         var link = e.target.closest && e.target.closest('a,button');
         cur.classList.toggle('is-view', !!view);
         cur.classList.toggle('is-link', !view && !!link);
-        if (label) label.textContent = view ? 'View' : (link && link.classList.contains('cta') ? 'Go' : '');
+        if (label) label.textContent = view ? 'View' : '';
       });
     }
     /* magnetic */
