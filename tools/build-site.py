@@ -150,15 +150,20 @@ RAIL_CSS = r"""
   .rail-fallback{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
   .rail-hud,.rail-btns{display:none;}
 }
-/* ===== mobile ===== */
+/* ===== mobile: rail jadi carousel swipe native (snap) — tinggi mengikuti konten,
+   tanpa pin 100svh sehingga tidak ada rongga hitam di bawah kartu ===== */
 @media(max-width:760px){
   #manifesto{padding:60px 24px 20px;}
   #work.archive{padding:6px 0 0;}
   .aw-head{margin-bottom:12px;}
-  .rail{gap:16px;}
-  .rail-pin{justify-content:flex-start;}
-  .rail{padding-top:76px;}
-  .rslide{width:min(92vw,500px);}
+  .rail-wrap{height:auto !important;}
+  .rail-pin{position:relative;height:auto;overflow:visible;justify-content:flex-start;}
+  .rail{gap:16px;transform:none !important;width:100%;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    padding:12px clamp(16px,5vw,24px) 8px;scroll-padding-left:clamp(16px,5vw,24px);}
+  .rail::-webkit-scrollbar{display:none;}
+  .rslide{width:min(84vw,440px);scroll-snap-align:start;}
   .rslide .rcap{padding:14px 16px 16px;gap:12px;align-items:flex-start;}
   .rslide .rc-mid b{font-size:19px;}
   .rslide .rc-mid span{display:block;}
@@ -166,11 +171,13 @@ RAIL_CSS = r"""
     margin-top:7px;font-family:"General Sans",sans-serif;font-size:13px;line-height:1.45;
     letter-spacing:0;text-transform:none;color:#a6a3a0;}
   .rslide .rc-go{display:none;}
-  .rail-hud{right:16px;left:16px;bottom:14px;}
+  /* HUD ikut aliran dokumen: tepat di bawah kartu, bukan di dasar viewport */
+  .rail-hud{position:relative;left:auto;right:auto;bottom:auto;margin:12px 16px 2px;}
   .rail-prog{max-width:38vw;}
   .rail-hint span:not(.ar){display:none;}
   .rail-btns button{width:36px;height:36px;font-size:14px;}
   .aw-count b{font-size:20px;}
+  #log{padding-top:36px;}
 }
 @media(max-height:520px){
   .rail-pin{height:auto;position:relative;}
@@ -453,6 +460,7 @@ def rail_js():
     return r"""
   (function(){
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mqMob = window.matchMedia("(max-width:760px)");
     const wrap = document.getElementById('railWrap'), pin = document.getElementById('railPin'),
           rail = document.getElementById('rail');
     const nowEl = document.getElementById('awNow'), bar = document.getElementById('railBar');
@@ -462,17 +470,53 @@ def rail_js():
     const totalTxt = document.getElementById('awTotal');
     if(totalTxt) totalTxt.textContent = n2(total);
     function n2(x){ return (x<10?'0':'')+x; }
+    function isMob(){ return mqMob.matches; }
     let H = 0, off = 0, range = 1, maxX = 0;
+
+    /* ---- mode mobile: swipe native (scroll-snap). Progress & tombol memakai scrollLeft rail ---- */
+    function railPad(){ return parseFloat(getComputedStyle(rail).paddingLeft)||0; }
+    function nativeMax(){ return Math.max(1, rail.scrollWidth - rail.clientWidth); }
+    function paintNative(){
+      const p = Math.max(0, Math.min(1, rail.scrollLeft / nativeMax()));
+      if(nowEl) nowEl.textContent = n2(Math.round(p*(total-1))+1);
+      if(bar) bar.style.width = (p*100).toFixed(2)+'%';
+    }
+    function nativeIdx(){
+      const cards = rail.querySelectorAll('.rslide');
+      const r = rail.getBoundingClientRect(), pad = railPad();
+      let best = 0, bd = Infinity;
+      for(let i=0;i<cards.length;i++){
+        const d = Math.abs(cards[i].getBoundingClientRect().left - (r.left+pad));
+        if(d<bd){ bd=d; best=i; }
+      }
+      return best;
+    }
+    function nativeTo(i){
+      const cards = rail.querySelectorAll('.rslide');
+      i = Math.max(0, Math.min(cards.length-1, i));
+      const r = rail.getBoundingClientRect(), c = cards[i].getBoundingClientRect();
+      try{ rail.scrollTo({left: rail.scrollLeft + (c.left - r.left) - railPad(), behavior:'smooth'}); }
+      catch(e){ rail.scrollLeft = rail.scrollLeft + (c.left - r.left) - railPad(); }
+    }
+    let rafN = 0;
+    function onNativeScroll(){ if(rafN) return; rafN = requestAnimationFrame(function(){ rafN=0; paintNative(); }); }
 
     function layout(){
       if(reduced){ wrap.style.height=''; pin.classList.add('rail-fallback'); return; }
+      if(isMob()){
+        // CSS mobile sudah menjadikan rail scroll-container native;
+        // lepas tinggi inline & transform desktop supaya tidak ada rongga.
+        wrap.style.height=''; rail.style.transform='';
+        maxX = 0; range = 1;
+        paintNative();
+        return;
+      }
       maxX = Math.max(0, rail.scrollWidth - window.innerWidth);
       if(maxX<=0){ wrap.style.height = '115vh'; range=1; H=window.innerHeight; return; }
       H = window.innerHeight;
-      const mob = window.innerWidth <= 760;
-      // desktop: 1px horizontal per 1px vertikal. mobile: lintasan dikompres (lebih pendek)
-      const travel = mob ? Math.max(260, Math.round(maxX*0.42)) : maxX;
-      const extra  = mob ? Math.min(70, Math.round(travel*0.16)) : Math.max(H*0.4, 140);
+      // desktop: 1px horizontal per 1px vertikal
+      const travel = maxX;
+      const extra  = Math.max(H*0.4, 140);
       wrap.style.height = (H + travel + extra) + 'px';
       range = travel + extra;
       off = wrap.offsetTop;
@@ -480,6 +524,7 @@ def rail_js():
     }
     let raf=0;
     function paint(){
+      if(isMob()){ paintNative(); return; }
       const y = window.scrollY - off;
       let p = Math.max(0, Math.min(1, y/range));
       rail.style.transform = 'translate3d(' + (-p*maxX) + 'px,0,0)';
@@ -494,10 +539,18 @@ def rail_js():
       const target = off + p*range;
       try{ window.scrollTo({top:target, behavior:'smooth'}); }catch(e){ window.scrollTo(0,target); }
     }
-    if(prevB) prevB.addEventListener('click', function(){ const c=parseInt(nowEl.textContent,10)||1; toIndex(c-2); });
-    if(nextB) nextB.addEventListener('click', function(){ const c=parseInt(nowEl.textContent,10)||0; toIndex(c); });
+    if(prevB) prevB.addEventListener('click', function(){
+      if(isMob()){ nativeTo(nativeIdx()-1); return; }
+      const c=parseInt(nowEl.textContent,10)||1; toIndex(c-2);
+    });
+    if(nextB) nextB.addEventListener('click', function(){
+      if(isMob()){ nativeTo(nativeIdx()+1); return; }
+      const c=parseInt(nowEl.textContent,10)||0; toIndex(c);
+    });
+    rail.addEventListener('scroll', onNativeScroll, {passive:true});
     window.addEventListener('scroll', onScroll, {passive:true});
     window.addEventListener('resize', function(){ clearTimeout(window.__rw); window.__rw=setTimeout(layout,150); });
+    if(mqMob.addEventListener) mqMob.addEventListener('change', layout);
     if(document.readyState!=='complete') window.addEventListener('load', layout, {once:true});
     layout();
     // gambar bisa mengubah lebar rail setelah dimuat
