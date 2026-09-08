@@ -4,7 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>404 — WHY ✴︎ GGG</title>
-
+<script>
+  /* Pre-paint transition veil on arrival (see transition.js) — mencegah flash putih/hitam */
+  (function(){
+    try{
+      if(sessionStorage.getItem('__wgl_a')==='1'){
+        var s=document.createElement('style');
+        s.id='wgl-veil';
+        s.textContent='html{background:#9e9da2 !important}body::before{content:"";position:fixed;inset:0;z-index:2147482999;background:#9e9da2;pointer-events:auto}';
+        (document.head||document.documentElement).appendChild(s);
+      }
+    }catch(e){}
+  })();
+</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Halaman tidak ditemukan — WHY GGG.">
@@ -153,22 +165,6 @@
     .btn{padding:14px 20px;font-size:11px;}
   }
 </style>
-<style id="vtCss">
-
-/* ===== View Transitions (cross-document) — blur fokus + header tetap ===== */
-@view-transition{ navigation:auto; }
-header{ view-transition-name:vt-nav; }
-header nav a.active{ color:#e9e9ea; }
-header nav a.active::before, header nav a.active::after{ opacity:1; }
-::view-transition-old(root){ animation:vtblurOut .3s ease-in both; }
-::view-transition-new(root){ animation:vtblurIn .55s cubic-bezier(.16,1,.3,1) both; }
-@keyframes vtblurOut{ to{opacity:0; filter:blur(15px); transform:scale(1.045);} }
-@keyframes vtblurIn { from{opacity:0; filter:blur(20px); transform:scale(1.05);} }
-@media (prefers-reduced-motion: reduce){
-  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){ animation:none !important; }
-}
-
-</style>
 </head>
 <body>
 
@@ -222,6 +218,6 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
     setTimeout(flicker, 1500);
   })();
 </script>
-
+<script src="transition.js?v=20260908j"></script>
 </body>
 </html>

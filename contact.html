@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Poster Series — WHY ✴︎ GGG</title>
+<title>Contact — WHY ✴︎ GGG</title>
 
-<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="WHY ✴︎ GGG — Personal Landing. Building quietly. ALL IN OR NOTHING. Editorial archive 05 works on #060607.">
 <meta name="theme-color" content="#060607">
@@ -34,10 +34,10 @@
 </script>
 <link rel="preload" as="video" href="crystal.mp4" type="video/mp4">
 <link rel="preload" as="video" href="fluid.mp4" type="video/mp4">
-<link rel="preload" href="../fonts/GeneralSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="preload" href="fonts/GeneralSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -671,33 +671,27 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){ animation:none !important; }
 }
 
-.the-hidden-archive{ view-transition-name:vt-the-hidden-archive; }
-.the-architecture-of-silence{ view-transition-name:vt-the-architecture-of-silence; }
-.lexier-cover{ view-transition-name:vt-lexier-cover; }
-.lexier-poster{ view-transition-name:vt-lexier-poster; }
-.brush-script{ view-transition-name:vt-brush-script; }
 
-.crumb{display:flex;gap:12px;align-items:center;margin-bottom:26px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
-.crumb a{color:#9a9a9e;text-decoration:none;}
-.crumb a:hover{color:#e9e9ea;}
-.crumb span{color:#e9e9ea;opacity:.35;}
-.whero{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:20px;border:1px solid rgba(255,255,255,.08);display:block;margin:0 0 34px;}
-.w-title{font-size:clamp(34px,6vw,76px);line-height:.95;font-weight:700;letter-spacing:-.045em;color:#e9e9ea;margin:0 0 16px;}
-.w-kind{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#9a9a9e;margin:0 0 8px;}
-.w-meta{display:flex;flex-wrap:wrap;gap:30px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:14px 2px;margin:0 0 36px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
-.w-meta b{display:block;color:#9a9a9e;font-weight:600;margin-bottom:3px;}
-.w-meta span{color:#e9e9ea;}
-.w-story{display:grid;grid-template-columns:1.5fr .9fr;gap:48px;align-items:start;}
-.w-story p{color:#cfcbc3;font-size:16px;line-height:1.75;margin:0 0 18px;max-width:64ch;}
-.w-story aside h4{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#9a9a9e;margin:0 0 12px;}
-.w-facts{list-style:none;margin:0;padding:0;}
-.w-facts li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;color:#e3e0d8;}
-.w-facts li span{color:#9a9a9e;font-family:"JetBrains Mono",monospace;font-size:11px;}
-.w-prevnext{display:flex;justify-content:space-between;gap:20px;margin-top:64px;padding-top:22px;border-top:1px solid rgba(255,255,255,.07);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;}
-.w-prevnext a{color:#e9e9ea;text-decoration:none;max-width:45%;}
-.w-prevnext a small{display:block;color:#9a9a9e;font-size:9px;letter-spacing:.2em;margin-bottom:4px;}
-.w-prevnext a:hover{color:#f0d9a0;}
-@media(max-width:760px){ .w-story{grid-template-columns:1fr;} .w-prevnext{flex-direction:column;} }
+/* ===== Contact page ===== */
+#contact-main{min-height:100svh;display:flex;align-items:center;
+  padding:110px clamp(20px,6vw,72px) 70px;position:relative;z-index:2;}
+#contact-main .cc{width:100%;max-width:1200px;margin:0 auto;}
+.cc-kicker{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.32em;text-transform:uppercase;
+  color:#9a9a9e;margin-bottom:26px;}
+.cc-title{font-size:clamp(44px,10vw,150px);line-height:.86;font-weight:700;letter-spacing:-.05em;}
+.cc-title em{font-style:normal;color:#f0d9a0;}
+.cc-big{font-family:"General Sans",sans-serif;font-weight:600;
+  font-size:clamp(30px,6vw,88px);letter-spacing:-.05em;line-height:.9;text-align:right;}
+.cc-links{margin-top:46px;display:flex;gap:22px;flex-wrap:wrap;align-items:center;
+  font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;}
+.cc-links a{color:#e9e9ea;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .25s,color .25s;}
+.cc-links a:hover{color:#f0d9a0;border-color:rgba(240,217,160,.5);}
+.cc-links .sep{color:#9a9a9e;opacity:.5;}
+.cc-meta{margin-top:34px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:#9a9a9e;}
+@media(max-width:760px){
+  .cc-big{text-align:left;margin-top:20px;}
+}
 
 </style>
 </head>
@@ -706,29 +700,30 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
   <div id="grain"></div>
 
   <header>
-    <a class="logo" href="../index.html" aria-label="WHY GGG — Home">
+    <a class="logo" href="index.html" aria-label="WHY GGG — Home">
       <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="28" height="28" aria-hidden="true">
         <g><path fill="#FFFFFF" fill-rule="nonzero" d="M 525.50 512.00 L 852.74 509.47 L 980.00 512.00 L 852.74 514.53 Z M 538.90 514.35 L 711.87 525.10 L 826.56 539.52 L 711.11 533.81 Z M 538.59 516.69 L 693.96 540.01 L 796.38 562.14 L 692.56 547.92 Z M 538.08 518.99 L 679.51 552.99 L 772.17 581.71 L 677.56 560.26 Z M 537.37 521.23 L 667.13 564.66 L 751.59 599.20 L 664.68 571.37 Z M 536.47 523.41 L 656.10 575.40 L 733.43 615.25 L 653.19 581.63 Z M 535.38 525.50 L 645.97 585.50 L 716.92 630.31 L 642.64 591.27 Z M 534.12 527.49 L 636.46 595.16 L 701.56 644.73 L 632.71 600.51 Z M 532.68 529.36 L 627.32 604.55 L 686.95 658.80 L 623.17 609.50 Z M 531.09 531.09 L 618.38 613.84 L 672.79 672.79 L 613.84 618.38 Z M 529.36 532.68 L 609.50 623.17 L 658.80 686.95 L 604.55 627.32 Z M 527.49 534.12 L 600.51 632.71 L 644.73 701.56 L 595.16 636.46 Z M 525.50 535.38 L 591.27 642.64 L 630.31 716.92 L 585.50 645.97 Z M 523.41 536.47 L 581.63 653.19 L 615.25 733.43 L 575.40 656.10 Z M 521.23 537.37 L 571.37 664.68 L 599.20 751.59 L 564.66 667.13 Z M 518.99 538.08 L 560.26 677.56 L 581.71 772.17 L 552.99 679.51 Z M 516.69 538.59 L 547.92 692.56 L 562.14 796.38 L 540.01 693.96 Z M 514.35 538.90 L 533.81 711.11 L 539.52 826.56 L 525.10 711.87 Z M 512.00 525.50 L 514.53 852.74 L 512.00 980.00 L 509.47 852.74 Z M 509.65 538.90 L 498.90 711.87 L 484.48 826.56 L 490.19 711.11 Z M 507.31 538.59 L 483.99 693.96 L 461.86 796.38 L 476.08 692.56 Z M 505.01 538.08 L 471.01 679.51 L 442.29 772.17 L 463.74 677.56 Z M 502.77 537.37 L 459.34 667.13 L 424.80 751.59 L 452.63 664.68 Z M 500.59 536.47 L 448.60 656.10 L 408.75 733.43 L 442.37 653.19 Z M 498.50 535.38 L 438.50 645.97 L 393.69 716.92 L 432.73 642.64 Z M 496.51 534.12 L 428.84 636.46 L 379.27 701.56 L 423.49 632.71 Z M 494.64 532.68 L 419.45 627.32 L 365.20 686.95 L 414.50 623.17 Z M 492.91 531.09 L 410.16 618.38 L 351.21 672.79 L 405.62 613.84 Z M 491.32 529.36 L 400.83 609.50 L 337.05 658.80 L 396.68 604.55 Z M 489.88 527.49 L 391.29 600.51 L 322.44 644.73 L 387.54 595.16 Z M 488.62 525.50 L 381.36 591.27 L 307.08 630.31 L 378.03 585.50 Z M 487.53 523.41 L 370.81 581.63 L 290.57 615.25 L 367.90 575.40 Z M 486.63 521.23 L 359.32 571.37 L 272.41 599.20 L 356.87 564.66 Z M 485.92 518.99 L 346.44 560.26 L 251.83 581.71 L 344.49 552.99 Z M 485.41 516.69 L 331.44 547.92 L 227.62 562.14 L 330.04 540.01 Z M 485.10 514.35 L 312.89 533.81 L 197.44 539.52 L 312.13 525.10 Z M 498.50 512.00 L 171.26 514.53 L 44.00 512.00 L 171.26 509.47 Z M 485.10 509.65 L 312.13 498.90 L 197.44 484.48 L 312.89 490.19 Z M 485.41 507.31 L 330.04 483.99 L 227.62 461.86 L 331.44 476.08 Z M 485.92 505.01 L 344.49 471.01 L 251.83 442.29 L 346.44 463.74 Z M 486.63 502.77 L 356.87 459.34 L 272.41 424.80 L 359.32 452.63 Z M 487.53 500.59 L 367.90 448.60 L 290.57 408.75 L 370.81 442.37 Z M 488.62 498.50 L 378.03 438.50 L 307.08 393.69 L 381.36 432.73 Z M 489.88 496.51 L 387.54 428.84 L 322.44 379.27 L 391.29 423.49 Z M 491.32 494.64 L 396.68 419.45 L 337.05 365.20 L 400.83 414.50 Z M 492.91 492.91 L 405.62 410.16 L 351.21 351.21 L 410.16 405.62 Z M 494.64 491.32 L 414.50 400.83 L 365.20 337.05 L 419.45 396.68 Z M 496.51 489.88 L 423.49 391.29 L 379.27 322.44 L 428.84 387.54 Z M 498.50 488.62 L 432.73 381.36 L 393.69 307.08 L 438.50 378.03 Z M 500.59 487.53 L 442.37 370.81 L 408.75 290.57 L 448.60 367.90 Z M 502.77 486.63 L 452.63 359.32 L 424.80 272.41 L 459.34 356.87 Z M 505.01 485.92 L 463.74 346.44 L 442.29 251.83 L 471.01 344.49 Z M 507.31 485.41 L 476.08 331.44 L 461.86 227.62 L 483.99 330.04 Z M 509.65 485.10 L 490.19 312.89 L 484.48 197.44 L 498.90 312.13 Z M 512.00 498.50 L 509.47 171.26 L 512.00 44.00 L 514.53 171.26 Z M 514.35 485.10 L 525.10 312.13 L 539.52 197.44 L 533.81 312.89 Z M 516.69 485.41 L 540.01 330.04 L 562.14 227.62 L 547.92 331.44 Z M 518.99 485.92 L 552.99 344.49 L 581.71 251.83 L 560.26 346.44 Z M 521.23 486.63 L 564.66 356.87 L 599.20 272.41 L 571.37 359.32 Z M 523.41 487.53 L 575.40 367.90 L 615.25 290.57 L 581.63 370.81 Z M 525.50 488.62 L 585.50 378.03 L 630.31 307.08 L 591.27 381.36 Z M 527.49 489.88 L 595.16 387.54 L 644.73 322.44 L 600.51 391.29 Z M 529.36 491.32 L 604.55 396.68 L 658.80 337.05 L 609.50 400.83 Z M 531.09 492.91 L 613.84 405.62 L 672.79 351.21 L 618.38 410.16 Z M 532.68 494.64 L 623.17 414.50 L 686.95 365.20 L 627.32 419.45 Z M 534.12 496.51 L 632.71 423.49 L 701.56 379.27 L 636.46 428.84 Z M 535.38 498.50 L 642.64 432.73 L 716.92 393.69 L 645.97 438.50 Z M 536.47 500.59 L 653.19 442.37 L 733.43 408.75 L 656.10 448.60 Z M 537.37 502.77 L 664.68 452.63 L 751.59 424.80 L 667.13 459.34 Z M 538.08 505.01 L 677.56 463.74 L 772.17 442.29 L 679.51 471.01 Z M 538.59 507.31 L 692.56 476.08 L 796.38 461.86 L 693.96 483.99 Z M 538.90 509.65 L 711.11 490.19 L 826.56 484.48 L 711.87 498.90 Z"/></g>
       </svg>
     </a>
     <nav aria-label="Navigasi utama">
-      <a href="../index.html">Home</a>
-      <a href="../about.html">About</a>
-      <a href="../index.html#work" class="active">Work</a>
-      <a href="../contact.html">Contact</a>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="index.html#work">Work</a>
+      <a href="contact.html" class="active">Contact</a>
     </nav>
   </header>
 
-  <div class="wrap" style="max-width:1120px;margin:0 auto;padding:96px 40px 60px;position:relative;z-index:2;">
-    <div class="crumb"><a href="../index.html">← Home</a><span>/</span><a href="../index.html#work">Archive</a><span>/</span><span>lexier poster</span></div>
-    <img class="whero lexier-poster" src="../lexier-poster.webp" alt="Lexier Poster" width="1600" height="900">
-    <div class="w-kind">print · motion</div>
-    <h1 class="w-title">Poster Series</h1>
-    <div class="w-meta"><div><b>Arsip</b><span>04</span></div><div><b>Tahun</b><span>2025</span></div><div><b>Tipe</b><span>Poster Series</span></div><div><b>Teknis</b><span>vanilla stack</span></div></div>
-    <div class="w-story"><div><p>Seri poster yang memperlakukan teks sebagai bentuk, bukan sekadar penyampai pesan.</p><p>Tiap poster adalah satu komposisi mandiri: skala, kontras, dan irama dibiarkan bermain — hasilnya tetap dalam satu bahasa rupa.</p><p>Beberapa versi dihidupkan sebagai motion singkat untuk media layar.</p></div><aside><h4>Fakta</h4><ul class="w-facts"><li>Jenis<span>Poster Series</span></li><li>Tahun<span>2025</span></li><li>Tag<span>print · motion</span></li><li>Status<span>Arsip</span></li></ul></aside></div>
-    <div class="w-prevnext">
-      <a href="../work/lexier-cover.html"><small>← Sebelumnya</small>Identity — Cover</a>
-      <a href="../work/brush-script.html" style="text-align:right"><small>Berikutnya →</small>Type Exploration</a>
+  <div id="contact-main">
+    <div class="cc">
+      <div class="cc-kicker">[ Say hi ]</div>
+      <div class="cc-title">Building<br><em>quietly</em>.</div>
+      <div class="cc-big">ALL IN OR<br>NOTHING</div>
+      <div class="cc-links">
+        <a href="mailto:hi@whyggg.com">hi@whyggg.com</a><span class="sep">•</span>
+        <a href="#">DISCORD</a><span class="sep">•</span>
+        <a href="https://github.com/wahanggaaa-code" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="cc-meta">Jakarta · Singapore · internet — UTC+7</div>
     </div>
   </div>
 
