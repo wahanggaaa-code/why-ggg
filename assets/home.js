@@ -22,15 +22,13 @@
   function maxX() { return Math.max(0, rail.scrollWidth - window.innerWidth); }
 
   /* ============ LOADER — crystal video, videoWrap out, tirai naik (signature) ============
-     Hanya muncul saat home dimuat langsung / refresh / back-forward.
-     Bila tiba lewat transisi antar-halaman (flag __wgl_a dari transition.js),
-     loader dilewati supaya curtain reveal "racing steps" tampil penuh seperti semula. */
+     Home selalu menampilkan loader tiap dimuat (refresh / direct / back / tiba via transisi).
+     Halaman lain tidak punya loader. Transisi antar-halaman = View Transitions blur fokus (CSS). */
   var loader = $('#loader'), videoWrap = $('#videoWrap'), crystal = $('#crystalVideo');
-  var loaderDone = false, vtArriving = false;
-  try { vtArriving = sessionStorage.getItem('__wgl_a') === '1'; } catch (e) {}
+  var loaderDone = false;
   function loaderOut() {
     if (loaderDone) return; loaderDone = true;
-    if (reduced || !loader || vtArriving) {
+    if (reduced || !loader) {
       if (loader) loader.classList.add('gone');
       reveal(); return;
     }
@@ -41,10 +39,7 @@
     }, 380);
     setTimeout(function () { loader.classList.add('gone'); }, 1400);
   }
-  if (vtArriving && loader) {
-    loader.classList.add('gone');                          /* transisi ambil alih arrival */
-    reveal();
-  } else if (loader && crystal && !reduced) {
+  if (loader && crystal && !reduced) {
     var started = false;
     function startCrystal() {
       if (started) return; started = true;
@@ -261,6 +256,20 @@
       el.addEventListener('pointerleave', function () { gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1,0.4)' }); });
     });
   }
+
+  /* link satu halaman (logo/Home/back-to-top): jangan reload sia-sia */
+  document.addEventListener('click', function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    var a = e.target.closest && e.target.closest('a'); if (!a) return;
+    var raw = a.getAttribute('href') || '';
+    if (raw === '#' || raw === '#!') { e.preventDefault(); return; }
+    var u; try { u = new URL(a.href); } catch (e2) { return; }
+    if (u.origin !== window.location.origin) return;
+    if (u.pathname === window.location.pathname && u.search === window.location.search && !u.hash) {
+      e.preventDefault();
+      scrollToY(0);
+    }
+  });
 
   window.addEventListener('load', function () { ScrollTrigger.refresh(); });
 
