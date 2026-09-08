@@ -1,4 +1,4 @@
-/* BUILD v20260908b — EXACTLY like the reference video: a curtain pulled UP.
+/* BUILD v20260908c — EXACTLY like the reference video: a curtain pulled UP.
  *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
  *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
  *            through the TOP (swipe up). Cache-bust ?v=20260908b.
@@ -51,23 +51,26 @@
   try{ arriving = sessionStorage.getItem('__wgl_a') === '1'; }catch(e){}
 
   /* ---------- geometry / timings ---------- */
-  // Staircase columns as before, slightly tightened.
-  var N_COLS = 54.0;
-  var STAGGER = 0.34;   // diagonal slope of the leading edge
-  var JITTER  = 0.22;   // blocky height variation between columns
+  // Clean staircase geometry — FEW, BIG, EVEN steps (no wave/hill look, no
+  // per-column jitter "chasing" each other). The leading edge is a real
+  // staircase: STEP_COUNT wide flat treads that rise by STEP_RISE each, from
+  // BASE (lowest step, at the left) up to BASE+total rise (highest step).
+  var STEP_COUNT = 6.0;   // number of big steps ("anak tangga") across width
+  var STEP_BASE  = 0.06;  // height of the lowest step (left side)
+  var STEP_RISE  = 0.12;  // height increase between consecutive steps
+  var STEP_H_MAX = STEP_BASE + STEP_RISE * (STEP_COUNT - 1.0); // 0.66
 
   // p (edge position) mapping — single RISING-edge model matching the
-  // reference video (a curtain pulled UP): both phases sweep the same way,
-  // only the veil side changes (uniform uSide in the shader):
-  //   COVER  (leaving, uSide=1): veil BELOW the edge -> the veil enters at
-  //     the BOTTOM of the old page and RISES to cover it fully (ref video,
-  //     frames ~4.0->4.7s). p: P_LOW -> P_HIGH.
+  // reference video (a curtain pulled UP): both phases sweep the same way
+  // and the step SHAPE stays fixed (it just slides upward), so no step ever
+  // "chases" another. Only the veil side changes (uniform uSide):
+  //   COVER  (leaving, uSide=1): veil BELOW the edge -> veil enters at the
+  //     BOTTOM of the old page and RISES to cover it fully.
   //   REVEAL (entering, uSide=0): veil ABOVE the edge -> starts fully
-  //     covered, then the veil RISES out through the TOP; the new page is
-  //     revealed from the BOTTOM of the screen upward (ref video, frames
-  //     ~1.6->2.3s). p: P_LOW -> P_HIGH.
-  var P_LOW   = -0.15;  // edge below screen bottom: veil-below=open / veil-above=full
-  var P_HIGH  =  1.55;  // edge above screen top:    veil-below=full  / veil-above=open
+  //     covered, then rises out through the TOP; the new page is revealed
+  //     from the BOTTOM of the screen upward.
+  var P_LOW   = -(STEP_H_MAX) - 0.08;           // staircase fully below screen -> open/full
+  var P_HIGH  = (1.0 - STEP_BASE) + 0.08;       // staircase fully above screen  -> full/open
 
   var COVER_MS  = 620;   // cover: veil rises from bottom to fill (swipe up)
   var REVEAL_MS = 780;   // reveal: veil rises out the top, page opens bottom-up
@@ -82,66 +85,30 @@
     'void main(){ vUv = aPos; gl_Position = vec4(aPos*2.0-1.0, 0.0, 1.0); }\n';
 
   var fs =
-    '#define N_COLS '  + N_COLS.toFixed(1)  + '\n' +
-    '#define STAGGER ' + STAGGER.toFixed(2) + '\n' +
-    '#define JITTER '  + JITTER.toFixed(2)  + '\n' +
+    '#define STEP_COUNT ' + STEP_COUNT.toFixed(1) + '\n' +
+    '#define STEP_BASE '  + STEP_BASE.toFixed(3)  + '\n' +
+    '#define STEP_RISE '  + STEP_RISE.toFixed(3)  + '\n' +
     'precision highp float;\n' +
     'varying vec2 vUv;\n' +
-    'uniform sampler2D uJitter;\n' +
     'uniform float uProgress;\n' +
     'uniform float uSide;\n' +   // 1 = veil below edge (cover), 0 = veil above edge (reveal)
     '\n' +
     'void main(){\n' +
     '  vec2 uv = vUv;\n' +
     '  float p = uProgress;\n' +
-    '  float colId = floor(clamp(uv.x, 0.0, 0.9999) * N_COLS);\n' +
-    '  float colFrac = colId / (N_COLS - 1.0);\n' +
-    '  float baseEdge = p - (1.0 - colFrac) * STAGGER;\n' +
-    '  float j = texture2D(uJitter, vec2((colId + 0.5)/N_COLS, 0.5)).r;\n' +
-    '  float offset = (j - 0.5) * JITTER;\n' +
-    '  float edgeY = baseEdge + offset;\n' +
-    // Covered = BELOW the edge (the veil is the region under the stair
-    // skyline — it fills from the bottom of the screen up to the stairs).
-    // NOTE: ascending smoothstep args + "1.0 - cov" — portable everywhere.
-    // (Reversed smoothstep args are undefined in GLSL and some GPUs flipped
-    // the covered side, making the wipe appear to start from the TOP.)
-    '  float above = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
+    // Which big step is this pixel in? Every pixel in the same step shares
+    // the SAME height -> wide flat treads (big steps, no wave, no chasing).
+    '  float stepId = floor(clamp(uv.x, 0.0, 0.9999) * STEP_COUNT);\n' +
+    '  float h = STEP_BASE + stepId * STEP_RISE;\n' +
+    '  float edgeY = p + h;\n' +
+    // Portable coverage (ascending smoothstep + mix), veil side via uSide:
+    '  float above = smoothstep(edgeY - 0.004, edgeY + 0.004, uv.y);\n' +
     '  float covered = mix(above, 1.0 - above, uSide);\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
 
   /* ---------- helpers ---------- */
-  function _rng(seed){ var t=seed>>>0; return function(){ t+=0x6D2B79F5; var r=Math.imul(t^t>>>15,1|t); r=r+Math.imul(r^r>>>7,61|r)^r; return ((r^r>>>14)>>>0)/4294967296; }; }
-
-  function mkJit(){
-    var s=N_COLS|0, STEPS=10.0;
-    var rand = _rng(1337);
-    var vals = new Array(s);
-    var v = 0.6, nextChange = 0, target = v;
-    for(var x=0;x<s;x++){
-      if(x>=nextChange){
-        var delta = (rand()-0.5)*0.6;
-        target = Math.max(0.1, Math.min(0.9, v + delta));
-        nextChange = x + 1 + Math.floor(rand()*3);
-      }
-      v = target;
-      vals[x] = Math.floor(v*STEPS + 0.5)/STEPS;
-    }
-    var mn=vals[0], mx=vals[0];
-    for(var k=1;k<s;k++){ if(vals[k]<mn)mn=vals[k]; if(vals[k]>mx)mx=vals[k]; }
-    var rng=mx-mn||1;
-    var cv=document.createElement('canvas'); cv.width=s; cv.height=1;
-    var cx=cv.getContext('2d');
-    var im=cx.createImageData(s,1), d=im.data;
-    for(var i=0;i<s;i++){
-      var t=(vals[i]-mn)/rng;
-      var px=Math.max(0,Math.min(255,Math.floor(t*255)));
-      d[i*4]=px; d[i*4+1]=px; d[i*4+2]=px; d[i*4+3]=255;
-    }
-    cx.putImageData(im,0,0);
-    return cv;
-  }
   function mkGL(cv){
     var gl=null;
     try{ gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false}); }catch(e){}
@@ -168,18 +135,9 @@
     gl.enableVertexAttribArray(l);
     gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
   }
-  function upT(gl,t,s){
-    gl.bindTexture(gl.TEXTURE_2D,t);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,s);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
-  }
 
   /* ---------- overlay / GL state ---------- */
-  var ov, cv, gl, prg, jTex, uP, uJ, uSide, quadBound=false;
+  var ov, cv, gl, prg, uP, uSide, quadBound=false;
   var sideSel = 1; // 1 = veil below edge (cover), 0 = veil above edge (reveal)
 
   function ensure(){
@@ -199,14 +157,8 @@
         bindQuad(gl,prg);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        jTex=gl.createTexture();
-        upT(gl,jTex,mkJit());
         uP=gl.getUniformLocation(prg,'uProgress');
         uSide=gl.getUniformLocation(prg,'uSide');
-        uJ=gl.getUniformLocation(prg,'uJitter');
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D,jTex);
-        gl.uniform1i(uJ,0);
         quadBound=true;
       }
     }
@@ -227,9 +179,6 @@
     if(!quadBound){ bindQuad(gl,prg); quadBound=true; }
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D,jTex);
-    gl.uniform1i(uJ,0);
     gl.uniform1f(uP,p);
     gl.uniform1f(uSide, sideSel);
     gl.drawArrays(gl.TRIANGLES,0,6);
