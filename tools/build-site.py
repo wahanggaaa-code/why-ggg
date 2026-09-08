@@ -236,17 +236,10 @@ def grain_div():
     m = re.search(r'<div id="grain">.*?</div>', BASE_INDEX, re.S)
     return m.group(0)
 
-def brand_svg(w=84):
-    m = re.search(r'<svg[\s\S]*?</svg>', brand_logo('.'))
-    svg = m.group(0)
-    return re.sub(r'\bwidth="[^"]*"\s*height="[^"]*"', 'width="%d" height="%d"' % (w, w), svg, count=1)
-
 def loader_html():
-    svg = brand_svg(84)
     return ('<div id="loader">\n  <div id="videoWrap">\n'
-            '    <video id="crystalVideo" muted autoplay playsinline preload="auto" aria-hidden="true">\n'
+            '    <video id="crystalVideo" muted autoplay playsinline preload="auto">\n'
             '      <source src="crystal.mp4" type="video/mp4">\n    </video>\n'
-            '    <div id="introMark" aria-hidden="true">' + svg + '</div>\n'
             '  </div>\n</div>')
 
 def hero_html():
@@ -305,46 +298,36 @@ def js_scramble():
 def loader_js():
     return r"""
   (function(){
+    // Intro selalu tampil SETIAP halaman utama dibuka/di-refresh (tanpa gate "sekali lihat").
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const l = document.getElementById('loader');
     if(!l) return;
+    if(reduced){ l.classList.add('gone'); return; }
     const vw = document.getElementById('videoWrap');
     const vid = document.getElementById('crystalVideo');
-    let done=false, seen=false;
-    try{ seen = sessionStorage.getItem('__intro')==='1'; }catch(e){}
-    function markReady(){ if(vw) vw.classList.add('ready'); }
-    function hide(){ if(done) return; done=true; l.classList.add('out');
-      setTimeout(function(){ l.classList.add('gone'); }, 900); }
+    let done=false, ok=false;
     const t0 = performance.now();
-    function scheduleHide(ms){ const el=Math.max(0, ms-(performance.now()-t0)); setTimeout(hide, el); }
-    if(reduced || seen){ l.classList.add('gone'); return; }
-    try{ sessionStorage.setItem('__intro','1'); }catch(e){}
-    // nyalakan video; bila gagal/terblokir, logo statis (#introMark) tetap tampil
-    function tryPlay(){
-      if(!vid){ markReady(); scheduleHide(900); return; }
-      let p = null;
-      try{ p = vid.play(); }catch(e){}
-      if(p && p.then){ p.then(function(){ markReady(); }).catch(function(){ /* fallback ke #introMark */ }); }
-      else { vid.addEventListener('playing', markReady, {once:true}); }
-      setTimeout(function(){ if(vid && !vid.paused && vid.currentTime>0) markReady(); }, 1100);
+    function hide(){
+      if(done) return; done=true;
+      l.classList.add('out');
+      if(vw) vw.classList.add('out');
+      setTimeout(function(){ l.classList.add('gone'); }, 850);
     }
-    tryPlay();
-    // intro singkat & pasti berakhir (sekitar 1.6s) — tidak menunggu window 'load'
-    scheduleHide(1600);
-    setTimeout(function(){ scheduleHide(3000); }, 200);
+    function at(ms){ const el=Math.max(0, ms-(performance.now()-t0)); setTimeout(hide, el); }
+    function startPlay(){
+      if(!vid){ at(900); return; }
+      function playing(){ if(!ok){ ok=true; at(1900); } }
+      let p=null;
+      try{ p = vid.play(); }catch(e){}
+      if(p && p.then){ p.then(playing).catch(function(){ at(900); }); }
+      else { vid.addEventListener('playing', playing, {once:true}); }
+      // video diam-diam sudah jalan tanpa event -> tetap selesaikan
+      setTimeout(function(){ if(vid && !vid.paused && vid.currentTime>0) playing(); }, 800);
+      // pengaman anti-lengket: intro pasti selesai walau video gagal total
+      setTimeout(function(){ if(!ok) at(700); }, 2600);
+    }
+    startPlay();
   })();
-"""
-
-INTRO_CSS = r"""
-/* ===== Intro loader — logo statis selalu tampil, video sebagai lapisan ===== */
-#videoWrap video{opacity:0;transition:opacity .5s ease .15s;}
-#videoWrap.ready video{opacity:1;}
-#introMark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  transition:opacity .45s ease,visibility .45s;}
-#introMark svg{width:88px;height:auto;opacity:.92;animation:introBreathe 2.6s ease-in-out infinite;}
-@keyframes introBreathe{0%,100%{opacity:.5;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
-#videoWrap.ready #introMark{opacity:0;visibility:hidden;}
-@media (prefers-reduced-motion: reduce){ #introMark svg{animation:none;} }
 """
 
 def rail_html():
@@ -438,7 +421,7 @@ def page_doc(title, head_css, inner_body, script, body_class=''):
             '\n<body%s>\n%s\n<script>\n%s</script>\n</body>\n</html>\n' % ((' class="'+body_class+'"') if body_class else '', inner_body, script))
 
 def home_page():
-    head_css = HOME_STYLE + '\n' + INTRO_CSS + '\n' + VT_CSS + '\n' + VT_NAMES + '\n' + RAIL_CSS
+    head_css = HOME_STYLE + '\n' + VT_CSS + '\n' + VT_NAMES + '\n' + RAIL_CSS
     main = ('<div id="main">\n  ' + grain_div() + '\n\n  ' + page_header('home') + '\n\n  '
             + hero_html() + '\n\n  ' + manifesto_html() + '\n\n  ' + rail_html() + '\n\n  ' + log_html() + '\n\n  '
             + footer_html() + '\n</div>')
