@@ -61,10 +61,10 @@
   var P_OPEN   = 1.15 + STAGGER + JITTER;
   var P_CLOSED = -0.15 - JITTER;
 
-  var COVER_MS  = 620;   // outgoing sweep
-  var REVEAL_MS = 820;   // incoming reveal
-  var START_DELAY_MS = 140; // tiny settle after DOM+fonts before reveal starts
-  var SAFE_MAX_MS    = 1500; // absolute cap so a stuck load never blocks reveal
+  var COVER_MS  = 540;   // outgoing sweep
+  var REVEAL_MS = 680;   // incoming reveal
+  var START_DELAY_MS = 60; // tiny settle after DOM+fonts before reveal starts
+  var SAFE_MAX_MS    = 1300; // absolute cap so a stuck load never blocks reveal
 
   /* ---------- shaders ---------- */
   var vs =
@@ -230,9 +230,10 @@
   }
 
   /* ---------- easing ---------- */
-  // easeInOutCubic — silky acceleration + deceleration (cover)
-  function easeInOutCubic(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
-  // easeOutCubic — starts fast, settles gently (reveal)
+  // easeInCubic — cover *accelerates* toward the cut: it closes decisively
+  // instead of lingering in the near-white fully-covered state.
+  function easeInCubic(t){ return t*t*t; }
+  // easeOutCubic — reveal starts fast, settles gently.
   function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
 
   /* ---------- state ---------- */
@@ -283,7 +284,7 @@
     drawAt(fromP);
 
     var t0=0;
-    var ease = phase==='cover' ? easeInOutCubic : easeOutCubic;
+    var ease = phase==='cover' ? easeInCubic : easeOutCubic;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
@@ -362,7 +363,7 @@
     }
     function domReady(){
       if(document.fonts && document.fonts.ready && document.fonts.ready.then){
-        var done=false, t=setTimeout(function(){ done=true; afterFonts(); }, 450);
+        var done=false, t=setTimeout(function(){ done=true; afterFonts(); }, 250);
         document.fonts.ready.then(function(){ if(done) return; clearTimeout(t); done=true; afterFonts(); });
       } else afterFonts();
     }
