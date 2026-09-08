@@ -1,3 +1,5 @@
+/* BUILD v20260908a — direction: COVER starts from the BOTTOM and rises (naik nutup),
+ * REVEAL falls from the TOP opening the page (turun buka). Cache-bust ?v=20260908a. */
 /* ========================================================================
  * WHY GGG — refined WebGL page transition (signature staircase / skyline)
  *
