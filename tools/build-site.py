@@ -121,6 +121,7 @@ RAIL_CSS = r"""
   letter-spacing:-.01em;line-height:1.15;}
 .rslide .rc-mid span{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;
   text-transform:uppercase;color:#9a9a9e;}
+.rslide .rc-blurb{display:none;}
 .rslide .rc-go{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;color:#e9e9ea;
   white-space:nowrap;opacity:.85;transition:transform .3s;}
 .rslide:hover .rc-go{transform:translateX(5px);color:var(--acc,#f0d9a0);}
@@ -157,9 +158,13 @@ RAIL_CSS = r"""
   .rail{gap:16px;}
   .rail-pin{justify-content:flex-start;}
   .rail{padding-top:76px;}
-  .rslide{width:min(86vw,440px);}
-  .rslide .rcap{padding:12px 14px 14px;gap:12px;}
-  .rslide .rc-mid b{font-size:17px;}
+  .rslide{width:min(92vw,500px);}
+  .rslide .rcap{padding:14px 16px 16px;gap:12px;align-items:flex-start;}
+  .rslide .rc-mid b{font-size:19px;}
+  .rslide .rc-mid span{display:block;}
+  .rslide .rc-blurb{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    margin-top:7px;font-family:"General Sans",sans-serif;font-size:13px;line-height:1.45;
+    letter-spacing:0;text-transform:none;color:#a6a3a0;}
   .rslide .rc-go{display:none;}
   .rail-hud{right:16px;left:16px;bottom:14px;}
   .rail-prog{max-width:38vw;}
@@ -175,6 +180,8 @@ RAIL_CSS = r"""
   .rslide{flex:0 0 auto;width:70vw;scroll-snap-align:center;}
   .rail-hud{display:none;}
 }
+/* override terakhir: fallback reduced-motion tanpa padding besar */
+@media (prefers-reduced-motion: reduce){ .rail{padding-top:12px;} }
 """
 
 CONTACT_CSS = r"""
@@ -419,7 +426,7 @@ def rail_html():
           '<a class="rslide" href="work/%s.html">' % w['slug'] +
           '<img class="rcvr %s" src="%s" alt="%s" width="1200" height="750" loading="eager" decoding="async">' % (w['slug'], w['img'], w['alt']) +
           '<div class="rcap"><span class="rc-idx">%s</span>' % n_of(i+1) +
-          '<span class="rc-mid"><b>%s</b><span>%s · %s</span></span>' % (w['kind'], w['tag'], w['year']) +
+          '<span class="rc-mid"><b>%s</b><span>%s · %s</span><span class="rc-blurb">%s</span></span>' % (w['kind'], w['tag'], w['year'], w['blurb']) +
           '<span class="rc-go">Buka</span></div></a>')
     total = n_of(len(WORK))
     return ('<section id="work" class="archive" aria-label="Arsip karya" style="scroll-margin-top:0">\n'
@@ -462,10 +469,12 @@ def rail_js():
       maxX = Math.max(0, rail.scrollWidth - window.innerWidth);
       if(maxX<=0){ wrap.style.height = '115vh'; range=1; H=window.innerHeight; return; }
       H = window.innerHeight;
-      // jarak scroll vertikal = lebar yang harus digeser + ruang napas
-      const extra = (window.innerWidth<=760) ? 90 : Math.max(H*0.4, 140);
-      wrap.style.height = (H + maxX + extra) + 'px';
-      range = (wrap.getBoundingClientRect().height - H);
+      const mob = window.innerWidth <= 760;
+      // desktop: 1px horizontal per 1px vertikal. mobile: lintasan dikompres (lebih pendek)
+      const travel = mob ? Math.max(260, Math.round(maxX*0.42)) : maxX;
+      const extra  = mob ? Math.min(70, Math.round(travel*0.16)) : Math.max(H*0.4, 140);
+      wrap.style.height = (H + travel + extra) + 'px';
+      range = travel + extra;
       off = wrap.offsetTop;
       paint();
     }
