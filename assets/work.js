@@ -231,6 +231,25 @@
     if (i >= 0) scrollArea.scrollTop = (centerIndex + i) * H;
   });
 
+  /* ---------- klik kartu: yang mengintip = pusatkan dulu; pusat = buka situs ---------- */
+  function activeIndex() {
+    var p = scrollArea.scrollTop / H;
+    return ((Math.round(p) % N) + N) % N;
+  }
+  slides.forEach(function (el, idx) {
+    el.addEventListener('click', function (e) {
+      if (!running) { e.preventDefault(); return; }          // saat intro masih kocok
+      var act = activeIndex();
+      if (idx === act) return;                                 // kartu pusat → biarkan buka link
+      e.preventDefault();                                      // kartu mengintip → pusatkan
+      var p = Math.round(scrollArea.scrollTop / H);
+      var d = idx - act;
+      if (d > N / 2) d -= N;
+      if (d < -N / 2) d += N;
+      scrollArea.scrollTop = (p + d) * H;
+    });
+  });
+
   updateUIFirst(startIdx);
   intro();
 })();
