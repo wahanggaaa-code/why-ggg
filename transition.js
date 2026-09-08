@@ -1,4 +1,4 @@
-/* BUILD v20260908h — EXACTLY like the reference video: a curtain pulled UP.
+/* BUILD v20260908i — EXACTLY like the reference video: a curtain pulled UP.
  *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
  *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
  *            through the TOP (swipe up). Cache-bust ?v=20260908b.
@@ -27,8 +27,8 @@
 (function(){
   'use strict';
 
-  var VEIL   = '#6b6a70';           // dimmed warm gray veil (was #c9c6cd ~flash)
-  var VEIL_RGB = [0.420, 0.416, 0.439];
+  var VEIL   = '#8b8a90';           // warm gray veil, medium (was #6b6a70 too dim)
+  var VEIL_RGB = [0.545, 0.541, 0.565];
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
