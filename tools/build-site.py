@@ -17,6 +17,10 @@ import os, re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.path.join(ROOT, 'tools', 'base')
 INDEX_OUT = os.path.join(ROOT, 'index.html')
+
+# GUARD (audit 08 SEP 2026): index.html dipelihara manual di cabang arsitektur-awwwards.
+# Generator DILARANG menimpanya kecuali env ALLOW_INDEX_CLOBBER=1 diset eksplisit.
+ALLOW_INDEX = os.environ.get('ALLOW_INDEX_CLOBBER') == '1'
 ABOUT_OUT = os.path.join(ROOT, 'about.html')
 CONTACT_OUT = os.path.join(ROOT, 'contact.html')
 WORKD = os.path.join(ROOT, 'work')
@@ -672,7 +676,10 @@ proj_pages   = project_pages()
 about_html   = about_page()
 nf_html      = notfound_page()
 
-open(INDEX_OUT,'w').write(index_html); print('index.html')
+if ALLOW_INDEX:
+    open(INDEX_OUT,'w').write(index_html); print('index.html')
+else:
+    print('SKIP index.html (dipelihara manual; set ALLOW_INDEX_CLOBBER=1 untuk memaksa)')
 open(ABOUT_OUT,'w').write(about_html); print('about.html')
 open(CONTACT_OUT,'w').write(contact_html); print('contact.html')
 for slug,h in proj_pages:
