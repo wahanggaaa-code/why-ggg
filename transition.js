@@ -3,27 +3,25 @@
  *
  * Pure vanilla WebGL, no deps, no page screenshots.
  *
- * Flow (one whole journey, click -> new page visible):
- *   click internal link -> the stair "curtain" FALLS from the top of the
- *   old page down to the bottom until the screen is fully covered (soft
- *   warm gray veil, blocky skyline leading edge) -> navigate.
- *   Destination pre-paints the same veil in <head> (no white flash) and then
- *   the curtain RISES back up — from the bottom of the new page, opening
- *   the page as it leaves through the top.
+ * Flow (ONE continuous effect, click -> new page visible):
+ *   click internal link -> the stair "curtain" RISES from the bottom of the
+ *   old page, climbing until the whole screen is covered (soft warm gray
+ *   veil, blocky skyline top edge). The instant it is full, the page swaps
+ *   and the same curtain immediately FALLS back down — the stairs descend
+ *   from the top of the new page down out of the bottom, opening the page.
+ *   It reads as one motion: naik memenuhi -> langsung turun membuka.
  *
  * Motion language:
- *   - Cover  (leaving old page): the veil fills ABOVE the stair edge and
- *     the edge FALLS from above the top of the screen down below the
- *     bottom — the curtain sinks DOWN until fully covered ("turun sampai
- *     bawah menutup").
- *   - Reveal (entering new page): the same veil then RISES — the stair
- *     edge climbs from below the bottom of the screen up over the top, so
- *     the curtain comes UP from the bottom and opens the page as it exits
- *     through the top ("naik dari bawah membuka halaman").
+ *   - Cover  (leaving old page): veil fills BELOW the stair edge; the edge
+ *     climbs from below the bottom of the screen up over the top, so the
+ *     curtain RISES until fully covered ("tangga naik memenuhi halaman").
+ *   - Reveal (entering new page): the same veil falls away — the stair edge
+ *     drops from above the top of the screen down below the bottom, opening
+ *     the page from top to bottom ("tangga turun membuka halaman").
  *
  * Refinements over the previous build:
- *   - Reveal starts as soon as DOM+fonts are ready (capped), NOT on slow
- *     window 'load' — no dead static veil.
+ *   - Reveal starts as soon as DOM+fonts are ready (capped) with a minimal
+ *     settle so the cover->reveal feels like one unbroken effect.
  *   - Same-page links (Home/logo/href="#" placeholders) are no longer
  *     treated as navigations (no pointless full reload + cover).
  *   - Browser back/forward & bfcache restores are handled (pageshow):
@@ -65,21 +63,21 @@
   var STAGGER = 0.34;   // diagonal slope of the leading edge
   var JITTER  = 0.22;   // blocky height variation between columns
 
-  // p (edge position) mapping — the veil fills ABOVE the stair edge
-  // (covered = uv.y > edgeY). Motion reads as one journey:
-  //   COVER (leaving): edge starts above the top of the screen (page
-  //     visible) and FALLS below the bottom => the curtain sinks DOWN from
-  //     the top until the screen is fully covered ("turun sampai bawah").
-  //   REVEAL (entering): edge starts below the bottom (fully covered) and
-  //     RISES above the top => the curtain comes up from the bottom,
-  //     opening the page as it leaves through the top ("naik membuka").
-  var P_OPEN   = 1.50;   // edge just above screen top -> fully visible
-  var P_CLOSED = -0.15;  // edge just below screen bottom -> fully covered
+  // p (edge position) mapping — the veil fills BELOW the stair edge
+  // (covered = uv.y < edgeY). ONE continuous effect:
+  //   COVER (leaving): edge starts below the bottom (page visible) and
+  //     RISES over the top => the curtain climbs UP until the screen is
+  //     fully covered ("tangga naik memenuhi halaman").
+  //   REVEAL (entering): edge starts above the top (fully covered) and
+  //     FALLS below the bottom => the curtain descends, opening the new
+  //     page from top to bottom ("langsung turun membuka halaman").
+  var P_OPEN   = -0.15;  // edge just below screen bottom -> fully visible
+  var P_CLOSED =  1.55;  // edge well above screen top    -> fully covered
 
-  var COVER_MS  = 700;   // outgoing sweep (curtain falls to cover)
-  var REVEAL_MS = 900;   // incoming reveal (curtain rises to open)
-  var START_DELAY_MS = 60; // tiny settle after DOM+fonts before reveal starts
-  var SAFE_MAX_MS    = 1400; // absolute cap so a stuck load never blocks reveal
+  var COVER_MS  = 560;   // cover: stairs rise to fill the screen
+  var REVEAL_MS = 760;   // reveal: stairs fall to open the new page
+  var START_DELAY_MS = 30; // minimal settle so cover->reveal feels continuous
+  var SAFE_MAX_MS    = 1300; // absolute cap so a stuck load never blocks reveal
 
   /* ---------- shaders ---------- */
   var vs =
@@ -106,9 +104,9 @@
     '  float j = texture2D(uJitter, vec2((colId + 0.5)/N_COLS, 0.5)).r;\n' +
     '  float offset = (j - 0.5) * JITTER;\n' +
     '  float edgeY = baseEdge + offset;\n' +
-    // Covered = ABOVE the edge (the veil is the region over the stair
-    // skyline — it fills from the top of the screen down to the stairs).
-    '  float covered = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
+    // Covered = BELOW the edge (the veil is the region under the stair
+    // skyline — it fills from the bottom of the screen up to the stairs).
+    '  float covered = smoothstep(edgeY + 0.005, edgeY - 0.005, uv.y);\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
@@ -246,12 +244,12 @@
   }
 
   /* ---------- easing ---------- */
-  // easeInQuad — cover: the curtain starts its fall gently ("perlahan")
-  // then accelerates to close decisively (no white linger at the end).
+  // easeInQuad — cover: the stairs start rising right after the click and
+  // accelerate into full cover (decisive, no dead time at the bottom).
   function easeInQuad(t){ return t*t; }
-  // easeInOutCubic — reveal: the curtain lifts off smoothly, accelerates
-  // through the sweep, then settles gently — a readable, slow rise.
-  function easeInOutCubic(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+  // easeOutCubic — reveal: the stairs start falling away IMMEDIATELY so the
+  // cover->reveal reads as one continuous effect, then settle as they exit.
+  function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
 
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
@@ -276,8 +274,8 @@
     ov.style.transform='translateY(0)';
     ov.style.pointerEvents='auto';
     void ov.offsetWidth;
-    ov.style.transition='transform 0.85s cubic-bezier(0.77,0,0.175,1)';
-    ov.style.transform='translateY(-102%)';
+    ov.style.transition='transform 0.8s cubic-bezier(0.77,0,0.175,1)';
+    ov.style.transform='translateY(102%)';
     setTimeout(function(){
       ov.style.opacity='0';
       ov.style.background='transparent';
@@ -301,8 +299,7 @@
     drawAt(fromP);
 
     var t0=0;
-    // Both sweeps are one-way in p; the eased direction is chosen per phase.
-    var ease = phase==='cover' ? easeInQuad : easeInOutCubic;
+    var ease = phase==='cover' ? easeInQuad : easeOutCubic;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
@@ -316,7 +313,7 @@
         if(phase==='cover'){
           // Let the browser actually present the final full veil, then leave.
           covered=true;
-          setTimeout(function(){ onDone&&onDone(); }, 30);
+          setTimeout(function(){ onDone&&onDone(); }, 15);
         } else {
           covered=false;
           ov.style.opacity='0';
@@ -361,9 +358,7 @@
       // First frame fully covered drawn synchronously above the removed veil.
       drawAt(P_CLOSED);
       requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          animate(REVEAL_MS, P_CLOSED, P_OPEN, 'reveal', function(){ busy=false; scrollToIntent(); });
-        });
+        animate(REVEAL_MS, P_CLOSED, P_OPEN, 'reveal', function(){ busy=false; scrollToIntent(); });
       });
     } else {
       fallbackReveal(function(){ busy=false; scrollToIntent(); });
@@ -381,7 +376,7 @@
     }
     function domReady(){
       if(document.fonts && document.fonts.ready && document.fonts.ready.then){
-        var done=false, t=setTimeout(function(){ done=true; afterFonts(); }, 250);
+        var done=false, t=setTimeout(function(){ done=true; afterFonts(); }, 150);
         document.fonts.ready.then(function(){ if(done) return; clearTimeout(t); done=true; afterFonts(); });
       } else afterFonts();
     }
