@@ -106,7 +106,11 @@
     '  float edgeY = baseEdge + offset;\n' +
     // Covered = BELOW the edge (the veil is the region under the stair
     // skyline — it fills from the bottom of the screen up to the stairs).
-    '  float covered = smoothstep(edgeY + 0.005, edgeY - 0.005, uv.y);\n' +
+    // NOTE: ascending smoothstep args + "1.0 - cov" — portable everywhere.
+    // (Reversed smoothstep args are undefined in GLSL and some GPUs flipped
+    // the covered side, making the wipe appear to start from the TOP.)
+    '  float cov = smoothstep(edgeY - 0.005, edgeY + 0.005, uv.y);\n' +
+    '  float covered = 1.0 - cov;\n' +
     '  vec3 col = vec3(' + VEIL_RGB[0].toFixed(3) + ', ' + VEIL_RGB[1].toFixed(3) + ', ' + VEIL_RGB[2].toFixed(3) + ');\n' +
     '  gl_FragColor = vec4(col, covered);\n' +
     '}\n';
