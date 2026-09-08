@@ -14,6 +14,7 @@
 <link rel="preload" href="fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="assets/home.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -40,12 +41,6 @@
   .bg video{width:100%;height:100%;object-fit:cover;filter:brightness(0.45)saturate(0.6)contrast(1.1);}
   .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(6,6,7,0.4) 0%, rgba(6,6,7,0.65) 50%, rgba(6,6,7,0.92) 82%, #060607 100%);}
 
-  header{
-    position:relative;z-index:20;
-    height:56px;display:flex;justify-content:space-between;align-items:center;
-    padding:0 40px;
-    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
-  }
   header .logo{
     color:#e9e9ea;letter-spacing:0.18em;text-decoration:none;
     display:inline-flex;align-items:center;justify-content:center;
@@ -132,22 +127,15 @@
     to{opacity:1;transform:none;}
   }
 
-  footer{
-    position:relative;z-index:2;
-    padding:26px 40px;display:flex;justify-content:space-between;align-items:center;
-    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#9a9a9e;
-  }
-
   /* Spark pulse animation on logo */
   @keyframes sparkPulse{
     0%,100%{opacity:1;}
     50%{opacity:0.6;}
   }
-  .logo-svg{animation:sparkPulse 3s ease-in-out infinite;}
 
   @media(max-width:900px){
     header,main,footer{padding-left:24px;padding-right:24px;}
-    header{padding:0 24px;height:52px;}
+
     main{padding-bottom:60px;}
     .actions{gap:10px;}
     .btn{padding:14px 20px;font-size:11px;}
