@@ -1,4 +1,4 @@
-/* BUILD v20260908d — EXACTLY like the reference video: a curtain pulled UP.
+/* BUILD v20260908e — EXACTLY like the reference video: a curtain pulled UP.
  *   cover  = veil rises from the BOTTOM of the old page to cover (swipe up).
  *   reveal = veil keeps rising: new page opens from the BOTTOM, veil exits
  *            through the TOP (swipe up). Cache-bust ?v=20260908b.
@@ -59,8 +59,15 @@
   var N_COLS   = 12.0;   // number of racing steps across the width
   var P_LOW    = -0.15;  // an edge at/below the screen bottom
   var P_HIGH   =  1.15;  // an edge at/above the screen top
-  var SPEED_MIN = 0.45;  // slowest column speed factor
-  var SPEED_MAX = 1.55;  // fastest column speed factor
+  // Speeds are CLOSE together so the columns stay near each other while they
+  // race (no single column far ahead). SCALE = 1/SPEED_MIN guarantees that at
+  // the end of the phase (uTime=1) EVERY column has fully arrived — the
+  // screen always closes completely before the reveal starts.
+  var SPEED_MIN = 0.78;  // slowest column speed factor
+  var SPEED_MAX = 1.00;  // fastest column speed factor
+  var SPEED_SCALE = 1.0 / SPEED_MIN; // stretch clock so slowest finishes at uTime=1
+  var COVER_HOLD_MS = 150; // hold the fully-closed veil before navigating
+                           // (screen closes first, then the new-page transition)
 
   var COVER_MS  = 620;   // cover: veil rises from bottom to fill (swipe up)
   var REVEAL_MS = 780;   // reveal: veil rises out the top, page opens bottom-up
@@ -76,6 +83,7 @@
 
   var fs =
     '#define N_COLS ' + N_COLS.toFixed(1) + '\n' +
+    '#define SCALE ' + SPEED_SCALE.toFixed(4) + '\n' +
     'precision highp float;\n' +
     'varying vec2 vUv;\n' +
     'uniform float uTime;\n' +     // 0..1 across the phase duration
@@ -95,7 +103,7 @@
     '  float sp = ' + SPEED_MIN.toFixed(3) + ' + ' + (SPEED_MAX-SPEED_MIN).toFixed(3) + ' * r;\n' +
     // Column-local progress: fast columns clamp at 1 early (they win the race
     // and wait), slow columns are still catching up -> visible chasing.
-    '  float tt = clamp(sp * uTime, 0.0, 1.0);\n' +
+    '  float tt = clamp(sp * SCALE * uTime, 0.0, 1.0);\n' +
     '  float edgeY = mix(' + P_LOW.toFixed(3) + ', ' + P_HIGH.toFixed(3) + ', easeInQuad(tt));\n' +
     // Portable coverage (ascending smoothstep + mix), veil side via uSide:
     '  float above = smoothstep(edgeY - 0.004, edgeY + 0.004, uv.y);\n' +
@@ -258,9 +266,11 @@
       } else {
         drawT(1);
         if(phase==='cover'){
-          // Let the browser actually present the final full veil, then leave.
+          // Screen is now FULLY covered (every column arrived thanks to
+          // SCALE). Hold it briefly so it reads as "menutup dulu", THEN the
+          // page swaps and the entry transition appears.
           covered=true;
-          setTimeout(function(){ onDone&&onDone(); }, 15);
+          setTimeout(function(){ onDone&&onDone(); }, COVER_HOLD_MS);
         } else {
           covered=false;
           ov.style.opacity='0';
