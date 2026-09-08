@@ -90,8 +90,7 @@
     tl.to('.hero-title .ln-i', { y: 0, duration: 1.15, stagger: 0.085 }, 0.1)
       .fromTo('.hero-kicker', { y: -14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.35)
       .fromTo('.hero-desc', { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9 }, 0.6)
-      .fromTo('.hero-cue', { opacity: 0 }, { opacity: 1, duration: 0.8 }, 0.9)
-      .fromTo('.marquee', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.9 }, 0.75);
+      .fromTo('.hero-cue', { opacity: 0 }, { opacity: 1, duration: 0.8 }, 0.9);
   }
 
   if (!hasGsap) return wireBasic();
