@@ -10,8 +10,9 @@
  *   sweeps the curtain back up to reveal the new page.
  *
  * Refinements over the previous build:
- *   - Cover is a one-way fast sweep; reveal uses a silkier ease (no flat
- *     "veil freeze" while waiting for window 'load').
+ *   - Cover is a one-way fast sweep; reveal rises with a silky ease and a
+ *     small pull-back near the top just before it finishes (see revealQ):
+ *     "naik, lalu di penghujung turun sedikit, baru tuntas".
  *   - Reveal starts as soon as DOM+fonts are ready (capped), NOT on slow
  *     window 'load' — no dead time staring at a static veil.
  *   - Same-page links (Home/logo/href="#" placeholders) are no longer
@@ -236,6 +237,30 @@
   // easeOutCubic — reveal starts fast, settles gently.
   function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
 
+  // REVEAL CURVE — "rise, then a small pull-back at the top, then finish".
+  // q is the reveal progress (0 = fully covered, 1 = fully open).
+  //   Phase A (rise):   q climbs 0 -> RISE_Q, stair edge sweeps up the screen.
+  //   Phase B (dip):    q pulls back to PULL_Q — just before the end the
+  //                     stairs briefly sweep back DOWN (a visible flick near
+  //                     the top), then...
+  //   Phase C (finish): q climbs PULL_Q -> 1 and the veil clears for good.
+  var RISE_T = 0.52;   // end of the main upward sweep (fraction of duration)
+  var RISE_Q = 0.80;   // how "open" the rise reaches before pulling back
+  var PULL_T = 0.74;   // end of the pull-back (fraction of duration)
+  var PULL_Q = 0.72;   // how far the stairs descend again (must stay < RISE_Q)
+  function revealQ(t){
+    if(t <= RISE_T){
+      var r = t / RISE_T;
+      return RISE_Q * easeOutCubic(r);
+    }
+    if(t <= PULL_T){
+      var r2 = (t - RISE_T) / (PULL_T - RISE_T);
+      return RISE_Q + (PULL_Q - RISE_Q) * easeInCubic(r2);
+    }
+    var r3 = (t - PULL_T) / (1 - PULL_T);
+    return PULL_Q + (1 - PULL_Q) * easeOutCubic(r3);
+  }
+
   /* ---------- state ---------- */
   var busy=false;      // a cover/reveal is in flight
   var covered=false;   // this document is currently fully under the veil
@@ -284,11 +309,12 @@
     drawAt(fromP);
 
     var t0=0;
-    var ease = phase==='cover' ? easeInCubic : easeOutCubic;
     function frame(now){
       if(!t0) t0=now;
       var t=Math.min(1,(now-t0)/dur);
-      var p=fromP+(toP-fromP)*ease(t);
+      var p = phase==='cover'
+        ? fromP + (toP-fromP)*easeInCubic(t)
+        : fromP + (toP-fromP)*revealQ(t);
       drawAt(p);
       if(t<1){
         cancelAnimationFrame(raf);
