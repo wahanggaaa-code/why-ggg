@@ -684,11 +684,13 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
         <a href="https://github.com/wahanggaaa-code" target="_blank" rel="noopener">GitHub</a>
       </div>
       <div class="cc-meta">Jakarta · Singapore · internet — UTC+7</div>
+      <div class="cc-meta" style="margin-top:12px">kunjunganmu ke-<b id="visitCount" style="color:#e9e9ea;font-weight:500">1</b></div>
     </div>
   </div>
 
   <footer>
     <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
+    <span><a href="full.html">Full index</a></span>
   </footer>
 </div>
 <script>
@@ -702,6 +704,10 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
       els.forEach(el=> io.observe(el));
     } else { els.forEach(el=> el.classList.add('revealed')); }
   })();
+</script>
+<script src="assets/egg.js"></script>
+<script>
+(function(){try{var k='whyggg_visits',n=(parseInt(localStorage.getItem(k)||'0',10)||0)+1;localStorage.setItem(k,String(n));var el=document.getElementById('visitCount');if(el)el.textContent=n;}catch(e){}})();
 </script>
 </body>
 </html>

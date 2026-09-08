@@ -242,3 +242,11 @@ footer a:hover{color:var(--ink)}
 .log-more{display:block;background:none;border:0;padding:16px 0 0;cursor:pointer;
   font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;color:#9a9a9e;text-transform:uppercase}
 .log-more:hover,.log-more:focus-visible{color:#e9e9ea}
+/* footer: visit counter + full index */
+footer .visit b{color:var(--ink);font-weight:500}
+footer .foot-links{display:inline-flex;gap:16px;align-items:center}
+footer .foot-links i{font-style:normal;opacity:.4}
+@media(max-width:760px){
+  footer{flex-wrap:wrap;row-gap:10px}
+  footer .visit{order:3;flex:1 1 100%}
+}

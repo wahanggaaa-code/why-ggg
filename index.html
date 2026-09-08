@@ -184,7 +184,8 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 
   <footer>
     <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
-    <a href="index.html">Back to top ↑</a>
+    <span class="visit">kunjunganmu ke-<b id="visitCount">1</b></span>
+    <span class="foot-links"><a href="full.html">Full index</a><i>·</i><a href="index.html">Back to top ↑</a></span>
   </footer>
 </div>
 
@@ -193,5 +194,9 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 <script src="vendor/lenis.min.js"></script>
 <script src="assets/gl-bg.js"></script>
 <script src="assets/home.js"></script>
+<script src="assets/egg.js"></script>
+<script>
+(function(){try{var k='whyggg_visits',n=(parseInt(localStorage.getItem(k)||'0',10)||0)+1;localStorage.setItem(k,String(n));var el=document.getElementById('visitCount');if(el)el.textContent=n;}catch(e){}})();
+</script>
 </body>
 </html>

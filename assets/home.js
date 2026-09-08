@@ -96,6 +96,22 @@
 
   if (!hasGsap) return wireBasic();
 
+  /* ============ HERO scroll-out (isabelmoranta) — judul terurai saat scroll, desktop saja ============ */
+  if (!reduced) {
+    var mmHero = gsap.matchMedia();
+    mmHero.add('(min-width: 761px)', function () {
+      var tw = gsap.to('.hero-title .ln-i', {
+        yPercent: -34, opacity: 0.1, filter: 'blur(5px)', ease: 'none', stagger: 0.07,
+        scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+      });
+      return function () {
+        if (tw.scrollTrigger) tw.scrollTrigger.kill();
+        tw.kill();
+        gsap.set('.hero-title .ln-i', { yPercent: 0, opacity: 1, filter: 'blur(0px)' });
+      };
+    });
+  }
+
   /* ================= MANIFESTO word scrub ================= */
   (function () {
     var el = $('#mfBig'); if (!el) return;

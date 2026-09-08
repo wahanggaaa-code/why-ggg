@@ -323,7 +323,8 @@
     var KF = keyframes();
     var P0 = centerIndex + startIdx;
     uiLayer.style.opacity = 0;
-    var tl = gsap.timeline({ onComplete: function () { running = true; renderLoop(); } });
+    var wloadEl = document.getElementById('wload');
+    var tl = gsap.timeline({ onComplete: function () { if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
     for (var idx = 0; idx < N; idx++) {
       var el = slides[idx];
       var target = poseFor(idx, P0, KF);
@@ -344,6 +345,7 @@
       tl.fromTo(el, from, to, 0.08 * idx);
     }
     tl.to(uiLayer, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.5);
+    if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.55);
   }
 
   window.addEventListener('resize', function () {
