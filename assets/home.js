@@ -289,3 +289,33 @@
     if (nb2) nb2.addEventListener('click', function () { nativeTo(nativeIdx() + 1); });
   }
 })();
+
+/* LOG collapse — 6 entri terbaru selalu tampil; sisanya dibuka/tutup via toggle mono.
+   Menjaga section 02 LOG tetap kompak walau daftar aktivitas terus bertambah. */
+(function () {
+  'use strict';
+  var list = document.querySelector('.log-list');
+  if (!list) return;
+  var rows = [].slice.call(list.querySelectorAll('.log-row'));
+  var KEEP = 6;
+  if (rows.length <= KEEP) return;
+  rows.slice(KEEP).forEach(function (r) { r.classList.add('log-old'); });
+  list.classList.add('collapsed');
+  var hidden = rows.length - KEEP;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'log-more';
+  btn.setAttribute('aria-expanded', 'false');
+  function label(open) {
+    btn.textContent = open
+      ? '( tutup — tampilkan ' + KEEP + ' terbaru )'
+      : '( +' + hidden + ' log sebelumnya — tampilkan )';
+  }
+  label(false);
+  btn.addEventListener('click', function () {
+    var isCollapsed = list.classList.toggle('collapsed');
+    btn.setAttribute('aria-expanded', String(!isCollapsed));
+    label(!isCollapsed);
+  });
+  list.appendChild(btn);
+})();

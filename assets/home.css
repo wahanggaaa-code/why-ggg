@@ -236,3 +236,9 @@ footer a:hover{color:var(--ink)}
   .hero-cue i::after{animation:none}
   .log-row,.log-row::before,.rslide,.rcvr{transition:none}
 }
+
+/* LOG collapse: terbaru selalu tampil; sisanya dibuka via toggle mono (tanpa pill) */
+.log-list.collapsed .log-old{display:none}
+.log-more{display:block;background:none;border:0;padding:16px 0 0;cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;color:#9a9a9e;text-transform:uppercase}
+.log-more:hover,.log-more:focus-visible{color:#e9e9ea}
