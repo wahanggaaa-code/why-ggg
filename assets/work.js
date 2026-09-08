@@ -54,7 +54,13 @@
   var targetScrollY = startY, currentScrollY = startY, lastScrollY = startY, velocity = 0;
   scrollArea.scrollTop = startY;
 
-  var mouseX = 0, mouseY = 0, curRX = 0, curRY = 0;
+  var mouseX = 0, mouseY = 0, curRX = 0, curRY = 0, lastInput = 0, settling = false;
+  ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach(function (ev) {
+    window.addEventListener(ev, function () {
+      lastInput = performance.now();
+      if (settling) { gsap.killTweensOf(scrollArea); settling = false; }
+    }, { passive: true });
+  });
   window.addEventListener('mousemove', function (e) {
     mouseX = (e.clientX / window.innerWidth) * 2 - 1;
     mouseY = (e.clientY / window.innerHeight) * 2 - 1;
@@ -67,7 +73,7 @@
     return { w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t), x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), b: lerp(a.b, b.b, t), o: lerp(a.o, b.o, t), rz: lerp(a.rz, b.rz, t), cp: cp };
   }
 
-  // keyframe posisi (px) — hibrida OCULAR + scatter huyml
+  // keyframe posisi (px) — hibrida OCULAR + scatter huyml; aspekdisamakan 1.45 agar gerak = scale uniform
   function keyframes() {
     var Wc = W < 820 ? Math.min(W * 0.72, 430) : Math.min(W * 0.46, 760);
     var Hc = Wc / 1.45;
@@ -75,11 +81,16 @@
     var nw = Math.max(140, W * 0.10);
     return {
       center: { w: Wc, h: Hc, x: (W - Wc) / 2, y: (H - Hc) / 2 - H * 0.06, b: 1, o: 1, rz: 0, cp: [0, 0, 100, 0, 100, 100, 0, 100] },
-      prev: { w: pw, h: pw * 0.72, x: W - pw * 0.82, y: -pw * 0.1, b: 0.3, o: 1, rz: 3, cp: [0, 0, 100, 0, 100, 80, 0, 100] },
-      next: { w: nw, h: nw * 0.62, x: -nw * 0.1, y: H - nw * 0.5, b: 0.4, o: 1, rz: -3, cp: [0, 20, 100, 0, 100, 100, 0, 100] },
-      farPrev: { w: W * 0.22, h: W * 0.22 * 0.66, x: W * 0.05, y: H * 0.26, b: 0.5, o: 0.85, rz: -8, cp: [0, 0, 100, 0, 100, 100, 0, 100] },
-      farNext: { w: W * 0.20, h: W * 0.20 * 0.66, x: W * 0.76, y: H * 0.56, b: 0.5, o: 0.85, rz: 7, cp: [0, 0, 100, 0, 100, 100, 0, 100] }
+      prev: { w: pw, h: pw / 1.45, x: W - pw * 0.82, y: -pw * 0.1, b: 0.3, o: 1, rz: 3, cp: [0, 0, 100, 0, 100, 80, 0, 100] },
+      next: { w: nw, h: nw / 1.45, x: -nw * 0.1, y: H - nw * 0.5, b: 0.4, o: 1, rz: -3, cp: [0, 20, 100, 0, 100, 100, 0, 100] },
+      farPrev: { w: W * 0.22, h: W * 0.22 / 1.45, x: W * 0.05, y: H * 0.26, b: 0.5, o: 0.85, rz: -8, cp: [0, 0, 100, 0, 100, 100, 0, 100] },
+      farNext: { w: W * 0.20, h: W * 0.20 / 1.45, x: W * 0.76, y: H * 0.56, b: 0.5, o: 0.85, rz: 7, cp: [0, 0, 100, 0, 100, 100, 0, 100] }
     };
+  }
+  var BASE = { w: 100, h: 69 };
+  function sizeBase() {
+    BASE.w = keyframes().center.w; BASE.h = keyframes().center.h;
+    for (var i = 0; i < slides.length; i++) { slides[i].style.width = BASE.w + 'px'; slides[i].style.height = BASE.h + 'px'; }
   }
 
   // pose slide ke-idx pada progress tertentu (+ efek fly-by kamera saat transisi)
@@ -118,9 +129,8 @@
   }
 
   function applyPose(el, wrapEl, p, isCenter) {
-    el.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,' + p.z + 'px) rotateZ(' + p.rz + 'deg) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg)';
-    el.style.width = p.w + 'px';
-    el.style.height = p.h + 'px';
+    var s = p.w / BASE.w;
+    el.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,' + p.z + 'px) rotateZ(' + p.rz + 'deg) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) scale(' + s + ')';
     el.style.clipPath = 'polygon(' + p.cp[0] + '% ' + p.cp[1] + '%, ' + p.cp[2] + '% ' + p.cp[3] + '%, ' + p.cp[4] + '% ' + p.cp[5] + '%, ' + p.cp[6] + '% ' + p.cp[7] + '%)';
     el.style.filter = 'brightness(' + p.b + ')';
     el.style.opacity = p.o;
@@ -173,6 +183,17 @@
 
     var progress = currentScrollY / H;
     var KF = keyframes();
+
+    // soft-settle one-shot: saat inersia & input tenang, glissade halus ke indeks terdekat
+    if (!settling && velocity < 0.3 && performance.now() - lastInput > 160) {
+      var nearest = Math.round(progress);
+      var gap = nearest * H - scrollArea.scrollTop;
+      if (Math.abs(gap) > 1 && Math.abs(gap) < H * 0.5) {
+        settling = true;
+        gsap.to(scrollArea, { scrollTop: nearest * H, duration: 0.5, ease: 'power2.out', onComplete: function () { settling = false; } });
+      }
+    }
+
     for (var idx = 0; idx < N; idx++) {
       var p = poseFor(idx, progress, KF);
       var isC = Math.abs(idx - (((progress % N) + N) % N) < 0.5) || Math.abs(idx - (((progress % N) + N) % N) + N) < 0.5 || Math.abs(idx - (((progress % N) + N) % N) - N) < 0.5;
@@ -205,11 +226,11 @@
       // tumpukan terkocok di pusat: bertumpuk miring, lalu "dibagikan" ke posisinya
       var from = {
         x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
-        width: 340, height: 238, opacity: 0, rotationZ: (idx - N / 2) * 5,
+        scale: 340 / BASE.w, opacity: 0, rotationZ: (idx - N / 2) * 5,
         clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', filter: 'brightness(0.6)'
       };
       var to = {
-        x: target.x, y: target.y, width: target.w, height: target.h, opacity: target.o,
+        x: target.x, y: target.y, scale: target.w / BASE.w, opacity: target.o,
         rotationZ: target.rz,
         clipPath: 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)',
         filter: 'brightness(' + target.b + ')',
@@ -225,6 +246,7 @@
     W = window.innerWidth; H = window.innerHeight;
     var pts = scrollArea.children;
     for (var i = 0; i < pts.length; i++) pts[i].style.height = H + 'px';
+    sizeBase();
   });
   window.addEventListener('hashchange', function () {
     var i = ORDER.indexOf((location.hash || '').replace('#', ''));
@@ -250,6 +272,7 @@
     });
   });
 
+  sizeBase();
   updateUIFirst(startIdx);
   intro();
 })();

@@ -7,7 +7,7 @@ body.work-page{overflow:hidden}
 /* --- carousel layer --- */
 .carousel-container{position:absolute;inset:0;pointer-events:none;z-index:5;perspective:1400px;perspective-origin:50% 46%}
 .slide{position:absolute;top:0;left:0;display:block;pointer-events:auto;cursor:pointer;
-  will-change:transform,width,height,clip-path,opacity,filter;
+  will-change:transform,clip-path,opacity,filter;contain:layout paint;
   transform-origin:top left;transform:translate3d(0,0,0);
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
   /* fallback grid */
@@ -16,9 +16,9 @@ body.work-page{overflow:hidden}
 .parallax-wrap{display:block;width:100%;height:100%;transform-origin:center;will-change:transform;transition:transform .1s ease-out}
 
 /* --- scroll container (snap native, klik tembus) --- */
-.scroll-container{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;z-index:10;pointer-events:none;scrollbar-width:none}
+.scroll-container{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;z-index:10;pointer-events:none;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .scroll-container::-webkit-scrollbar{display:none}
-.snap-point{width:100%;height:100vh;scroll-snap-align:center;pointer-events:auto;touch-action:pan-y}
+.snap-point{width:100%;height:100vh;pointer-events:auto;touch-action:pan-y}
 
 /* --- UI layer --- */
 .wui{position:fixed;inset:0;pointer-events:none;z-index:20;display:flex;flex-direction:column;justify-content:space-between;will-change:filter;padding:96px 6vw 7vh}
