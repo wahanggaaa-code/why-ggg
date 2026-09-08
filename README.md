@@ -54,3 +54,10 @@ jalankan `python3 tools/build-site.py`.
 
 Alur: kerja di `arsitektur-awwwards` → generate → commit → push → saat rilis
 merge ke `main` → push `main`. Detail di [`DEPLOY.md`](DEPLOY.md).
+
+## Home v2 (seit 08 SEP 2026) — HAND-MAINTAINED
+`index.html` + `assets/home.css` + `assets/home.js` + `assets/gl-bg.js` + `vendor/` (GSAP, ScrollTrigger, Lenis)
+adalah sumber kebenaran untuk halaman home. **JANGAN jalankan `tools/build-site.py`** untuk home —
+generator itu masih memakai desain lama dan akan menimpa `index.html` v2.
+Halaman lain (about/contact/work/404) tetap hasil generator sampai dimigrasi.
+Deploy tetap: `wrangler deploy` (static assets seluruh root; vendor/ & assets/ ikut ter-upload).
