@@ -232,7 +232,6 @@ footer a:hover{color:var(--ink)}
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
   html{scroll-behavior:auto}
   .js .ln-i{transform:none}
-  .mq-track{animation:none}
   .hero-cue i::after{animation:none}
   .log-row,.log-row::before,.rslide,.rcvr{transition:none}
 }

@@ -31,6 +31,17 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
 4. Commit + push ke `arsitektur-awwwards`.
 
+## Gerbang rilis (wajib sebelum merge ke `main`)
+
+1. Statis: semua JS lolos `node --check` (termasuk inline), HTML balance tanpa
+   id ganda, CSS kurawal seimbang, JSON-LD valid, tidak ada link/asset lokal 404,
+   tidak ada kode yatim (id/class/fungsi tak terpakai).
+2. Runtime desktop + mobile: 7 halaman 0 console/page error, 0 request gagal;
+   loader home selesai; intro work ±2 dtk; toggle LOG, filter full, palette cmd+k,
+   overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI.
+3. Reduced-motion: work jatuh ke grid `no-wn` tanpa error.
+4. `sitemap.xml` + `llms.txt` + `02 LOG` + docs selaras dengan isi rilis.
+
 ## Deploy ke production
 
 ```bash

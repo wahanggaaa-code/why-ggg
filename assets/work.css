@@ -41,7 +41,6 @@ html.no-wn #wapp{position:static}
 @media (max-width:820px){
   .wui{padding:84px 5vw 6vh}
   .wtext{bottom:5vh}
-  .whint{right:5vw;bottom:auto;top:84px}
 }
 @media (prefers-reduced-motion:reduce){
   .parallax-wrap{transition:none}

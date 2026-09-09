@@ -1,55 +1,39 @@
-# WHY ✴︎ GGG
-
-> Personal landing / editorial archive of WHY GGG — independent maker
-> (design, code, motion). Building quietly. Quiet hands, loud standards.
-
-## Pages
-
-- Home: https://why-ggg.wahanggaaa.workers.dev/
-  Hero + manifesto + 01 ARCHIVE (rail horizontal, 6 selected works)
-  + 02 LOG (changelog) + closing.
-- Work: https://why-ggg.wahanggaaa.workers.dev/work.html
-  3D loop carousel of all 10 live projects. Deep-link per project:
-  work.html#<slug> (slug = nama file thumbnail).
-- Full index: https://why-ggg.wahanggaaa.workers.dev/full.html
-  Plain list of all 10 projects with carousel + live links.
-- About: https://why-ggg.wahanggaaa.workers.dev/about.html
-  Bio, quick facts, principles, stack & tools, colophon.
-- Contact: https://why-ggg.wahanggaaa.workers.dev/contact.html
-  Email + links. One viewport, no form.
-
-## Projects (all live, 2026)
-
-- Aethelgard — The Hidden Archive (editorial · archive):
-  https://aethelgard-7e0.pages.dev/ · work.html#aethelgard-7e0
-- Vroeger Koffiehuis (f&b · brand):
-  https://vroeger-koffiehuis.pages.dev/ · work.html#vroeger-koffiehuis
-- LEXIER® (type · studio):
-  https://lexier.pages.dev/ · work.html#lexier
-- ÉLAN — New Mood (fashion · editorial):
-  https://elan-fashion-editorial.pages.dev/ · work.html#elan-fashion-editorial
-- VIPERA — Émeraude (horlogerie · luxury):
-  https://vipera-emeraude.pages.dev/ · work.html#vipera-emeraude
-- AELIAN — The Light Within (immersive · 3d):
-  https://aelian.pages.dev/ · work.html#aelian
-- Cerulean Chic (fashion · e-commerce):
-  https://cerulean-chic.pages.dev/ · work.html#cerulean-chic
-- CHERIEL (fashion · brand):
-  https://cheriel-landing.pages.dev/ · work.html#cheriel-landing
-- OCULAR (cinematic · portfolio):
-  https://ocular-45z.pages.dev/ · work.html#ocular-45z
-- GLINT (jewelry · brand):
-  https://glint-landing-58i.pages.dev/ · work.html#glint-landing-58i
-
-## Contact
-
-- Email: hi@whyggg.com
-- GitHub: https://github.com/wahanggaaa-code
-
-## Notes for AI consumers
-
-- Static vanilla HTML/CSS/JS site, no framework, no build step.
-- Design system: dark editorial noir (#060607 on #e9e9ea), General Sans +
-  JetBrains Mono, all assets self-hosted (no CDN).
-- Loader video exists only on home; other pages have none.
-- Preferredcanonical host: why-ggg.wahanggaaa.workers.dev.
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/work.html</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/full.html</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/lab.html</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/about.html</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://why-ggg.wahanggaaa.workers.dev/contact.html</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

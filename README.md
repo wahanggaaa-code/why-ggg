@@ -21,11 +21,13 @@ Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputu
   fly-by kamera saat transisi, **intro riffle-burst + deal tengah-ke-luar + snap
   kartu utama** (jalan setelah 10 gambar ter-decode, maks 2,5 dtk — mulus sejak
   kunjungan pertama), status `loading the playlist…`, fling governor (momentum
-  berpagu maks 2,5 section), scroll-snap lembut, counter & info teks sinkron.
+  berpagu maks 2,5 section), scroll-snap lembut, counter & info teks sinkron,
+  toggle `[ list ]` overlay daftar inline, chromatic RGB-split saat velocity tinggi.
   Klik kartu mengintip = pusatkan; klik kartu pusat = buka situs live (tab baru).
   Deep-link `work.html#<slug>`.
-- **full.html** — index polos 10 karya (satu baris per projek: tautan carousel →
-  + live ↗); ditaut dari UI work + semua footer. Tanpa nav utama.
+- **full.html** — index polos 10 karya (kode arsip `26.XX`, filter kategori +
+  count, tautan carousel → + live ↗); ditaut dari UI work + semua footer.
+  Tanpa nav utama.
 - **llms.txt** — peta situs + daftar projek + kontak untuk konsumen AI.
 - **lab.html** — running systems & eksperimen (daftar mono + thumbnail kode + status); ditaut dari footer.
 - **about.html**, **contact.html**, **404.html** — chrome & token desain sama dengan
