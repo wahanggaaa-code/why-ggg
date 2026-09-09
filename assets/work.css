@@ -87,5 +87,5 @@ html.no-wn .wtog{display:none}
   .wl-row{grid-template-columns:52px 1fr;gap:6px 14px}
   .wl-live{grid-column:2;justify-self:start}
 }
-#wapp.chro .slide img{filter:drop-shadow(3px 0 0 rgba(255,45,85,.45)) drop-shadow(-3px 0 0 rgba(0,229,255,.45))}
+#wapp.chro .slide.is-c img{filter:drop-shadow(3px 0 0 rgba(255,45,85,.45)) drop-shadow(-3px 0 0 rgba(0,229,255,.45))}
 #wapp.chro .counter-num,#wapp.chro .w-title{text-shadow:2px 0 rgba(255,45,85,.55),-2px 0 rgba(0,229,255,.55)}

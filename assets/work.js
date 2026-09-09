@@ -176,6 +176,12 @@
       farNext: { w: W * 0.20, h: W * 0.20 / 1.45, x: W * 0.76, y: H * 0.56, b: 0.5, o: 0.85, rz: 7, cp: [0, 0, 100, 0, 100, 100, 0, 100] }
     };
   }
+  var KFcache = null, KFkey = '';
+  function keyframesCached() { // keyframe cuma dihitung ulang saat viewport berubah
+    var k = W + 'x' + H;
+    if (k !== KFkey) { KFkey = k; KFcache = keyframes(); }
+    return KFcache;
+  }
   var BASE = { w: 100, h: 69 };
   function sizeBase() {
     BASE.w = keyframes().center.w; BASE.h = keyframes().center.h;
@@ -218,14 +224,22 @@
   }
 
   function applyPose(el, wrapEl, p, isCenter) {
-    var s = p.w / BASE.w;
-    el.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,' + p.z + 'px) rotateZ(' + p.rz + 'deg) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) scale(' + s + ')';
-    el.style.clipPath = 'polygon(' + p.cp[0] + '% ' + p.cp[1] + '%, ' + p.cp[2] + '% ' + p.cp[3] + '%, ' + p.cp[4] + '% ' + p.cp[5] + '%, ' + p.cp[6] + '% ' + p.cp[7] + '%)';
-    el.style.filter = 'brightness(' + p.b + ')';
-    el.style.opacity = p.o;
-    wrapEl.style.transform = isCenter
-      ? 'scale(1.1) perspective(1000px) rotateX(' + curRX + 'deg) rotateY(' + curRY + 'deg)'
+    // tulis style hanya saat berubah; string dibulatkan agar settle = stabil (bukan epsilon abadi)
+    var tf = 'translate3d(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,' + p.z.toFixed(1) + 'px)'
+      + ' rotateZ(' + p.rz.toFixed(2) + 'deg) rotateY(' + p.ry.toFixed(2) + 'deg) rotateX(' + p.rx.toFixed(2) + 'deg)'
+      + ' scale(' + (p.w / BASE.w).toFixed(4) + ')';
+    if (el._tf !== tf) { el._tf = tf; el.style.transform = tf; }
+    var cp = 'polygon(' + p.cp[0].toFixed(1) + '% ' + p.cp[1].toFixed(1) + '%, ' + p.cp[2].toFixed(1) + '% ' + p.cp[3].toFixed(1)
+      + '%, ' + p.cp[4].toFixed(1) + '% ' + p.cp[5].toFixed(1) + '%, ' + p.cp[6].toFixed(1) + '% ' + p.cp[7].toFixed(1) + '%)';
+    if (el._cp !== cp) { el._cp = cp; el.style.clipPath = cp; }
+    var fl = 'brightness(' + p.b.toFixed(3) + ')';
+    if (el._fl !== fl) { el._fl = fl; el.style.filter = fl; }
+    var op = +p.o.toFixed(3);
+    if (el._op !== op) { el._op = op; el.style.opacity = op; }
+    var wt = isCenter
+      ? 'scale(1.1) perspective(1000px) rotateX(' + curRX.toFixed(2) + 'deg) rotateY(' + curRY.toFixed(2) + 'deg)'
       : 'scale(1) perspective(1000px) rotateX(0deg) rotateY(0deg)';
+    if (wrapEl._wt !== wt) { wrapEl._wt = wt; wrapEl.style.transform = wt; }
   }
 
   /* ---------- teks UI: ganti INSTAN saat indeks berubah ---------- */
@@ -257,7 +271,7 @@
   /* ---------- render loop ---------- */
   var running = false;
   var TEXT_VMAX = 1600; // px/detik — teks UI ditahan saat fling agar tak strobe
-  var lastFrameT = performance.now(), lastBlur = -1; // feel: clock & bucket blur
+  var lastFrameT = performance.now(), lastBlur = -1, lastBlurT = 0, lastC = -1; // feel: clock, bucket blur, idx pusat chromatic
   function renderLoop() {
     if (!running) return;
     W = window.innerWidth; H = window.innerHeight;
@@ -275,14 +289,19 @@
     if (velocity > 1400) { if (!wappEl._chro) { wappEl._chro = true; wappEl.classList.add('chro'); } }
     else if (velocity < 900) { if (wappEl._chro) { wappEl._chro = false; wappEl.classList.remove('chro'); } }
 
-    var blurPx = velocity > 30 ? Math.min(velocity / 300, 10) : 0;
-    if (Math.abs(blurPx - lastBlur) > 0.4) { lastBlur = blurPx; gsap.set(uiLayer, { filter: 'blur(' + blurPx.toFixed(1) + 'px)' }); }
+    // blur UI = repaint full-layer -> langkah bulat 0..10 + throttle 90ms (0 selalu langsung: teks kembali tajam)
+    var blurStep = velocity > 30 ? Math.min(Math.round(velocity / 300), 10) : 0;
+    if (blurStep !== lastBlur && (blurStep === 0 || nowT - lastBlurT > 90)) {
+      lastBlur = blurStep; lastBlurT = nowT;
+      uiLayer.style.filter = blurStep ? 'blur(' + blurStep + 'px)' : '';
+    }
 
     curRY = lerp(curRY, mouseX * 10, damp(0.05));
     curRX = lerp(curRX, -mouseY * 10, damp(0.05));
 
     var progress = currentScrollY / H;
-    var KF = keyframes();
+    var pMod = ((progress % N) + N) % N;
+    var KF = keyframesCached();
 
     // soft-settle one-shot: saat inersia & input tenang, glissade halus ke indeks terdekat
     if (!settling && velocity < 25 && performance.now() - lastInput > 120) {
@@ -298,12 +317,17 @@
       var p = poseFor(idx, progress, KF);
       var sEl = slides[idx];
       if (p.o <= 0.01) { // tak terlihat -> sembunyikan & lewati (hemat GPU HP)
-        if (!sEl._hid) { sEl._hid = true; sEl.style.opacity = '0'; sEl.style.visibility = 'hidden'; }
+        if (!sEl._hid) { sEl._hid = true; sEl._op = -1; sEl.style.opacity = '0'; sEl.style.visibility = 'hidden'; }
         continue;
       } else if (sEl._hid) { sEl._hid = false; sEl.style.visibility = 'visible'; }
-      var isC = Math.abs(idx - (((progress % N) + N) % N) < 0.5) || Math.abs(idx - (((progress % N) + N) % N) + N) < 0.5 || Math.abs(idx - (((progress % N) + N) % N) - N) < 0.5;
+      var isC = Math.abs(idx - pMod) < 0.5 || Math.abs(idx - pMod + N) < 0.5 || Math.abs(idx - pMod - N) < 0.5;
       applyPose(sEl, wraps[idx], p, isC);
-      slides[idx].style.zIndex = Math.round(100 - Math.abs(((idx - (((progress % N) + N) % N) + N * 1.5) % N) - N / 2) * 10);
+      if (isC && lastC !== idx) { // chromatic rgb-split cuma di kartu pusat (1 layer, bukan 7)
+        if (lastC >= 0) slides[lastC].classList.remove('is-c');
+        sEl.classList.add('is-c'); lastC = idx;
+      }
+      var zw = Math.round(100 - Math.abs(((idx - pMod + N * 1.5) % N) - N / 2) * 10);
+      if (sEl._zw !== zw) { sEl._zw = zw; sEl.style.zIndex = zw; }
     }
 
     if ((progress < 10 || progress > 80) && targetScrollY % H === 0 && Math.abs(targetScrollY - currentScrollY) < 1) {
