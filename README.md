@@ -30,8 +30,9 @@ Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputu
   Tanpa nav utama.
 - **llms.txt** — peta situs + daftar projek + kontak untuk konsumen AI.
 - **lab.html** — running systems & eksperimen (daftar mono + thumbnail kode + status); ditaut dari footer.
-- **about.html**, **contact.html**, **404.html** — chrome & token desain sama dengan
+- **about.html**, **contact.html** — chrome & token desain sama dengan
   home (migrasi bahasa desain selesai SEP 2026; isi/layout tidak berubah).
+- **404.html** — "kartu hilang" (kipas + kartu ?/404 bisa dibalik, tombol kocok ulang).
 - About / contact / work / full / lab / 404 **tidak punya loader**.
 - Semua halaman: easter egg (`assets/egg.js`) — pesan console + klik logo ✴︎ 5×
   (lintas-halaman) memicu toast + putaran spark.
@@ -40,11 +41,12 @@ Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputu
 ```
 index.html  about.html  contact.html  work.html  full.html  lab.html  404.html  llms.txt  # MANUAL
 assets/
-  home.css  home.js        # design system + logika home (loader, rail, log, closing)
+  home.css  home.js  gl-bg.js  # design system + logika home (loader, rail, log, closing, silk)
   work.css  work.js        # carousel 3D loop halaman work
   egg.js                   # easter egg global (console + spark 5x)
   cmdk.js                  # command palette CMD+K (halaman · projek · live · aksi salin)
   navp.js                  # nav hover preview + magnet tombol (desktop)
+  wipe.js                  # transisi deck-wipe antar-halaman (semua halaman)
   proj/*.webp              # thumbnail = screenshot hero 10 projek live (1100px)
 vendor/                    # gsap, ScrollTrigger, lenis (self-hosted)
 fonts/                     # General Sans + JetBrains Mono (woff2, self-hosted)
@@ -59,7 +61,8 @@ wrangler.toml  .assetsignore  DEPLOY.md
    (indeks rail, hover panah/link, progress bar, angka total, indeks full.html,
    tipe log, status lab, baris aktif palette).
 4. Rail mobile = swipe native scroll-snap (bukan drag JS).
-5. **Tanpa tombol pill** selamanya (closing pakai link mono polos; panah rail polos).
+5. **Tanpa tombol pill** selamanya (closing pakai link mono polos; panah rail polos;
+   satu-satunya pengecualian tercatat = 3 tombol di 404).
 6. Transisi antar-halaman = deck-wipe (`assets/wipe.js`, WAAPI transform/opacity).
    Entry membuka di semua halaman kecuali index (loader) & work (intro).
 7. **UI tidak berubah tanpa keputusan pemilik repo.**
@@ -70,7 +73,8 @@ wrangler.toml  .assetsignore  DEPLOY.md
 2. `work.html`: tambah `<a class="slide" href="https://<slug>.pages.dev/" …>`
    (urutan bebas; info ada di JS).
 3. `assets/work.js`: tambah slug di `ORDER` dan entri `{cat,title,desc}` di `slideData`
-   pada posisi yang sama.
+   pada posisi yang sama + entri LQIP `'<slug>': 'data:image…'` (thumb 24px base64;
+   tanpa ini kartu langsung full-res — tidak rusak, hanya tanpa blur-up).
 4. `full.html`: tambah satu `.fx-row` (kode `26.XX` + `data-tags` filter + carousel + live);
    `work.html`: tambah satu `.wl-row` di overlay list; `assets/cmdk.js`: tambah entri `PROJ`;
    `llms.txt`: tambah satu baris projek.

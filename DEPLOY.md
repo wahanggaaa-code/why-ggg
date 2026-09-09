@@ -20,17 +20,20 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
 
 1. Kerja di `arsitektur-awwwards`.
 2. Edit file halaman/asset langsung:
-   - desain & logika home: `assets/home.css`, `assets/home.js`
+   - desain & logika home: `assets/home.css`, `assets/home.js`, `assets/gl-bg.js` (silk WebGL)
    - halaman work: `work.html`, `assets/work.css`, `assets/work.js`
    - konten halaman: `index.html`, `about.html`, `contact.html`, `full.html`, `lab.html`, `404.html`, `llms.txt`
-   - global: `assets/egg.js` (easter egg, dimuat semua halaman)
+   - global: `assets/egg.js` (easter egg) + `assets/cmdk.js` (palette) +
+     `assets/navp.js` (nav preview + magnet) — dimuat semua halaman
+   - transisi: `assets/wipe.js` (1 script tepat setelah `<body>`, semua halaman)
    - thumbnail projek: `assets/proj/<slug>.webp`
 3. Uji lokal: `python3 -m http.server 8080`.
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
    intro work: LQIP instan lalu kocok 5 babak ±3 dtk (skip via scroll/klik;
    wload hilang, counter jalan) ·
    full.html 10 baris · cmd+k jalan (+aksi salin) ·
-   deck-wipe antar-halaman (klik → panel menutup → entry membuka) · reduced-motion = native.
+   deck-wipe antar-halaman (klik → panel menutup → entry membuka) · 404 deck + flip ·
+   reduced-motion = native.
 4. Commit + push ke `arsitektur-awwwards`.
 
 ## Gerbang rilis (wajib sebelum merge ke `main`)
@@ -38,9 +41,12 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
 1. Statis: semua JS lolos `node --check` (termasuk inline), HTML balance tanpa
    id ganda, CSS kurawal seimbang, JSON-LD valid, tidak ada link/asset lokal 404,
    tidak ada kode yatim (id/class/fungsi tak terpakai).
+   Setelah edit mekanis lintas-file: verifikasi render + gaya tiap halaman
+   (pelajaran: insiden contact SEP 2026 — regex menelan 320 baris CSS).
 2. Runtime desktop + mobile: 7 halaman 0 console/page error, 0 request gagal;
    loader home selesai; intro work main instan (LQIP) lalu kocok ±3 dtk; toggle LOG, filter full, palette cmd+k,
-   overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI.
+   overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI
+   (kecuali overlap work yang disengaja: counter/kartu, desc/peek-card mobile).
 3. Reduced-motion: work jatuh ke grid `no-wn` tanpa error.
 4. `sitemap.xml` + `llms.txt` + `02 LOG` + docs selaras dengan isi rilis.
 
@@ -69,13 +75,15 @@ npx wrangler deploy
 
 - **Deck-wipe** (`assets/wipe.js`, 1 script tepat setelah `<body>`) aktif di semua
   halaman: exit 4 panel menutup ±0,6 dtk → entry membuka (kecuali index & work).
+- Palette cmd+k: halaman · projek · live · aksi salin (email/link halaman/deep-link kartu).
 - Deep-link carousel work: `work.html#<slug>` (slug = nama file webp di `assets/proj/`).
 - Semua library (GSAP, ScrollTrigger, Lenis, font) **self-hosted** — tanpa CDN.
 - Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);
   `crystal.mp4` tetap di-preload karena dipakai loader home.
-- Intro work = riffle-burst + deal (GSAP, transform 3D murni); LQIP blur-up
+- Intro work = kocokan 5 babak (GSAP, transform 3D murni); LQIP blur-up
   (kartu mungil inline ~1KB, full menajam progresif; nunggu hero + font berkap;
-  pra-raster opacity 0.01; tanpa tween clip-path) menjaga first-open tetap
+  deck tampil sejak gate = pra-raster alami; tanpa tween clip-path) menjaga
+  first-open tetap
   mulus di jaringan lambat — jangan dilepas tanpa ganti.
 - Keamanan: pernah ada PAT GitHub muncul di riwayat chat/sesi — **rotasi token** bila
   masih aktif; gunakan token ber-scope repo hanya via environment/CLI, jangan di file.

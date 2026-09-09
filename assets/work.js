@@ -473,6 +473,7 @@
     for (var li = 0; li < imgs.length; li++) (function (gim, slug) {
       if (!gim || (gim.complete && gim.naturalWidth)) return;
       var full = gim.currentSrc || gim.src;
+      if (!LQIP[slug]) return; // tanpa entri LQIP -> langsung full-res (anti-rusak projek baru)
       gim.src = LQIP[slug];
       var pre = new Image();
       var done = new Promise(function (res) {

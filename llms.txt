@@ -14,8 +14,8 @@
 - Full index: https://why-ggg.wahanggaaa.workers.dev/full.html
   Plain list of all 10 projects with carousel + live links.
 - Lab: https://why-ggg.wahanggaaa.workers.dev/lab.html
-  Running systems & experiments (LB-01 riffle-burst, LB-02 fling governor,
-  LB-03 CMD+K palette, LB-04 chromatic fly-by, LB-05 spark egg, LB-06 counter).
+  Running systems & experiments: Riffle-burst intro, Fling governor,
+  CMD+K palette, Chromatic fly-by, Spark egg ×5, Visit counter.
 - About: https://why-ggg.wahanggaaa.workers.dev/about.html
   Bio, quick facts, principles, stack & tools, colophon.
 - Contact: https://why-ggg.wahanggaaa.workers.dev/contact.html
