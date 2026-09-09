@@ -29,7 +29,7 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
    intro work: LQIP instan lalu kocok 5 babak ±3 dtk (skip via scroll/klik;
    wload hilang, counter jalan) ·
-   full.html 10 baris · cmd+k jalan ·
+   full.html 10 baris · cmd+k jalan (+aksi salin) ·
    deck-wipe antar-halaman (klik → panel menutup → entry membuka) · reduced-motion = native.
 4. Commit + push ke `arsitektur-awwwards`.
 

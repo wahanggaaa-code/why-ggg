@@ -58,4 +58,21 @@
   }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
   window.addEventListener('scroll', hide, { passive: true, capture: true });
+  /* magnet: tombol & link mail tertarik lembut ke kursor (pointer halus, non-reduced) */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var mags = document.querySelectorAll('.btn, a[href^="mailto:"]');
+  for (var m = 0; m < mags.length; m++) {
+    (function (el) {
+      if (window.getComputedStyle(el).display === 'inline') return; /* transform butuh non-inline */
+      if (!el.classList.contains('btn')) el.style.transition = 'transform .25s ease';
+      el.addEventListener('mousemove', function (e) {
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - (r.left + r.width / 2)) / 8;
+        var dy = (e.clientY - (r.top + r.height / 2)) / 8;
+        dx = Math.max(-6, Math.min(6, dx)); dy = Math.max(-6, Math.min(6, dy));
+        el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+      });
+      el.addEventListener('mouseleave', function () { el.style.transform = ''; });
+    })(mags[m]);
+  }
 })();

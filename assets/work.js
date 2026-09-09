@@ -67,6 +67,7 @@
   var slug = (location.hash || '').replace('#', '');
   var startIdx = ORDER.indexOf(slug);
   if (startIdx < 0) startIdx = 0;
+  window.__workSlug = function () { return ORDER[currentIndex >= 0 ? currentIndex : startIdx]; }; // palette: salin deep-link kartu aktif
   var startY = (centerIndex + startIdx) * H;
   var targetScrollY = startY, currentScrollY = startY, lastScrollY = startY, velocity = 0;
   scrollArea.scrollTop = startY;

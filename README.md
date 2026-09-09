@@ -43,8 +43,8 @@ assets/
   home.css  home.js        # design system + logika home (loader, rail, log, closing)
   work.css  work.js        # carousel 3D loop halaman work
   egg.js                   # easter egg global (console + spark 5x)
-  cmdk.js                  # command palette CMD+K (semua halaman)
-  navp.js                  # nav hover preview (desktop)
+  cmdk.js                  # command palette CMD+K (halaman · projek · live · aksi salin)
+  navp.js                  # nav hover preview + magnet tombol (desktop)
   proj/*.webp              # thumbnail = screenshot hero 10 projek live (1100px)
 vendor/                    # gsap, ScrollTrigger, lenis (self-hosted)
 fonts/                     # General Sans + JetBrains Mono (woff2, self-hosted)

@@ -28,10 +28,15 @@
   PROJ.forEach(function (p) { ITEMS.push({ t: p[1], k: 'carousel', h: 'work.html#' + p[0], d: p[0] }); });
   PROJ.forEach(function (p) { ITEMS.push({ t: p[1], k: 'live', h: p[2], ext: true, d: 'live site' }); });
   ITEMS.push({ t: 'Copy email hi@whyggg.com', k: 'action', act: 'copy', d: 'clipboard' });
+  ITEMS.push({ t: 'Copy link halaman ini', k: 'action', act: 'copylink', d: 'clipboard' });
+  if ((location.pathname.split('/').pop() || 'index.html') === 'work.html') {
+    ITEMS.push({ t: 'Copy link kartu aktif', k: 'action', act: 'copycard', d: 'deep-link' });
+  }
 
   var css = '.ck-ov{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.62);display:none}'
     + '.ck-ov.open{display:block}'
-    + '.ck-p{width:min(580px,92vw);margin:11vh auto 0;background:#0a0a0c;border:1px solid rgba(255,255,255,.14)}'
+    + '.ck-p{width:min(580px,92vw);margin:11vh auto 0;background:#0a0a0c;border:1px solid rgba(255,255,255,.14);transition:border-color .3s ease}'
+    + '.ck-p.yank{border-color:#f0d9a0}'
     + '.ck-in{width:100%;box-sizing:border-box;background:none;border:0;border-bottom:1px solid rgba(255,255,255,.1);'
     + 'color:#e9e9ea;font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:.06em;'
     + 'padding:15px 18px;outline:none}'
@@ -94,13 +99,24 @@
   }
   function go(it) {
     if (!it) return;
-    if (it.act === 'copy') {
+    if (it.act === 'copy' || it.act === 'copylink' || it.act === 'copycard') {
+      var payload = 'hi@whyggg.com', okMsg = 'email tersalin ✓ — sampai jumpa di inbox';
+      if (it.act === 'copylink') { payload = location.href; okMsg = 'link halaman tersalin ✓'; }
+      if (it.act === 'copycard') {
+        var slug = '';
+        try { slug = window.__workSlug ? window.__workSlug() : ''; } catch (e) { slug = ''; }
+        if (slug) { try { payload = new URL('work.html#' + slug, location.href).href; } catch (e2) { payload = location.href; } }
+        else { payload = location.href; }
+        okMsg = 'deep-link kartu tersalin ✓' + (slug ? ' — ' + slug : '');
+      }
       var done = function (ok) {
-        foot.textContent = ok ? 'email tersalin ✓' : 'gagal menyalin — hi@whyggg.com';
+        foot.textContent = ok ? okMsg : 'gagal menyalin — ' + payload;
+        var panel = ov.querySelector('.ck-p');
+        if (ok && panel) { panel.classList.add('yank'); setTimeout(function () { panel.classList.remove('yank'); }, 700); }
         setTimeout(close, 900);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('hi@whyggg.com').then(function () { done(true); }, function () { done(false); });
+        navigator.clipboard.writeText(payload).then(function () { done(true); }, function () { done(false); });
       } else { done(false); }
       return;
     }
