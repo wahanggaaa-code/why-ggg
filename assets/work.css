@@ -83,7 +83,7 @@ html.no-wn .wtog{display:none}
 .wl-live{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;color:#e9e9ea;text-decoration:none;white-space:nowrap}
 .wl-live:hover{color:#f0d9a0}
 @media (max-width:820px){
-  .wtog{top:84px;bottom:auto;left:5vw}
+  .wtog{top:122px;bottom:auto;left:auto;right:5vw}
   .wlist{padding:120px 6vw 48px}
   .wl-row{grid-template-columns:52px 1fr;gap:6px 14px}
   .wl-live{grid-column:2;justify-self:start}
