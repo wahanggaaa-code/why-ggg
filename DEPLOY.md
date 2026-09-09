@@ -1,52 +1,73 @@
 # Deploy & Workflow — WHY ✴︎ GGG
 
-Satu sumber kebenaran: **vanilla `index.html`** (tanpa build). Kedua branch `main` dan
-`gh-pages` selalu dijaga **identik** supaya merge aman.
+Situs statis **vanilla** (HTML/CSS/JS) yang **dipelihara manual** di branch
+pengembangan. Tidak ada build step: file di root repo = file yang disajikan.
+
+> Semua halaman (`index/about/contact/work/full/lab/404`, plus `llms.txt`) disunting
+> langsung di root repo — tidak ada build step dan tidak ada generator.
 
 ## Peta lingkungan
-| Lingkungan | Branch | Host | Peran |
-|---|---|---|---|
-| Production | `main` | Cloudflare Pages (domain custom) | Situs live |
-| Staging / preview | `gh-pages` | GitHub Pages (`wahanggaaa-code.github.io/why-ggg`) | Tempat revisi & cek |
-| Cadangan React | `react-archive` (lokal) | — | Arsip app React, tidak di-deploy |
 
-## Alur kerja (staging → production)
-1. **Revisi di `gh-pages`** — edit konten/efek, commit.
-2. **Cek preview** di GitHub Pages (`...github.io/why-ggg`).
-3. **Merge ke `main`**: `git checkout main && git merge gh-pages && git push origin main`.
-4. **Cloudflare auto-deploy** `main` (±1 menit).
+| Lingkungan | Branch | Peran |
+|---|---|---|
+| Pengembangan | `arsitektur-awwwards` | semua revisi & kerja harian |
+| Production | `main` | situs live (Cloudflare Workers Assets + domain custom) |
 
-> Aturan: jangan edit `main` langsung. Semua perubahan lahir di `gh-pages`.
+Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
+`arsitektur-awwwards` → `main` atas keputusan pemilik repo.
 
-## Setup GitHub Pages (staging)
-Settings → **Pages** → Build and deployment → Source: **Deploy from a branch** →
-Branch: **`gh-pages`**, folder `/` → Save.
+## Siklus kerja harian
 
-## Setup Cloudflare Workers (production)
-Project ini **Workers + Assets** (bukan Pages). Konfigurasi di dashboard:
-1. Workers & Pages → connect repo `wahanggaaa-code/why-ggg`.
-2. Production branch: **`main`**.
-3. Build command: *(kosong / None)*.
-4. Deploy command: `npx wrangler deploy` · Version command: `npx wrangler versions upload`.
-5. **WAJIB** salah satu agar build tidak gagal:
-   - set env var `NODE_VERSION = 22`, **atau**
-   - pin deploy/version command ke `npx wrangler@3 ...` (kompatibel Node lama).
-6. Repo harus punya `wrangler.toml` (sudah ada, `[assets] directory="./"`).
+1. Kerja di `arsitektur-awwwards`.
+2. Edit file halaman/asset langsung:
+   - desain & logika home: `assets/home.css`, `assets/home.js`
+   - halaman work: `work.html`, `assets/work.css`, `assets/work.js`
+   - konten halaman: `index.html`, `about.html`, `contact.html`, `full.html`, `lab.html`, `404.html`, `llms.txt`
+   - global: `assets/egg.js` (easter egg, dimuat semua halaman)
+   - thumbnail projek: `assets/proj/<slug>.webp`
+3. Uji lokal: `python3 -m http.server 8080`.
+   Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
+   intro work selesai ±2 dtk (wload hilang, counter jalan) · full.html 10 baris · cmd+k jalan ·
+   transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
+4. Commit + push ke `arsitektur-awwwards`.
 
-> Mengubah settings TIDAK memicu build. Setelah mengubah, **push commit baru** atau
-> klik **Retry deployment** agar build jalan.
+## Gerbang rilis (wajib sebelum merge ke `main`)
 
-## Setelah domain custom live
-Karena path relatif, situs jalan di domain apa pun. Tapi perbarui referensi absolut:
-- `index.html`: `<link rel="canonical">` dan JSON-LD `url`/`sameAs`
-- `sitemap.xml`: `<loc>`
-- `robots.txt`: baris `Sitemap:`
+1. Statis: semua JS lolos `node --check` (termasuk inline), HTML balance tanpa
+   id ganda, CSS kurawal seimbang, JSON-LD valid, tidak ada link/asset lokal 404,
+   tidak ada kode yatim (id/class/fungsi tak terpakai).
+2. Runtime desktop + mobile: 7 halaman 0 console/page error, 0 request gagal;
+   loader home selesai; intro work ±2 dtk; toggle LOG, filter full, palette cmd+k,
+   overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI.
+3. Reduced-motion: work jatuh ke grid `no-wn` tanpa error.
+4. `sitemap.xml` + `llms.txt` + `02 LOG` + docs selaras dengan isi rilis.
 
-## Menambah entri LOG (rutin)
-Copy template di `index.html` (komentar dalam `#log`), isi tanggal/teks/tag,
-taruh sebagai baris **paling atas** `.log-list`, lalu commit di `gh-pages`.
+## Deploy ke production
 
-## Keamanan
-- Jangan commit token/secret. Push lewat SSH atau token sementara, lalu **revoke**.
-- Repo publik: history lama masih memuat folder React. Bila ingin bersih total,
-  jadikan repo private atau rewrite history.
+```bash
+# 1) merge pengembangan ke main (keputusan pemilik)
+git checkout main && git merge arsitektur-awwwards && git push origin main
+
+# 2) deploy Workers Assets dari root repo (branch main)
+npx wrangler deploy
+```
+
+- Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
+- `.assetsignore` memastikan file non-publik (`DEPLOY.md`, `wrangler.toml`, `.git`, `.wrangler`, `.gitignore`) tidak ikut ter-deploy;
+  `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
+- `full.html`, `lab.html` & `llms.txt` ikut ter-deploy otomatis (file statis di root).
+- URL live: https://why-ggg.wahanggaaa.workers.dev/ (＋ domain custom via dashboard).
+- Rollback: `npx wrangler deployments list` → `npx wrangler rollback <version-id>`.
+
+## Catatan operasional
+
+- **View Transitions** cross-document (blur fokus) aktif di semua halaman via CSS
+  inline `#vtCss`; header ikut morph (`view-transition-name: vt-nav`).
+- Deep-link carousel work: `work.html#<slug>` (slug = nama file webp di `assets/proj/`).
+- Semua library (GSAP, ScrollTrigger, Lenis, font) **self-hosted** — tanpa CDN.
+- Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);
+  `crystal.mp4` tetap di-preload karena dipakai loader home.
+- Intro work = riffle-burst + deal (GSAP, transform 3D murni); gerbang decode gambar
+  (maks 2,5 dtk) menjaga kunjungan pertama tetap mulus — jangan dilepas tanpa ganti.
+- Keamanan: pernah ada PAT GitHub muncul di riwayat chat/sesi — **rotasi token** bila
+  masih aktif; gunakan token ber-scope repo hanya via environment/CLI, jangan di file.

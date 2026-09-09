@@ -4,19 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>404 — WHY ✴︎ GGG</title>
-<script>
-  /* Pre-paint transition veil on arrival (see transition.js) — mencegah flash putih/hitam */
-  (function(){
-    try{
-      if(sessionStorage.getItem('__wgl_a')==='1'){
-        var s=document.createElement('style');
-        s.id='wgl-veil';
-        s.textContent='html{background:#9e9da2 !important}body::before{content:"";position:fixed;inset:0;z-index:2147482999;background:#9e9da2;pointer-events:auto}';
-        (document.head||document.documentElement).appendChild(s);
-      }
-    }catch(e){}
-  })();
-</script>
+
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="description" content="Halaman tidak ditemukan — WHY GGG.">
@@ -26,6 +14,7 @@
 <link rel="preload" href="fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="assets/home.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -52,12 +41,6 @@
   .bg video{width:100%;height:100%;object-fit:cover;filter:brightness(0.45)saturate(0.6)contrast(1.1);}
   .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(6,6,7,0.4) 0%, rgba(6,6,7,0.65) 50%, rgba(6,6,7,0.92) 82%, #060607 100%);}
 
-  header{
-    position:relative;z-index:20;
-    height:56px;display:flex;justify-content:space-between;align-items:center;
-    padding:0 40px;
-    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
-  }
   header .logo{
     color:#e9e9ea;letter-spacing:0.18em;text-decoration:none;
     display:inline-flex;align-items:center;justify-content:center;
@@ -144,26 +127,35 @@
     to{opacity:1;transform:none;}
   }
 
-  footer{
-    position:relative;z-index:2;
-    padding:26px 40px;display:flex;justify-content:space-between;align-items:center;
-    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#9a9a9e;
-  }
-
   /* Spark pulse animation on logo */
   @keyframes sparkPulse{
     0%,100%{opacity:1;}
     50%{opacity:0.6;}
   }
-  .logo-svg{animation:sparkPulse 3s ease-in-out infinite;}
 
   @media(max-width:900px){
     header,main,footer{padding-left:24px;padding-right:24px;}
-    header{padding:0 24px;height:52px;}
+
     main{padding-bottom:60px;}
     .actions{gap:10px;}
     .btn{padding:14px 20px;font-size:11px;}
   }
+</style>
+<style id="vtCss">
+
+/* ===== View Transitions (cross-document) — blur fokus + header tetap ===== */
+@view-transition{ navigation:auto; }
+header{ view-transition-name:vt-nav; }
+header nav a.active{ color:#e9e9ea; }
+header nav a.active::before, header nav a.active::after{ opacity:1; }
+::view-transition-old(root){ animation:vtblurOut .3s ease-in both; }
+::view-transition-new(root){ animation:vtblurIn .55s cubic-bezier(.16,1,.3,1) both; }
+@keyframes vtblurOut{ to{opacity:0; filter:blur(15px); transform:scale(1.045);} }
+@keyframes vtblurIn { from{opacity:0; filter:blur(20px); transform:scale(1.05);} }
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){ animation:none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -200,7 +192,7 @@
 
 <footer>
   <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
-  <span>ERR_PAGE_NOT_FOUND</span>
+  <span>ERR_PAGE_NOT_FOUND · <a href="full.html">Full index</a> · <a href="lab.html">Lab</a></span>
 </footer>
 
 <script>
@@ -218,6 +210,9 @@
     setTimeout(flicker, 1500);
   })();
 </script>
-<script src="transition.js?v=20260908j"></script>
+
+<script src="assets/egg.js"></script>
+<script src="assets/cmdk.js"></script>
+<script src="assets/navp.js"></script>
 </body>
 </html>
