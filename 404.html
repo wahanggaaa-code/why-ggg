@@ -59,7 +59,7 @@
 
   main{
     position:relative;z-index:2;
-    flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    flex:1;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:48px;
     padding:0 40px 80px;
   }
   .kicker{
@@ -67,14 +67,6 @@
     margin-bottom:24px;
     animation:fadeUp 0.8s 0.2s cubic-bezier(0.22,0.61,0.36,1) both;
   }
-  .code{
-    font-family:"General Sans",sans-serif;font-weight:700;
-    font-size:clamp(80px,18vw,260px);
-    line-height:0.85;letter-spacing:-0.06em;color:#e9e9ea;
-    margin:0;
-    animation:fadeUp 0.9s 0.3s cubic-bezier(0.22,0.61,0.36,1) both;
-  }
-  .code em{font-style:normal;color:#9a9a9e;}
   .msg{
     font-family:"General Sans",sans-serif;font-weight:500;
     font-size:clamp(22px,3vw,40px);line-height:1.15;letter-spacing:-0.03em;color:#e9e9ea;
@@ -100,27 +92,56 @@
   .btn-ghost{background:rgba(255,255,255,0.04);color:#e9e9ea;border:1px solid rgba(255,255,255,0.08);}
   .btn-ghost:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);}
 
-  /* Glitch flicker on 404 */
-  .code .glitch{position:relative;display:inline-block;}
-  .code .glitch::before,
-  .code .glitch::after{
-    content:attr(data-text);position:absolute;top:0;left:0;width:100%;
-    opacity:0;pointer-events:none;
+  /* Deck kartu hilang — kipas + kartu depan bisa dibalik (klik) */
+  .deck{
+    position:relative;flex:0 0 auto;
+    width:clamp(200px,24vw,300px);aspect-ratio:5/7;
+    perspective:1200px;
+    animation:fadeUp 0.9s 0.4s cubic-bezier(0.22,0.61,0.36,1) both,
+      floaty 6s 1.4s ease-in-out infinite;
   }
-  .code .glitch::before{color:#ff3b3b;transform:translate(-2px,0);clip-path:inset(0 0 80% 0);}
-  .code .glitch::after{color:#3bb5ff;transform:translate(2px,0);clip-path:inset(80% 0 0 0);}
-  @keyframes glitch{
-    0%,100%{opacity:0;}
-    5%{opacity:0.8;transform:translate(-3px,1px);clip-path:inset(20% 0 50% 0);}
-    10%{opacity:0;}
-    15%{opacity:0.6;transform:translate(3px,-1px);clip-path:inset(60% 0 10% 0);}
-    20%{opacity:0;}
-    40%{opacity:0;}
-    45%{opacity:0.7;transform:translate(-2px,0);clip-path:inset(40% 0 30% 0);}
-    50%{opacity:0;}
+  .deck .ghost{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:clamp(110px,16vw,220px);letter-spacing:-0.05em;
+    color:rgba(233,233,234,0.055);user-select:none;pointer-events:none;
   }
-  .code .glitch.flick::before,
-  .code .glitch.flick::after{animation:glitch 2.5s infinite;}
+  .deck .fan{
+    position:absolute;inset:0;border-radius:14px;
+    background:linear-gradient(160deg,#161619,#0b0b0d);
+    border:1px solid rgba(255,255,255,0.09);
+  }
+  .deck .f1{transform:rotate(-9deg) translate(-16px,10px);}
+  .deck .f2{transform:rotate(-4deg) translate(-6px,4px);}
+  .deck .f3{transform:rotate(5deg) translate(10px,6px);}
+  .deck .lost{
+    position:absolute;inset:0;padding:0;cursor:pointer;
+    background:none;border:0;
+    transform-style:preserve-3d;
+    transition:transform 0.7s cubic-bezier(0.16,1,0.3,1);
+  }
+  .deck .lost:hover{transform:rotateY(-12deg) scale(1.02);}
+  .deck .lost.flip{transform:rotateY(180deg);}
+  .deck .lost.flip:hover{transform:rotateY(180deg) scale(1.02);}
+  .deck .face{
+    position:absolute;inset:0;border-radius:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  }
+  .deck .front{background:rgba(10,10,12,0.78);border:2px dashed rgba(240,217,160,0.6);}
+  .deck .back{background:#f0d9a0;transform:rotateY(180deg);border:2px solid #f0d9a0;}
+  .deck .q{font-weight:700;font-size:clamp(56px,7vw,96px);line-height:1;letter-spacing:-0.04em;}
+  .deck .front .q{color:#f0d9a0;}
+  .deck .back .q{color:#060607;font-size:clamp(44px,5.5vw,72px);}
+  .deck .cap{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;}
+  .deck .front .cap{color:#9a9a9e;}
+  .deck .back .cap{color:rgba(6,6,7,0.65);}
+  .deck .spark{font-size:18px;}
+  .deck .front .spark{color:rgba(240,217,160,0.8);}
+  .deck .back .spark{color:#060607;}
+  @keyframes floaty{
+    0%,100%{transform:translateY(-8px) rotate(-1.5deg);}
+    50%{transform:translateY(8px) rotate(1.5deg);}
+  }
 
   @keyframes fadeUp{
     from{opacity:0;transform:translateY(20px);}
@@ -136,7 +157,9 @@
   @media(max-width:900px){
     header,main,footer{padding-left:24px;padding-right:24px;}
 
-    main{padding-bottom:60px;}
+    main{padding-bottom:48px;flex-direction:column;justify-content:center;gap:28px;}
+    .deck{order:-1;width:clamp(140px,42vw,180px);}
+    .msg{font-size:clamp(24px,7vw,34px);}
     .actions{gap:10px;}
     .btn{padding:14px 20px;font-size:11px;}
   }
@@ -167,16 +190,25 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 </header>
 
 <main>
-  <div class="kicker">[ ERROR · 404 · NOT FOUND ]</div>
-  <h1 class="code">
-    <span class="glitch" data-text="404" id="glitch">4<em>0</em>4</span>
-  </h1>
-  <p class="msg">Halaman ini <em>tidak ada</em> — atau belum sempat saya buat.</p>
-  <p class="sub">URL-nya mungkin salah ketik, pindah, atau memang tidak pernah ada di #060607. Coba pulang ke beranda, atau lihat arsip karya.</p>
-  <div class="actions">
-    <a href="/" class="btn btn-primary">← Pulang ke Home</a>
-    <a href="/#work" class="btn btn-ghost">Lihat Arsip</a>
-    <a href="/about.html" class="btn btn-ghost">Tentang Saya</a>
+  <div class="copy">
+    <div class="kicker">[ ERROR · 404 · KARTU HILANG ]</div>
+    <h1 class="msg">Satu kartu <em>hilang</em> dari dek.</h1>
+    <p class="sub">URL-nya salah ketik, sudah pindah meja, atau kartunya memang belum dicetak. Klik kartunya — atau kocok ulang dan mulai lagi dari home.</p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">✴︎ Kocok ulang → Home</a>
+      <a href="/#work" class="btn btn-ghost">Lihat Arsip</a>
+      <a href="/about.html" class="btn btn-ghost">Tentang Saya</a>
+    </div>
+  </div>
+  <div class="deck" role="img" aria-label="Ilustrasi satu kartu hilang dari dek">
+    <div class="ghost" aria-hidden="true">404</div>
+    <div class="fan f1" aria-hidden="true"></div>
+    <div class="fan f2" aria-hidden="true"></div>
+    <div class="fan f3" aria-hidden="true"></div>
+    <button class="lost" id="lost" aria-label="Balik kartu: lihat sisi 404">
+      <span class="face front" aria-hidden="true"><span class="q">?</span><span class="cap">Kartu hilang</span><span class="spark">✴︎</span></span>
+      <span class="face back" aria-hidden="true"><span class="q">404</span><span class="cap">Tak di tumpukan</span><span class="spark">✴︎</span></span>
+    </button>
   </div>
 </main>
 
@@ -186,18 +218,11 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
 </footer>
 
 <script>
-  // Trigger glitch flicker randomly
+  // Balik kartu hilang (klik) — depan "?" / belakang "404"
   (function(){
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduced) return;
-    const el = document.getElementById('glitch');
-    if(!el) return;
-    function flicker(){
-      el.classList.add('flick');
-      setTimeout(()=> el.classList.remove('flick'), 600 + Math.random()*400);
-      setTimeout(flicker, 3000 + Math.random()*5000);
-    }
-    setTimeout(flicker, 1500);
+    var lost = document.getElementById('lost');
+    if(!lost) return;
+    lost.addEventListener('click', function(){ lost.classList.toggle('flip'); });
   })();
 </script>
 
