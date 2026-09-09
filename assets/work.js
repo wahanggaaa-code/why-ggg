@@ -324,7 +324,9 @@
     var P0 = centerIndex + startIdx;
     uiLayer.style.opacity = 0;
     var wloadEl = document.getElementById('wload');
-    var tl = gsap.timeline({ onComplete: function () { if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
+    var FULLCP = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+    // paused: dimainkan setelah gerbang decode di bawah (from langsung tampil via immediateRender)
+    var tl = gsap.timeline({ paused: true, onComplete: function () { if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
     for (var idx = 0; idx < N; idx++) {
       var el = slides[idx];
       var target = poseFor(idx, P0, KF);
@@ -332,20 +334,48 @@
       var from = {
         x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
         scale: 340 / BASE.w, opacity: 0, rotationZ: (idx - N / 2) * 5,
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', filter: 'brightness(0.6)'
+        filter: 'brightness(0.6)'
       };
+      var cpT = 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)';
       var to = {
         x: target.x, y: target.y, scale: target.w / BASE.w, opacity: target.o,
         rotationZ: target.rz,
-        clipPath: 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)',
         filter: 'brightness(' + target.b + ')',
         duration: 0.9, ease: 'power3.out'
       };
+      // clip-path = repaint per frame -> tween hanya kartu yang clip-nya berubah (mengintip);
+      // sisanya pasang final langsung, hasil visual identik
+      if (cpT !== FULLCP) { from.clipPath = FULLCP; to.clipPath = cpT; }
+      else { el.style.clipPath = cpT; }
       el.style.zIndex = 100 - idx;
       tl.fromTo(el, from, to, 0.08 * idx);
     }
     tl.to(uiLayer, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.5);
     if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.55);
+    // gerbang decode: intro jalan hanya setelah 10 gambar siap ter-decode (maks 2.5 dtk),
+    // lalu 2 frame napas agar kompositor memegang layer sebelum tween pertama jalan.
+    // kunjungan pertama = tak ada lagi upload tekstur GPU di tengah kocokan.
+    var imgs = [];
+    for (var gi = 0; gi < slides.length; gi++) {
+      var gim = slides[gi].querySelector('img');
+      if (gim) imgs.push(gim);
+    }
+    var allReady;
+    try {
+      allReady = Promise.all(imgs.map(function (im) {
+        if (im.complete && im.naturalWidth) return Promise.resolve();
+        if (im.decode) { try { return im.decode().then(function () {}, function () {}); } catch (e) {} }
+        return new Promise(function (res) {
+          im.addEventListener('load', res, { once: true });
+          im.addEventListener('error', res, { once: true });
+        });
+      }));
+    } catch (e) { allReady = Promise.resolve(); }
+    Promise.race([allReady, new Promise(function (res) { setTimeout(res, 2500); })]).then(function () {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { tl.play(); });
+      });
+    });
   }
 
   window.addEventListener('resize', function () {
