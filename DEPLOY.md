@@ -53,6 +53,10 @@ npx wrangler deploy
 ```
 
 - Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
+- 404 custom: `not_found_handling = "404-page"` — URL yang tak cocok file otomatis
+  menyajikan `404.html` dengan status 404 (tanpa Worker, tanpa biaya invocasi).
+  Semua ref di `404.html` wajib absolut (`/...`) karena disajikan di URL sedalam
+  apa pun; uji sarang: sajikan `404.html` di path `/foo/bar` dan pastikan 0 request gagal.
 - `.assetsignore` memastikan file non-publik (`DEPLOY.md`, `wrangler.toml`, `.git`, `.wrangler`, `.gitignore`) tidak ikut ter-deploy;
   `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
 - `full.html`, `lab.html` & `llms.txt` ikut ter-deploy otomatis (file statis di root).

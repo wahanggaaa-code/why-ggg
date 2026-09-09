@@ -6,3 +6,5 @@ compatibility_date = "2024-09-25"
 # Sajikan seluruh root repo sebagai static assets (tanpa build step).
 [assets]
 directory = "./"
+# URL yang tak cocok file → sajikan 404.html dengan status 404 (tanpa Worker).
+not_found_handling = "404-page"
