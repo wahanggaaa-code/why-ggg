@@ -9,25 +9,37 @@ Live: https://why-ggg.wahanggaaa.workers.dev/
 Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputusan manual).
 
 ## Halaman
-- **index.html** — hero video `fluid.mp4` full-bleed + judul kinetik → `01 ARCHIVE`
-  (rail horizontal sticky-pin; 6 kartu projek live; klik kartu = masuk `work.html#slug`)
-  → `02 LOG` → closing → footer. **Loader crystal (`crystal.mp4`) muncul setiap home
-  dimuat** (refresh / direct / back / arrival) — dan hanya di home.
+- **index.html** — hero video `fluid.mp4` full-bleed + judul kinetik (terurai +
+  blur + fade saat scroll, desktop saja) → `01 ARCHIVE` (rail horizontal
+  sticky-pin; 6 kartu projek live; klik kartu = masuk `work.html#slug`; HUD =
+  progress bar + panah ← → polos tanpa pill) → `02 LOG` → closing → footer
+  (counter kunjungan + link Full index). **Loader crystal (`crystal.mp4`)
+  muncul setiap home dimuat** (refresh / direct / back / arrival) — dan hanya
+  di home.
 - **work.html** — carousel 3D loop 10 projek live: kartu pusat + parallax mouse,
   kartu prev/next mengintip dari sudut (morph clip-path), 2 kartu melayang redup,
-  fly-by kamera saat transisi, intro *deck-shuffle* setelah load, scroll-snap lembut,
-  counter & info teks sinkron. Klik kartu mengintip = pusatkan; klik kartu pusat =
-  buka situs live (tab baru). Deep-link `work.html#<slug>`.
+  fly-by kamera saat transisi, **intro riffle-burst + deal tengah-ke-luar + snap
+  kartu utama** (jalan setelah 10 gambar ter-decode, maks 2,5 dtk — mulus sejak
+  kunjungan pertama), status `loading the playlist…`, fling governor (momentum
+  berpagu maks 2,5 section), scroll-snap lembut, counter & info teks sinkron.
+  Klik kartu mengintip = pusatkan; klik kartu pusat = buka situs live (tab baru).
+  Deep-link `work.html#<slug>`.
+- **full.html** — index polos 10 karya (satu baris per projek: tautan carousel →
+  + live ↗); ditaut dari UI work + semua footer. Tanpa nav utama.
+- **llms.txt** — peta situs + daftar projek + kontak untuk konsumen AI.
 - **about.html**, **contact.html**, **404.html** — chrome & token desain sama dengan
   home (migrasi bahasa desain selesai SEP 2026; isi/layout tidak berubah).
-- About / contact / work / 404 **tidak punya loader**.
+- About / contact / work / full / 404 **tidak punya loader**.
+- Semua halaman: easter egg (`assets/egg.js`) — pesan console + klik logo ✴︎ 5×
+  (lintas-halaman) memicu toast + putaran spark.
 
 ## Struktur
 ```
-index.html  about.html  contact.html  work.html  404.html   # dipelihara MANUAL
+index.html  about.html  contact.html  work.html  full.html  404.html  llms.txt  # MANUAL
 assets/
   home.css  home.js        # design system + logika home (loader, rail, log, closing)
   work.css  work.js        # carousel 3D loop halaman work
+  egg.js                   # easter egg global (console + spark 5x)
   proj/*.webp              # thumbnail = screenshot hero 10 projek live (1100px)
 vendor/                    # gsap, ScrollTrigger, lenis (self-hosted)
 fonts/                     # General Sans + JetBrains Mono (woff2, self-hosted)
@@ -39,9 +51,9 @@ wrangler.toml  .assetsignore  DEPLOY.md
 1. Loader crystal = home-only, selalu muncul tiap home dimuat.
 2. Hero home = video `fluid.mp4` full-bleed; tanpa kicker/progress bar header.
 3. Palet teks: ink `#e9e9ea` & mut `#9a9a9e`; aksen sand `#f0d9a0` hanya di spot asli
-   (indeks rail, hint panah, hover, progress bar, angka total).
+   (indeks rail, hover panah/link, progress bar, angka total, indeks full.html).
 4. Rail mobile = swipe native scroll-snap (bukan drag JS).
-5. **Tanpa tombol pill** selamanya (closing pakai link mono polos).
+5. **Tanpa tombol pill** selamanya (closing pakai link mono polos; panah rail polos).
 6. Transisi antar-halaman = View Transitions blur fokus (CSS murni) + morph header
    `vt-nav`. Tidak ada JS curtain/WebGL antar-halaman.
 7. **UI tidak berubah tanpa keputusan pemilik repo.**
@@ -49,11 +61,13 @@ wrangler.toml  .assetsignore  DEPLOY.md
 ## Menambah projek baru
 1. Screenshot hero situs projek (1280×720) → konversi webp lebar 1100px →
    `assets/proj/<slug>.webp`.
-2. `work.html`: tambah `<a class="slide" href="https://<slug>.pages.dev/" …>` (urutan
-   bebas) + blok `.wi` tidak dipakai lagi (info ada di JS).
+2. `work.html`: tambah `<a class="slide" href="https://<slug>.pages.dev/" …>`
+   (urutan bebas; info ada di JS).
 3. `assets/work.js`: tambah slug di `ORDER` dan entri `{cat,title,desc}` di `slideData`
    pada posisi yang sama.
-4. Opsional: pasang di rail home (`index.html`, slot 6 kartu) dengan href
+4. `full.html`: tambah satu `.fx-row` (carousel + live); `llms.txt`: tambah satu
+   baris projek.
+5. Opsional: pasang di rail home (`index.html`, slot 6 kartu) dengan href
    `work.html#<slug>`.
 
 ## Lokal

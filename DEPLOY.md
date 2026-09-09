@@ -3,8 +3,8 @@
 Situs statis **vanilla** (HTML/CSS/JS) yang **dipelihara manual** di branch
 pengembangan. Tidak ada build step: file di root repo = file yang disajikan.
 
-> Semua halaman (`index/about/contact/work/404`) disunting langsung di root repo —
-> tidak ada build step dan tidak ada generator.
+> Semua halaman (`index/about/contact/work/full/404`, plus `llms.txt`) disunting
+> langsung di root repo — tidak ada build step dan tidak ada generator.
 
 ## Peta lingkungan
 
@@ -22,10 +22,12 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
 2. Edit file halaman/asset langsung:
    - desain & logika home: `assets/home.css`, `assets/home.js`
    - halaman work: `work.html`, `assets/work.css`, `assets/work.js`
-   - konten halaman: `index.html`, `about.html`, `contact.html`, `404.html`
+   - konten halaman: `index.html`, `about.html`, `contact.html`, `full.html`, `404.html`, `llms.txt`
+   - global: `assets/egg.js` (easter egg, dimuat semua halaman)
    - thumbnail projek: `assets/proj/<slug>.webp`
 3. Uji lokal: `python3 -m http.server 8080`.
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
+   intro work selesai ±2 dtk (wload hilang, counter jalan) · full.html 10 baris ·
    transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
 4. Commit + push ke `arsitektur-awwwards`.
 
@@ -42,6 +44,7 @@ npx wrangler deploy
 - Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
 - `.assetsignore` memastikan file non-publik (`DEPLOY.md`, `wrangler.toml`, `.git`, `.wrangler`, `.gitignore`) tidak ikut ter-deploy;
   `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
+- `full.html` & `llms.txt` ikut ter-deploy otomatis (file statis di root).
 - URL live: https://why-ggg.wahanggaaa.workers.dev/ (＋ domain custom via dashboard).
 - Rollback: `npx wrangler deployments list` → `npx wrangler rollback <version-id>`.
 
@@ -53,5 +56,7 @@ npx wrangler deploy
 - Semua library (GSAP, ScrollTrigger, Lenis, font) **self-hosted** — tanpa CDN.
 - Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);
   `crystal.mp4` tetap di-preload karena dipakai loader home.
+- Intro work = riffle-burst + deal (GSAP, transform 3D murni); gerbang decode gambar
+  (maks 2,5 dtk) menjaga kunjungan pertama tetap mulus — jangan dilepas tanpa ganti.
 - Keamanan: pernah ada PAT GitHub muncul di riwayat chat/sesi — **rotasi token** bila
   masih aktif; gunakan token ber-scope repo hanya via environment/CLI, jangan di file.
