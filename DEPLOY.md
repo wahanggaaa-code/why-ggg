@@ -3,7 +3,7 @@
 Situs statis **vanilla** (HTML/CSS/JS) yang **dipelihara manual** di branch
 pengembangan. Tidak ada build step: file di root repo = file yang disajikan.
 
-> Semua halaman (`index/about/contact/work/full/404`, plus `llms.txt`) disunting
+> Semua halaman (`index/about/contact/work/full/lab/404`, plus `llms.txt`) disunting
 > langsung di root repo — tidak ada build step dan tidak ada generator.
 
 ## Peta lingkungan
@@ -22,12 +22,12 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
 2. Edit file halaman/asset langsung:
    - desain & logika home: `assets/home.css`, `assets/home.js`
    - halaman work: `work.html`, `assets/work.css`, `assets/work.js`
-   - konten halaman: `index.html`, `about.html`, `contact.html`, `full.html`, `404.html`, `llms.txt`
+   - konten halaman: `index.html`, `about.html`, `contact.html`, `full.html`, `lab.html`, `404.html`, `llms.txt`
    - global: `assets/egg.js` (easter egg, dimuat semua halaman)
    - thumbnail projek: `assets/proj/<slug>.webp`
 3. Uji lokal: `python3 -m http.server 8080`.
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
-   intro work selesai ±2 dtk (wload hilang, counter jalan) · full.html 10 baris ·
+   intro work selesai ±2 dtk (wload hilang, counter jalan) · full.html 10 baris · cmd+k jalan ·
    transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
 4. Commit + push ke `arsitektur-awwwards`.
 
@@ -44,7 +44,7 @@ npx wrangler deploy
 - Konfigurasi: `wrangler.toml` — Workers Assets dengan directory root repo.
 - `.assetsignore` memastikan file non-publik (`DEPLOY.md`, `wrangler.toml`, `.git`, `.wrangler`, `.gitignore`) tidak ikut ter-deploy;
   `vendor/`, `assets/`, `fonts/` **ikut** ter-deploy.
-- `full.html` & `llms.txt` ikut ter-deploy otomatis (file statis di root).
+- `full.html`, `lab.html` & `llms.txt` ikut ter-deploy otomatis (file statis di root).
 - URL live: https://why-ggg.wahanggaaa.workers.dev/ (＋ domain custom via dashboard).
 - Rollback: `npx wrangler deployments list` → `npx wrangler rollback <version-id>`.
 

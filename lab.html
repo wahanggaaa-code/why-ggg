@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Full index — WHY ✴︎ GGG</title>
+<title>Lab — WHY ✴︎ GGG</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="logo.png">
-<meta name="description" content="Full index — all 10 works by WHY GGG. Quiet hands, loud standards.">
+<meta name="description" content="Lab — running systems & experiments by WHY GGG. Things that might work.">
 <meta name="theme-color" content="#060607">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Full index — WHY ✴︎ GGG">
-<meta property="og:description" content="Every project, one list. 10 works, 2026.">
+<meta property="og:title" content="Lab — WHY ✴︎ GGG">
+<meta property="og:description" content="Running systems & experiments. Shipped & tinkering.">
 <meta property="og:image" content="https://why-ggg.wahanggaaa.workers.dev/og-image.jpg">
-<link rel="canonical" href="https://why-ggg.wahanggaaa.workers.dev/full.html">
+<link rel="canonical" href="https://why-ggg.wahanggaaa.workers.dev/lab.html">
 <link rel="preload" href="fonts/GeneralSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -35,43 +35,33 @@
   header nav a::before{content:"[";margin-right:4px;opacity:0.4}
   header nav a::after{content:"]";margin-left:4px;opacity:0.4}
 
-  #fidx{position:relative;z-index:2;padding:88px 40px 90px;max-width:1100px;margin:0 auto}
-  .fx-kicker{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#9a9a9e;margin-bottom:20px}
-  .fx-title{font-weight:700;font-size:clamp(38px,6vw,84px);line-height:.92;letter-spacing:-0.05em;margin:0 0 10px}
-  .fx-count{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#9a9a9e;margin-bottom:44px}
-  .fx-count b{color:#e9e9ea;font-weight:500}
-  .fx-filt{display:flex;gap:20px;flex-wrap:wrap;margin:0 0 8px}
-  .fx-filt button{background:none;border:0;padding:6px 0;cursor:pointer;font-family:"JetBrains Mono",monospace;
-    font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9a9e}
-  .fx-filt button i{font-style:normal;opacity:.55}
-  .fx-filt button:hover{color:#e9e9ea}
-  .fx-filt button.on{color:#f0d9a0}
-  .fx-tip{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;color:#9a9a9e;margin-bottom:30px}
-  .fx-tip b{color:#e9e9ea;font-weight:500}
-  .fx-row.hide{display:none}
-  .fx-list{border-top:1px solid rgba(255,255,255,0.08)}
-  .fx-row{display:grid;grid-template-columns:52px 62px 1fr auto auto;gap:20px;align-items:baseline;
-    padding:20px 0;border-bottom:1px solid rgba(255,255,255,0.08);text-decoration:none}
-  .fx-idx{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:#f0d9a0}
-  .fx-code{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;color:#9a9a9e}
-  .fx-mid{min-width:0}
-  .fx-mid b{display:block;font-weight:600;font-size:clamp(19px,2.4vw,27px);letter-spacing:-0.02em;line-height:1.15}
-  .fx-mid span{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9a9a9e}
-  .fx-a{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;color:#e9e9ea;text-decoration:none;
-    border-bottom:1px solid transparent;transition:border-color .25s,color .25s;white-space:nowrap}
-  .fx-a:hover{color:#f0d9a0;border-color:rgba(240,217,160,.5)}
+  #lab{position:relative;z-index:2;padding:88px 40px 90px;max-width:1100px;margin:0 auto}
+  .lx-kicker{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#9a9a9e;margin-bottom:20px}
+  .lx-title{font-weight:700;font-size:clamp(38px,6vw,84px);line-height:.92;letter-spacing:-0.05em;margin:0 0 10px}
+  .lx-count{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#9a9a9e;margin-bottom:44px}
+  .lx-count b{color:#e9e9ea;font-weight:500}
+  .lx-list{border-top:1px solid rgba(255,255,255,0.08)}
+  .lx-row{display:grid;grid-template-columns:92px 1fr auto;gap:22px;align-items:center;
+    padding:18px 0;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .lx-thumb{display:flex;align-items:center;justify-content:center;height:62px;
+    border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.02);
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;color:#f0d9a0}
+  .lx-mid{min-width:0}
+  .lx-mid b{display:block;font-weight:600;font-size:clamp(18px,2.2vw,25px);letter-spacing:-0.02em;line-height:1.15}
+  .lx-mid span{display:block;margin-top:6px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;line-height:1.7;color:#9a9a9e}
+  .lx-st{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
+  .lx-st.shipped{color:#f0d9a0}
+  .lx-st.wip{color:#e9e9ea}
 
   .js .rv{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s cubic-bezier(0.22,0.61,0.36,1)}
   .js .rv.revealed{opacity:1;transform:none}
 
   @media(max-width:900px){
-    header,#fidx,footer{padding-left:24px;padding-right:24px}
-    #fidx{padding-top:64px}
-    .fx-row{grid-template-columns:52px 1fr;gap:6px 16px}
-    .fx-idx{grid-column:1;grid-row:1}
-    .fx-code{grid-column:1;grid-row:2}
-    .fx-mid{grid-column:2;grid-row:1/3}
-    .fx-a{grid-column:2;justify-self:start}
+    header,#lab,footer{padding-left:24px;padding-right:24px}
+    #lab{padding-top:64px}
+    .lx-row{grid-template-columns:72px 1fr;gap:8px 16px}
+    .lx-thumb{height:52px;font-size:10px;grid-row:1/3}
+    .lx-st{grid-column:2;justify-self:start}
   }
 </style>
 <style id="vtCss">
@@ -105,96 +95,47 @@ header{ view-transition-name:vt-nav; }
     </nav>
   </header>
 
-  <section id="fidx" aria-label="Full index">
-    <div class="fx-kicker rv">[ Full index (10) — everything ]</div>
-    <h1 class="fx-title rv">Every project,<br>one list.</h1>
-    <div class="fx-count rv"><b>10</b> works · 2026 · carousel atau live, pilih sendiri</div>
-    <div class="fx-filt rv" role="group" aria-label="Filter kategori">
-      <button data-f="all" class="on">All <i></i></button>
-      <button data-f="fashion">Fashion <i></i></button>
-      <button data-f="brand">Brand <i></i></button>
-      <button data-f="editorial">Editorial <i></i></button>
-      <button data-f="luxury">Luxury <i></i></button>
-      <button data-f="digital">Digital <i></i></button>
-    </div>
-    <div class="fx-tip rv">tips: tekan <b>cmd+k</b> di halaman mana pun untuk melompat.</div>
-    <div class="fx-list">
-    <div class="fx-row rv" data-tags="editorial">
-      <span class="fx-idx">01</span>
-      <span class="fx-code">26.AE</span>
-      <span class="fx-mid"><b>Aethelgard — The Hidden Archive</b><span>editorial · archive · 2026</span></span>
-      <a class="fx-a" href="work.html#aethelgard-7e0">carousel →</a>
-      <a class="fx-a" href="https://aethelgard-7e0.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="brand">
-      <span class="fx-idx">02</span>
-      <span class="fx-code">26.VK</span>
-      <span class="fx-mid"><b>Vroeger Koffiehuis</b><span>f&b · brand · 2026</span></span>
-      <a class="fx-a" href="work.html#vroeger-koffiehuis">carousel →</a>
-      <a class="fx-a" href="https://vroeger-koffiehuis.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="brand">
-      <span class="fx-idx">03</span>
-      <span class="fx-code">26.LX</span>
-      <span class="fx-mid"><b>LEXIER®</b><span>type · studio · 2026</span></span>
-      <a class="fx-a" href="work.html#lexier">carousel →</a>
-      <a class="fx-a" href="https://lexier.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="fashion editorial">
-      <span class="fx-idx">04</span>
-      <span class="fx-code">26.EL</span>
-      <span class="fx-mid"><b>ÉLAN — New Mood</b><span>fashion · editorial · 2026</span></span>
-      <a class="fx-a" href="work.html#elan-fashion-editorial">carousel →</a>
-      <a class="fx-a" href="https://elan-fashion-editorial.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="luxury">
-      <span class="fx-idx">05</span>
-      <span class="fx-code">26.VP</span>
-      <span class="fx-mid"><b>VIPERA — Émeraude</b><span>horlogerie · luxury · 2026</span></span>
-      <a class="fx-a" href="work.html#vipera-emeraude">carousel →</a>
-      <a class="fx-a" href="https://vipera-emeraude.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="digital">
-      <span class="fx-idx">06</span>
-      <span class="fx-code">26.AL</span>
-      <span class="fx-mid"><b>AELIAN — The Light Within</b><span>immersive · 3d · 2026</span></span>
-      <a class="fx-a" href="work.html#aelian">carousel →</a>
-      <a class="fx-a" href="https://aelian.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="fashion">
-      <span class="fx-idx">07</span>
-      <span class="fx-code">26.CC</span>
-      <span class="fx-mid"><b>Cerulean Chic</b><span>fashion · e-commerce · 2026</span></span>
-      <a class="fx-a" href="work.html#cerulean-chic">carousel →</a>
-      <a class="fx-a" href="https://cerulean-chic.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="fashion brand">
-      <span class="fx-idx">08</span>
-      <span class="fx-code">26.CH</span>
-      <span class="fx-mid"><b>CHERIEL</b><span>fashion · brand · 2026</span></span>
-      <a class="fx-a" href="work.html#cheriel-landing">carousel →</a>
-      <a class="fx-a" href="https://cheriel-landing.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="digital">
-      <span class="fx-idx">09</span>
-      <span class="fx-code">26.OC</span>
-      <span class="fx-mid"><b>OCULAR</b><span>cinematic · portfolio · 2026</span></span>
-      <a class="fx-a" href="work.html#ocular-45z">carousel →</a>
-      <a class="fx-a" href="https://ocular-45z.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
-    <div class="fx-row rv" data-tags="brand luxury">
-      <span class="fx-idx">10</span>
-      <span class="fx-code">26.GL</span>
-      <span class="fx-mid"><b>GLINT</b><span>jewelry · brand · 2026</span></span>
-      <a class="fx-a" href="work.html#glint-landing-58i">carousel →</a>
-      <a class="fx-a" href="https://glint-landing-58i.pages.dev/" target="_blank" rel="noopener">live ↗</a>
-    </div>
+  <section id="lab" aria-label="Lab">
+    <div class="lx-kicker rv">[ Lab — experiments ]</div>
+    <h1 class="lx-title rv">Things that<br>might work.</h1>
+    <div class="lx-count rv"><b>06</b> running systems · shipped &amp; tinkering</div>
+    <div class="lx-list">
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·01</span>
+        <span class="lx-mid"><b>Riffle-burst intro</b><span>work.js · sepuluh kartu meledak jadi kipas 3D, deal tengah-ke-luar, snap kartu utama</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·02</span>
+        <span class="lx-mid"><b>Fling governor</b><span>work.js · momentum liar diganti luncuran berpagu 2,5 section + momentum-kill</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·03</span>
+        <span class="lx-mid"><b>CMD+K palette</b><span>cmdk.js · lompat ke halaman &amp; projek dari keyboard, di semua halaman</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·04</span>
+        <span class="lx-mid"><b>Chromatic fly-by</b><span>work.js · rgb-split sesaat saat carousel melaju kencang</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·05</span>
+        <span class="lx-mid"><b>Spark egg ×5</b><span>egg.js · klik logo lima kali lintas halaman → toast + putaran spark</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
+      <div class="lx-row rv">
+        <span class="lx-thumb">LB·06</span>
+        <span class="lx-mid"><b>Visit counter</b><span>localstorage · kunjunganmu ke-n — jujur per-visitor, tanpa backend</span></span>
+        <span class="lx-st shipped">shipped</span>
+      </div>
     </div>
   </section>
 
   <footer>
     <span>© 2026 WHY ✴︎ GGG — All Rights Reserved</span>
-    <span><a href="work.html">← Work</a> · <a href="lab.html">Lab</a></span>
+    <span class="foot-links"><a href="full.html">Full index</a><i>·</i><a href="index.html">← Home</a></span>
   </footer>
 </div>
 <script>
@@ -210,26 +151,6 @@ header{ view-transition-name:vt-nav; }
     } else {
       els.forEach(el=> el.classList.add('revealed'));
     }
-  })();
-</script>
-<script>
-  (function(){
-    var rows = Array.prototype.slice.call(document.querySelectorAll('.fx-row'));
-    var btns = Array.prototype.slice.call(document.querySelectorAll('.fx-filt button'));
-    function count(f){ return f === 'all' ? rows.length : rows.filter(function(r){
-      return (' ' + r.getAttribute('data-tags') + ' ').indexOf(' ' + f + ' ') > -1; }).length; }
-    btns.forEach(function(b){
-      b.querySelector('i').textContent = '(' + String(count(b.getAttribute('data-f'))).padStart(2, '0') + ')';
-      b.addEventListener('click', function(){
-        btns.forEach(function(x){ x.classList.remove('on'); });
-        b.classList.add('on');
-        var f = b.getAttribute('data-f');
-        rows.forEach(function(r){
-          var show = f === 'all' || (' ' + r.getAttribute('data-tags') + ' ').indexOf(' ' + f + ' ') > -1;
-          r.classList.toggle('hide', !show);
-        });
-      });
-    });
   })();
 </script>
 <script src="assets/egg.js"></script>

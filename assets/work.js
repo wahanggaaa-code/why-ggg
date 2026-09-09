@@ -32,6 +32,7 @@
   var wraps = document.querySelectorAll('.parallax-wrap');
   var scrollArea = document.getElementById('wscroll');
   var uiLayer = document.getElementById('wui');
+  var wappEl = document.getElementById('wapp');
   if (!slides.length || !scrollArea) { document.documentElement.classList.add('no-wn'); return; }
 
   var H = window.innerHeight, W = window.innerWidth;
@@ -270,6 +271,9 @@
     currentScrollY = lerp(currentScrollY, targetScrollY, damp(trackRate));
     velocity = Math.abs(currentScrollY - lastScrollY) / dtF; // px/detik
     lastScrollY = currentScrollY;
+    // chromatic fly-by: rgb-split sesaat saat melaju kencang (hysteresis anti-kedip)
+    if (velocity > 1400) { if (!wappEl._chro) { wappEl._chro = true; wappEl.classList.add('chro'); } }
+    else if (velocity < 900) { if (wappEl._chro) { wappEl._chro = false; wappEl.classList.remove('chro'); } }
 
     var blurPx = velocity > 30 ? Math.min(velocity / 300, 10) : 0;
     if (Math.abs(blurPx - lastBlur) > 0.4) { lastBlur = blurPx; gsap.set(uiLayer, { filter: 'blur(' + blurPx.toFixed(1) + 'px)' }); }
@@ -447,6 +451,24 @@
       scrollArea.scrollTop = (p + d) * H;
     });
   });
+
+  /* ---------- TOG: overlay list inline (mode daftar tanpa pindah halaman) ---------- */
+  (function () {
+    var wtog = document.getElementById('wtog');
+    var wlist = document.getElementById('wlist');
+    var wclose = document.getElementById('wclose');
+    if (!wtog || !wlist) return;
+    function open() { wlist.hidden = false; wtog.setAttribute('aria-expanded', 'true'); if (wclose) wclose.focus(); }
+    function shut() { wlist.hidden = true; wtog.setAttribute('aria-expanded', 'false'); wtog.focus(); }
+    wtog.addEventListener('click', function () { wlist.hidden ? open() : shut(); });
+    if (wclose) wclose.addEventListener('click', shut);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !wlist.hidden) shut(); });
+    // klik judul baris = hashchange memusatkan kartu (handler existing) + tutup overlay
+    wlist.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest ? e.target.closest('a.wl-t') : null;
+      if (t) { wlist.hidden = true; wtog.setAttribute('aria-expanded', 'false'); }
+    });
+  })();
 
   sizeBase();
   updateUIFirst(startIdx);

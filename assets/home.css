@@ -145,12 +145,13 @@ header nav a.active{color:var(--ink)}
 .work-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-bottom:22px}
 .work-head .count{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink)}
 .log-list{border-top:1px solid var(--line)}
-.log-row{position:relative;isolation:isolate;display:grid;grid-template-columns:120px 1fr auto;gap:24px;align-items:baseline;
+.log-row{position:relative;isolation:isolate;display:grid;grid-template-columns:104px 96px 1fr auto;gap:20px;align-items:baseline;
   padding:22px 0;border-bottom:1px solid var(--line);transition:padding-left .5s var(--ease)}
 .log-row::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(255,255,255,.035);transform:scaleY(0);transform-origin:top;transition:transform .5s var(--ease)}
 .log-row:hover{padding-left:16px}
 .log-row:hover::before{transform:scaleY(1)}
 .log-date{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mut)}
+.log-type{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--acc);white-space:nowrap}
 .log-text{font-size:15px;line-height:1.62;color:#c9c9cc}
 .log-text b{font-weight:700;color:var(--ink)}
 .log-tag{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:lowercase;color:var(--mut);background:rgba(255,255,255,.06);border-radius:999px;padding:5px 11px}
@@ -208,7 +209,9 @@ footer a:hover{color:var(--ink)}
   .rail-prog{max-width:38vw}
   .rail-btns button{font-size:17px;padding:12px 10px}
   #log{padding:84px 6vw 0}
-  .log-row{grid-template-columns:1fr;gap:6px;padding:18px 0}
+  .log-row{grid-template-columns:auto 1fr;gap:4px 14px;padding:18px 0}
+  .log-text{grid-column:1/-1}
+  .log-tag{grid-column:1/-1}
   .log-row:hover{padding-left:0}
   .log-tag{justify-self:start}
   #closing{margin-top:32px;padding:48px 6vw 44px}

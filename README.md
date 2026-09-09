@@ -27,19 +27,22 @@ Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputu
 - **full.html** — index polos 10 karya (satu baris per projek: tautan carousel →
   + live ↗); ditaut dari UI work + semua footer. Tanpa nav utama.
 - **llms.txt** — peta situs + daftar projek + kontak untuk konsumen AI.
+- **lab.html** — running systems & eksperimen (daftar mono + thumbnail kode + status); ditaut dari footer.
 - **about.html**, **contact.html**, **404.html** — chrome & token desain sama dengan
   home (migrasi bahasa desain selesai SEP 2026; isi/layout tidak berubah).
-- About / contact / work / full / 404 **tidak punya loader**.
+- About / contact / work / full / lab / 404 **tidak punya loader**.
 - Semua halaman: easter egg (`assets/egg.js`) — pesan console + klik logo ✴︎ 5×
   (lintas-halaman) memicu toast + putaran spark.
 
 ## Struktur
 ```
-index.html  about.html  contact.html  work.html  full.html  404.html  llms.txt  # MANUAL
+index.html  about.html  contact.html  work.html  full.html  lab.html  404.html  llms.txt  # MANUAL
 assets/
   home.css  home.js        # design system + logika home (loader, rail, log, closing)
   work.css  work.js        # carousel 3D loop halaman work
   egg.js                   # easter egg global (console + spark 5x)
+  cmdk.js                  # command palette CMD+K (semua halaman)
+  navp.js                  # nav hover preview (desktop)
   proj/*.webp              # thumbnail = screenshot hero 10 projek live (1100px)
 vendor/                    # gsap, ScrollTrigger, lenis (self-hosted)
 fonts/                     # General Sans + JetBrains Mono (woff2, self-hosted)
@@ -51,7 +54,8 @@ wrangler.toml  .assetsignore  DEPLOY.md
 1. Loader crystal = home-only, selalu muncul tiap home dimuat.
 2. Hero home = video `fluid.mp4` full-bleed; tanpa kicker/progress bar header.
 3. Palet teks: ink `#e9e9ea` & mut `#9a9a9e`; aksen sand `#f0d9a0` hanya di spot asli
-   (indeks rail, hover panah/link, progress bar, angka total, indeks full.html).
+   (indeks rail, hover panah/link, progress bar, angka total, indeks full.html,
+   tipe log, status lab, baris aktif palette).
 4. Rail mobile = swipe native scroll-snap (bukan drag JS).
 5. **Tanpa tombol pill** selamanya (closing pakai link mono polos; panah rail polos).
 6. Transisi antar-halaman = View Transitions blur fokus (CSS murni) + morph header
@@ -65,8 +69,9 @@ wrangler.toml  .assetsignore  DEPLOY.md
    (urutan bebas; info ada di JS).
 3. `assets/work.js`: tambah slug di `ORDER` dan entri `{cat,title,desc}` di `slideData`
    pada posisi yang sama.
-4. `full.html`: tambah satu `.fx-row` (carousel + live); `llms.txt`: tambah satu
-   baris projek.
+4. `full.html`: tambah satu `.fx-row` (kode `26.XX` + `data-tags` filter + carousel + live);
+   `work.html`: tambah satu `.wl-row` di overlay list; `assets/cmdk.js`: tambah entri `PROJ`;
+   `llms.txt`: tambah satu baris projek.
 5. Opsional: pasang di rail home (`index.html`, slot 6 kartu) dengan href
    `work.html#<slug>`.
 
