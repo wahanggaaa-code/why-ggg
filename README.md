@@ -1,8 +1,8 @@
 # WHY ✴︎ GGG — Personal Landing
 
 Portfolio personal / editorial — situs statis **vanilla** (HTML · CSS · JS, tanpa
-framework, tanpa build step). Multi-halaman dengan **View Transitions** cross-document
-(blur fokus + morph header), rail arsip horizontal di home, dan halaman work berupa
+framework, tanpa build step). Multi-halaman dengan **transisi deck-wipe**
+(4 panel kartu sapu-menutup/membuka, WAAPI transform), rail arsip horizontal di home, dan halaman work berupa
 **carousel 3D loop** (pola hero OCULAR / garis keturunan huyml.co).
 
 Live: https://why-ggg.wahanggaaa.workers.dev/
@@ -60,8 +60,8 @@ wrangler.toml  .assetsignore  DEPLOY.md
    tipe log, status lab, baris aktif palette).
 4. Rail mobile = swipe native scroll-snap (bukan drag JS).
 5. **Tanpa tombol pill** selamanya (closing pakai link mono polos; panah rail polos).
-6. Transisi antar-halaman = View Transitions blur fokus (CSS murni) + morph header
-   `vt-nav`. Tidak ada JS curtain/WebGL antar-halaman.
+6. Transisi antar-halaman = deck-wipe (`assets/wipe.js`, WAAPI transform/opacity).
+   Entry membuka di semua halaman kecuali index (loader) & work (intro).
 7. **UI tidak berubah tanpa keputusan pemilik repo.**
 
 ## Menambah projek baru

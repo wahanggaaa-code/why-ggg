@@ -141,24 +141,14 @@
     .btn{padding:14px 20px;font-size:11px;}
   }
 </style>
-<style id="vtCss">
-
-/* ===== View Transitions (cross-document) — blur fokus + header tetap ===== */
-@view-transition{ navigation:auto; }
-header{ view-transition-name:vt-nav; }
+<style>
+/* penanda link nav aktif (dulu di blok view-transition, dipertahankan) */
 header nav a.active{ color:#e9e9ea; }
 header nav a.active::before, header nav a.active::after{ opacity:1; }
-::view-transition-old(root){ animation:vtblurOut .3s ease-in both; }
-::view-transition-new(root){ animation:vtblurIn .55s cubic-bezier(.16,1,.3,1) both; }
-@keyframes vtblurOut{ to{opacity:0; filter:blur(15px); transform:scale(1.045);} }
-@keyframes vtblurIn { from{opacity:0; filter:blur(20px); transform:scale(1.05);} }
-@media (prefers-reduced-motion: reduce){
-  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){ animation:none !important; }
-}
-
 </style>
 </head>
 <body>
+<script src="/assets/wipe.js"></script>
 
 <div class="bg">
   <video muted autoplay loop playsinline poster="/fluid-poster.webp">

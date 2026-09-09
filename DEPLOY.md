@@ -30,7 +30,7 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    intro work: LQIP instan lalu kocok 5 babak ±3 dtk (skip via scroll/klik;
    wload hilang, counter jalan) ·
    full.html 10 baris · cmd+k jalan ·
-   transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
+   deck-wipe antar-halaman (klik → panel menutup → entry membuka) · reduced-motion = native.
 4. Commit + push ke `arsitektur-awwwards`.
 
 ## Gerbang rilis (wajib sebelum merge ke `main`)
@@ -67,8 +67,8 @@ npx wrangler deploy
 
 ## Catatan operasional
 
-- **View Transitions** cross-document (blur fokus) aktif di semua halaman via CSS
-  inline `#vtCss`; header ikut morph (`view-transition-name: vt-nav`).
+- **Deck-wipe** (`assets/wipe.js`, 1 script tepat setelah `<body>`) aktif di semua
+  halaman: exit 4 panel menutup ±0,6 dtk → entry membuka (kecuali index & work).
 - Deep-link carousel work: `work.html#<slug>` (slug = nama file webp di `assets/proj/`).
 - Semua library (GSAP, ScrollTrigger, Lenis, font) **self-hosted** — tanpa CDN.
 - Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);

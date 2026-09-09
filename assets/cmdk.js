@@ -110,11 +110,11 @@
       try {
         location.hash = it.h.slice(1);
         var cur = location.pathname.split('/').pop() || 'index.html';
-        if (cur !== 'work.html') location.href = it.h;
+        if (cur !== 'work.html') { if (!window.__wipeTo || !window.__wipeTo(it.h)) location.href = it.h; }
       } catch (e) { location.href = it.h; }
       return;
     }
-    location.href = it.h;
+    if (!window.__wipeTo || !window.__wipeTo(it.h)) location.href = it.h;
   }
   document.addEventListener('keydown', function (e) {
     var k = e.key && e.key.toLowerCase ? e.key.toLowerCase() : e.key;

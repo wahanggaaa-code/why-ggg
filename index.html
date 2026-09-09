@@ -41,27 +41,14 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="assets/home.css">
 <script>document.documentElement.classList.add('js');</script>
-<style id="vtCss">
-/* ===== View Transitions (cross-document) — blur fokus + header tetap ===== */
-@view-transition{ navigation:auto; }
-header{ view-transition-name:vt-nav; }
+<style>
+/* penanda link nav aktif (dulu di blok view-transition, dipertahankan) */
 header nav a.active{ color:#e9e9ea; }
 header nav a.active::before, header nav a.active::after{ opacity:1; }
-::view-transition-old(root){ animation:vtblurOut .3s ease-in both; }
-::view-transition-new(root){ animation:vtblurIn .55s cubic-bezier(.16,1,.3,1) both; }
-@keyframes vtblurOut{ to{opacity:0; filter:blur(15px); transform:scale(1.045);} }
-@keyframes vtblurIn { from{opacity:0; filter:blur(20px); transform:scale(1.05);} }
-@media (prefers-reduced-motion: reduce){
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
-}
-.the-hidden-archive{ view-transition-name:vt-the-hidden-archive; }
-.the-architecture-of-silence{ view-transition-name:vt-the-architecture-of-silence; }
-.lexier-cover{ view-transition-name:vt-lexier-cover; }
-.lexier-poster{ view-transition-name:vt-lexier-poster; }
-.brush-script{ view-transition-name:vt-brush-script; }
 </style>
 </head>
 <body>
+<script src="assets/wipe.js"></script>
 <noscript><style>#loader{display:none !important}</style></noscript>
 
 <div id="loader" aria-hidden="true">
@@ -151,6 +138,7 @@ header nav a.active::before, header nav a.active::after{ opacity:1; }
     <div class="log-list">
       <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">Deck disebar — <b>4 sudut mengintip + sliver tepi</b>, kocokan riffle-silang selebar layar.</span></div>
       <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">Kocokan dipercepat — <b>±3 dtk</b>, koreografi & skip tak berubah.</span></div>
+      <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">Transisi deck-wipe — <b>4 panel kartu</b> sapu antar-halaman, gantikan blur VT.</span></div>
       <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">Kocokan 5 babak — <b>split, riffle, fan, deal ±3,3 dtk</b> + skip via scroll/klik.</span></div>
       <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">First-open jaringan lambat — <b>LQIP blur-up</b>: intro main instan, kartu menajam progresif.</span></div>
       <div class="log-row"><span class="log-date">09 SEP 2026</span><span class="log-type">[ MOTION ]</span><span class="log-text">Scroll work fluid — <b>cache tulis style</b> render loop, blur UI di-throttle, chromatic cuma kartu pusat.</span></div>

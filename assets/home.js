@@ -23,7 +23,7 @@
 
   /* ============ LOADER — crystal video, videoWrap out, tirai naik (signature) ============
      Home selalu menampilkan loader tiap dimuat (refresh / direct / back / tiba via transisi).
-     Halaman lain tidak punya loader. Transisi antar-halaman = View Transitions blur fokus (CSS). */
+     Halaman lain tidak punya loader. Transisi antar-halaman = deck-wipe (assets/wipe.js). */
   var loader = $('#loader'), videoWrap = $('#videoWrap'), crystal = $('#crystalVideo');
   var loaderDone = false;
   function loaderOut() {
