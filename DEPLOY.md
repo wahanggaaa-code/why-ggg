@@ -27,7 +27,7 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    - thumbnail projek: `assets/proj/<slug>.webp`
 3. Uji lokal: `python3 -m http.server 8080`.
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
-   intro work: LQIP instan lalu kocok 5 babak ±3,3 dtk (skip via scroll/klik;
+   intro work: LQIP instan lalu kocok 5 babak ±3,5 dtk (skip via scroll/klik;
    wload hilang, counter jalan) ·
    full.html 10 baris · cmd+k jalan ·
    transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
@@ -39,7 +39,7 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    id ganda, CSS kurawal seimbang, JSON-LD valid, tidak ada link/asset lokal 404,
    tidak ada kode yatim (id/class/fungsi tak terpakai).
 2. Runtime desktop + mobile: 7 halaman 0 console/page error, 0 request gagal;
-   loader home selesai; intro work main instan (LQIP) lalu kocok ±3,3 dtk; toggle LOG, filter full, palette cmd+k,
+   loader home selesai; intro work main instan (LQIP) lalu kocok ±3,5 dtk; toggle LOG, filter full, palette cmd+k,
    overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI.
 3. Reduced-motion: work jatuh ke grid `no-wn` tanpa error.
 4. `sitemap.xml` + `llms.txt` + `02 LOG` + docs selaras dengan isi rilis.

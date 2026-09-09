@@ -17,9 +17,9 @@ Branch pengembangan: `arsitektur-awwwards` · Production: `main` (merge = keputu
   muncul setiap home dimuat** (refresh / direct / back / arrival) — dan hanya
   di home.
 - **work.html** — carousel 3D loop 10 projek live: kartu pusat + parallax mouse,
-  kartu prev/next mengintip dari sudut (morph clip-path), 2 kartu melayang redup,
-  fly-by kamera saat transisi, **intro riffle-burst + deal tengah-ke-luar + snap
-  kartu utama** (LQIP blur-up: main instan, kartu menajam progresif — mulus sejak
+  4 sudut mengintip (prev/next + peek) + 2 melayang + 2 sliver tepi (morph clip-path),
+  fly-by kamera saat transisi, **intro kocokan 5 babak ±3,5 dtk + skip**
+  (LQIP blur-up: main instan, kartu menajam progresif — mulus sejak
   kunjungan pertama), status `loading the playlist…`, fling governor (momentum
   berpagu maks 2,5 section), scroll-snap lembut, counter & info teks sinkron,
   toggle `[ list ]` overlay daftar inline, chromatic RGB-split saat velocity tinggi.
