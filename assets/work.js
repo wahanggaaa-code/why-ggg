@@ -1,6 +1,7 @@
 /* WORK — carousel 3D loop. Diport dari hero OCULAR (se-garis huyml.co), lalu dihybrida ke arah huyml:
-   - intro "kocok/deal kartu": riffle burst (tumpukan meledak jadi kipas 3D) lalu deal
-     tengah-ke-luar + snap kartu utama; LQIP blur-up (main instan, tajam progresif)
+   - intro kocokan 5 babak ±3,3 dtk: SPLIT belah dua -> RIFFLE anyam -> SQUARE rapikan ->
+     FAN kipas busur -> DEAL flip tengah-ke-luar + snap hero; bisa skip via scroll/klik;
+     LQIP blur-up (main instan, tajam progresif)
    - komposisi hibrida: pusat + 2 sudut mengintip + 2 kartu melayang redup di ruang tengah
    - fly-by kamera saat transisi: kartu keluar menekuk ke arah kamera (translateZ+rotateY liar),
      kartu masuk muncul dari kedalaman
@@ -371,55 +372,77 @@
     // jarak sirkular dari kartu aktif -> deal dibagikan dari tengah ke luar
     function dist(i) { var dd = Math.abs(i - startIdx) % N; return dd > N / 2 ? N - dd : dd; }
     // paused: dimainkan setelah gerbang decode di bawah (from langsung tampil via immediateRender)
-    var tl = gsap.timeline({ paused: true, onComplete: function () { if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
-    var spreadX = Math.min(W * 0.34, 380);
+    var tl = gsap.timeline({ paused: true, onComplete: function () { unskip(); if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
+    // skip: scroll/klik saat kocokan -> langsung final (renderLoop handoff tetap mulus)
+    function skipIntro() { if (!tl.isActive()) return; unskip(); tl.progress(1); }
+    function unskip() {
+      window.removeEventListener('wheel', skipIntro);
+      window.removeEventListener('touchmove', skipIntro);
+      window.removeEventListener('mousedown', skipIntro);
+    }
+    window.addEventListener('wheel', skipIntro, { passive: true });
+    window.addEventListener('touchmove', skipIntro, { passive: true });
+    window.addEventListener('mousedown', skipIntro);
+    var spreadX = Math.min(W * 0.30, 340);
+    var fanStep = Math.min(72, W * 0.075), fanArc = Math.min(150, H * 0.16);
+    var cx = W / 2 - 170, cy = H / 2 - 120; // poros tumpukan
+    var s0 = 340 / BASE.w; // skala kartu saat flourish
     for (var idx = 0; idx < N; idx++) {
       var el = slides[idx];
       var dd = dist(idx);
       var hero = dd === 0;
       var target = poseFor(idx, P0, KF);
-      var r1 = rnd(idx * 4 + 1), r2 = rnd(idx * 4 + 2), r3 = rnd(idx * 4 + 3), r4 = rnd(idx * 4 + 4);
+      var r1 = rnd(idx * 4 + 1), r2 = rnd(idx * 4 + 2), r3 = rnd(idx * 4 + 3);
       var cpT = 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)';
       // state awal langsung (tanpa tween): redup + clip final; z = rumus renderLoop -> handoff tanpa pop
-      el.style.filter = 'brightness(0.6)';
+      el.style.filter = 'brightness(0.75)';
       el.style.clipPath = cpT; // clip final sejak awal — tanpa tween clip-path (repaint-bound)
       el.style.zIndex = 100 - dd * 10;
-      // A. RIFFLE BURST: tumpukan meledak jadi kipas 3D liar (rotasi & z murni transform -> murah)
+      // Kocokan 5 babak (transform/opacity saja): SPLIT -> RIFFLE -> SQUARE -> FAN -> DEAL+flip
+      var left = idx < N / 2, odd = idx % 2 === 1;
+      var fo = idx - (N - 1) / 2; // -4.5..4.5 poros kipas
+      // 1. SPLIT: deck belah dua (hero naik sorot di tengah); deck tampil sejak gate
       tl.fromTo(el, {
-        x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
-        scale: 340 / BASE.w, opacity: 0.01, rotationZ: (idx - N / 2) * 5 // 0.01 = pra-raster tak kasatmata
+        x: cx + (idx - N / 2) * 7, y: cy + (idx % 3 - 1) * 9,
+        scale: s0, opacity: 1, rotationZ: (idx - N / 2) * 2, rotationY: 0, rotationX: 0, z: 0
       }, {
-        x: W / 2 - 170 + r1 * spreadX,
-        y: H / 2 - 150 + r2 * H * 0.20 - H * 0.06,
-        scale: (340 / BASE.w) * 1.18,
-        opacity: target.o,
-        rotationZ: hero ? -18 : r1 * 50 + r3 * 10,
-        rotationY: hero ? -70 : r2 * 55,
-        rotationX: hero ? 16 : r3 * 28,
-        z: hero ? 260 : (0.5 + 0.5 * r4) * 220,
-        duration: 0.45, ease: 'power3.out'
-      }, 0.03 * dd);
-      // B. DEAL: tiap kartu mengayun ke posisinya, mendarat mentega
-      var land = {
-        x: target.x, y: target.y, scale: target.w / BASE.w, rotationZ: target.rz,
-        rotationX: 0, rotationY: 0, z: 0,
-        filter: 'brightness(' + target.b + ')',
-        duration: 0.9, ease: 'expo.out', overwrite: 'auto'
-      };
-      var landPos = 0.42 + 0.06 * dd;
-      tl.to(el, land, landPos);
+        x: hero ? cx : cx + (left ? -spreadX : spreadX) + r1 * 20,
+        y: hero ? cy - H * 0.10 : cy - H * 0.04 + r2 * 30,
+        scale: hero ? s0 * 1.12 : s0,
+        opacity: 1, rotationZ: hero ? 0 : (left ? -9 : 9),
+        duration: 0.55, ease: 'power2.inOut'
+      }, 0.10 + (hero ? 0 : 0.02 * idx));
+      // 2. RIFFLE: anyam kembali ke tengah, selang-seling z (jalinan kartu)
+      tl.to(el, { x: cx + (odd ? 30 : -30) + r1 * 12, y: cy + r2 * 14,
+        rotationZ: odd ? 5 : -5, z: odd ? 70 : 0,
+        duration: 0.45, ease: 'power3.inOut', overwrite: 'auto' }, 0.72);
+      // 3. SQUARE: rapikan tumpukan
+      tl.to(el, { x: cx, y: cy, rotationZ: 0, z: 0,
+        duration: 0.28, ease: 'power2.out', overwrite: 'auto' }, 1.18);
+      // 4. FAN: kipas busur sekejap (tengah tertinggi), sedikit menjauh
+      tl.to(el, { x: cx + fo * fanStep, y: cy - (1 - Math.pow(fo / 4.5, 2)) * fanArc + r3 * 12,
+        rotationZ: fo * 6.5, scale: s0 * 0.82,
+        duration: 0.5, ease: 'power3.inOut', overwrite: 'auto' }, 1.48);
+      // 5. DEAL: kibas flip lalu terbang ke pose final, tengah-ke-luar
+      var dealT = 2.02 + 0.07 * dd;
+      tl.to(el, { rotationY: (dd % 2 ? 55 : -55), z: 130,
+        duration: 0.18, ease: 'power2.in', overwrite: 'auto' }, dealT);
+      tl.to(el, { x: target.x, y: target.y, scale: target.w / BASE.w,
+        rotationZ: target.rz, rotationX: 0, rotationY: 0, z: 0,
+        opacity: target.o, filter: 'brightness(' + target.b + ')',
+        duration: 0.72, ease: 'expo.out', overwrite: 'auto' }, dealT + 0.12);
       // snap kartu utama saat mendarat (kembali tepat ke target -> handoff mulus)
       if (hero) {
-        var s0 = target.w / BASE.w;
-        tl.to(el, { scale: s0 * 1.035, duration: 0.12, ease: 'power2.out' }, landPos + 0.9);
-        tl.to(el, { scale: s0, duration: 0.35, ease: 'power3.inOut' }, landPos + 1.02);
+        var sT = target.w / BASE.w;
+        tl.to(el, { scale: sT * 1.035, duration: 0.12, ease: 'power2.out' }, dealT + 0.84);
+        tl.to(el, { scale: sT, duration: 0.35, ease: 'power3.inOut' }, dealT + 0.96);
       }
     }
-    tl.fromTo(uiLayer, { y: 18 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 0.85);
-    if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.9);
+    tl.fromTo(uiLayer, { y: 18 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 2.55);
+    if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 2.6);
     // kesiapan LQIP (blok di bawah): kartu tak-lengkap tampil mungil dulu, full menajam
     // progresif; intro cukup nunggu hero + font (berkap). Lalu reflow + 3 frame napas agar
-    // kompositor memegang layer sebelum tween pertama jalan (pra-raster via opacity 0.01).
+    // kompositor memegang layer sebelum tween pertama jalan (deck tampil sejak gate = sudah pra-raster).
     var imgs = [];
     for (var gi = 0; gi < slides.length; gi++) {
       var gim = slides[gi].querySelector('img');
