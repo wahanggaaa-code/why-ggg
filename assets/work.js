@@ -389,6 +389,7 @@
     function dist(i) { var dd = Math.abs(i - startIdx) % N; return dd > N / 2 ? N - dd : dd; }
     // paused: dimainkan setelah gerbang decode di bawah (from langsung tampil via immediateRender)
     var tl = gsap.timeline({ paused: true, onComplete: function () { unskip(); if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
+    tl.timeScale(1.08); // kocokan ±3,2 dtk (total ±3,5 dtk); proporsi babak utuh, skip tak terpengaruh
     // skip: scroll/klik saat kocokan -> langsung final (renderLoop handoff tetap mulus)
     function skipIntro() { if (!tl.isActive()) return; unskip(); tl.progress(1); }
     function unskip() {
