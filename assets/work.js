@@ -1,5 +1,6 @@
 /* WORK — carousel 3D loop. Diport dari hero OCULAR (se-garis huyml.co), lalu dihybrida ke arah huyml:
-   - intro "kocok/deal kartu" setelah load (kartu dikocok dari tumpukan pusat lalu dibagi ke posisinya)
+   - intro "kocok/deal kartu": riffle burst (tumpukan meledak jadi kipas 3D) lalu deal
+     tengah-ke-luar + snap kartu utama; jalan setelah gerbang decode gambar
    - komposisi hibrida: pusat + 2 sudut mengintip + 2 kartu melayang redup di ruang tengah
    - fly-by kamera saat transisi: kartu keluar menekuk ke arah kamera (translateZ+rotateY liar),
      kartu masuk muncul dari kedalaman
@@ -325,33 +326,58 @@
     uiLayer.style.opacity = 0;
     var wloadEl = document.getElementById('wload');
     var FULLCP = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+    // pseudo-acak deterministik per kartu (koreografi konsisten tiap kunjungan)
+    function rnd(seed) { var x = Math.sin(seed * 12.9898) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; }
+    // jarak sirkular dari kartu aktif -> deal dibagikan dari tengah ke luar
+    function dist(i) { var dd = Math.abs(i - startIdx) % N; return dd > N / 2 ? N - dd : dd; }
     // paused: dimainkan setelah gerbang decode di bawah (from langsung tampil via immediateRender)
     var tl = gsap.timeline({ paused: true, onComplete: function () { if (wloadEl) wloadEl.style.display = 'none'; running = true; renderLoop(); } });
+    var spreadX = Math.min(W * 0.34, 380);
     for (var idx = 0; idx < N; idx++) {
       var el = slides[idx];
+      var dd = dist(idx);
+      var hero = dd === 0;
       var target = poseFor(idx, P0, KF);
-      // tumpukan terkocok di pusat: bertumpuk miring, lalu "dibagikan" ke posisinya
-      var from = {
-        x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
-        scale: 340 / BASE.w, opacity: 0, rotationZ: (idx - N / 2) * 5,
-        filter: 'brightness(0.6)'
-      };
+      var r1 = rnd(idx * 4 + 1), r2 = rnd(idx * 4 + 2), r3 = rnd(idx * 4 + 3), r4 = rnd(idx * 4 + 4);
       var cpT = 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)';
-      var to = {
-        x: target.x, y: target.y, scale: target.w / BASE.w, opacity: target.o,
-        rotationZ: target.rz,
+      // state awal langsung (tanpa tween): redup + clip final; z = rumus renderLoop -> handoff tanpa pop
+      el.style.filter = 'brightness(0.6)';
+      el.style.clipPath = (cpT !== FULLCP) ? FULLCP : cpT;
+      el.style.zIndex = 100 - dd * 10;
+      // A. RIFFLE BURST: tumpukan meledak jadi kipas 3D liar (rotasi & z murni transform -> murah)
+      tl.fromTo(el, {
+        x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
+        scale: 340 / BASE.w, opacity: 0, rotationZ: (idx - N / 2) * 5
+      }, {
+        x: W / 2 - 170 + r1 * spreadX,
+        y: H / 2 - 150 + r2 * H * 0.20 - H * 0.06,
+        scale: (340 / BASE.w) * 1.18,
+        opacity: target.o,
+        rotationZ: hero ? -18 : r1 * 50 + r3 * 10,
+        rotationY: hero ? -70 : r2 * 55,
+        rotationX: hero ? 16 : r3 * 28,
+        z: hero ? 260 : (0.5 + 0.5 * r4) * 220,
+        duration: 0.45, ease: 'power3.out'
+      }, 0.03 * dd);
+      // B. DEAL: tiap kartu mengayun ke posisinya, mendarat mentega
+      var land = {
+        x: target.x, y: target.y, scale: target.w / BASE.w, rotationZ: target.rz,
+        rotationX: 0, rotationY: 0, z: 0,
         filter: 'brightness(' + target.b + ')',
-        duration: 0.9, ease: 'power3.out'
+        duration: 0.9, ease: 'expo.out', overwrite: 'auto'
       };
-      // clip-path = repaint per frame -> tween hanya kartu yang clip-nya berubah (mengintip);
-      // sisanya pasang final langsung, hasil visual identik
-      if (cpT !== FULLCP) { from.clipPath = FULLCP; to.clipPath = cpT; }
-      else { el.style.clipPath = cpT; }
-      el.style.zIndex = 100 - idx;
-      tl.fromTo(el, from, to, 0.08 * idx);
+      if (cpT !== FULLCP) land.clipPath = cpT; // clip-path mahal -> tween hanya yang butuh
+      var landPos = 0.42 + 0.06 * dd;
+      tl.to(el, land, landPos);
+      // snap kartu utama saat mendarat (kembali tepat ke target -> handoff mulus)
+      if (hero) {
+        var s0 = target.w / BASE.w;
+        tl.to(el, { scale: s0 * 1.035, duration: 0.12, ease: 'power2.out' }, landPos + 0.9);
+        tl.to(el, { scale: s0, duration: 0.35, ease: 'power3.inOut' }, landPos + 1.02);
+      }
     }
-    tl.to(uiLayer, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.5);
-    if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.55);
+    tl.fromTo(uiLayer, { y: 18 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 0.85);
+    if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.9);
     // gerbang decode: intro jalan hanya setelah 10 gambar siap ter-decode (maks 2.5 dtk),
     // lalu 2 frame napas agar kompositor memegang layer sebelum tween pertama jalan.
     // kunjungan pertama = tak ada lagi upload tekstur GPU di tengah kocokan.
