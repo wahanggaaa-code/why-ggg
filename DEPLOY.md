@@ -27,7 +27,8 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    - thumbnail projek: `assets/proj/<slug>.webp`
 3. Uji lokal: `python3 -m http.server 8080`.
    Checklist cepat: 0 console error · rail mobile swipe native · loader hanya di home ·
-   intro work selesai ±2 dtk (wload hilang, counter jalan) · full.html 10 baris · cmd+k jalan ·
+   intro work: tunggu decode (progres n/10, kap 6 dtk) lalu kocok ±2 dtk
+   (wload hilang, counter jalan) · full.html 10 baris · cmd+k jalan ·
    transisi blur fokus antar-halaman · reduced-motion jatuh ke fallback.
 4. Commit + push ke `arsitektur-awwwards`.
 
@@ -37,7 +38,7 @@ Aturan tetap: **tidak ada commit/edit langsung di `main`**. Rilis = merge
    id ganda, CSS kurawal seimbang, JSON-LD valid, tidak ada link/asset lokal 404,
    tidak ada kode yatim (id/class/fungsi tak terpakai).
 2. Runtime desktop + mobile: 7 halaman 0 console/page error, 0 request gagal;
-   loader home selesai; intro work ±2 dtk; toggle LOG, filter full, palette cmd+k,
+   loader home selesai; intro work tunggu-decode lalu kocok ±2 dtk; toggle LOG, filter full, palette cmd+k,
    overlay list, deep-link `#slug` berfungsi; tanpa overflow-x; tanpa overlap UI.
 3. Reduced-motion: work jatuh ke grid `no-wn` tanpa error.
 4. `sitemap.xml` + `llms.txt` + `02 LOG` + docs selaras dengan isi rilis.
@@ -72,6 +73,7 @@ npx wrangler deploy
 - Video hero (`fluid.mp4`) tidak di-preload sejak audit SEP 2026 (streaming natural);
   `crystal.mp4` tetap di-preload karena dipakai loader home.
 - Intro work = riffle-burst + deal (GSAP, transform 3D murni); gerbang decode gambar
-  (maks 2,5 dtk) menjaga kunjungan pertama tetap mulus — jangan dilepas tanpa ganti.
+  (tunggu beneran + progres n/10, kap 6 dtk; pra-raster opacity 0.01; tanpa tween
+  clip-path) menjaga kunjungan pertama tetap mulus — jangan dilepas tanpa ganti.
 - Keamanan: pernah ada PAT GitHub muncul di riwayat chat/sesi — **rotasi token** bila
   masih aktif; gunakan token ber-scope repo hanya via environment/CLI, jangan di file.

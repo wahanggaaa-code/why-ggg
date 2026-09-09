@@ -329,7 +329,6 @@
     var P0 = centerIndex + startIdx;
     uiLayer.style.opacity = 0;
     var wloadEl = document.getElementById('wload');
-    var FULLCP = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
     // pseudo-acak deterministik per kartu (koreografi konsisten tiap kunjungan)
     function rnd(seed) { var x = Math.sin(seed * 12.9898) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; }
     // jarak sirkular dari kartu aktif -> deal dibagikan dari tengah ke luar
@@ -346,12 +345,12 @@
       var cpT = 'polygon(' + target.cp[0] + '% ' + target.cp[1] + '%, ' + target.cp[2] + '% ' + target.cp[3] + '%, ' + target.cp[4] + '% ' + target.cp[5] + '%, ' + target.cp[6] + '% ' + target.cp[7] + '%)';
       // state awal langsung (tanpa tween): redup + clip final; z = rumus renderLoop -> handoff tanpa pop
       el.style.filter = 'brightness(0.6)';
-      el.style.clipPath = (cpT !== FULLCP) ? FULLCP : cpT;
+      el.style.clipPath = cpT; // clip final sejak awal — tanpa tween clip-path (repaint-bound)
       el.style.zIndex = 100 - dd * 10;
       // A. RIFFLE BURST: tumpukan meledak jadi kipas 3D liar (rotasi & z murni transform -> murah)
       tl.fromTo(el, {
         x: W / 2 - 170 + (idx - N / 2) * 7, y: H / 2 - 120 + (idx % 3 - 1) * 9,
-        scale: 340 / BASE.w, opacity: 0, rotationZ: (idx - N / 2) * 5
+        scale: 340 / BASE.w, opacity: 0.01, rotationZ: (idx - N / 2) * 5 // 0.01 = pra-raster tak kasatmata
       }, {
         x: W / 2 - 170 + r1 * spreadX,
         y: H / 2 - 150 + r2 * H * 0.20 - H * 0.06,
@@ -370,7 +369,6 @@
         filter: 'brightness(' + target.b + ')',
         duration: 0.9, ease: 'expo.out', overwrite: 'auto'
       };
-      if (cpT !== FULLCP) land.clipPath = cpT; // clip-path mahal -> tween hanya yang butuh
       var landPos = 0.42 + 0.06 * dd;
       tl.to(el, land, landPos);
       // snap kartu utama saat mendarat (kembali tepat ke target -> handoff mulus)
@@ -382,28 +380,38 @@
     }
     tl.fromTo(uiLayer, { y: 18 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 0.85);
     if (wloadEl) tl.to(wloadEl, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.9);
-    // gerbang decode: intro jalan hanya setelah 10 gambar siap ter-decode (maks 2.5 dtk),
-    // lalu 2 frame napas agar kompositor memegang layer sebelum tween pertama jalan.
-    // kunjungan pertama = tak ada lagi upload tekstur GPU di tengah kocokan.
+    // gerbang decode: intro jalan hanya setelah 10 gambar siap ter-decode (maks 6 dtk,
+    // progres n/10 di wload agar tunggu cache-kosong terasa hidup), lalu reflow + 3 frame
+    // napas agar kompositor memegang layer sebelum tween pertama jalan. kunjungan pertama =
+    // tak ada upload tekstur GPU di tengah kocokan (kartu pra-raster via opacity 0.01).
     var imgs = [];
     for (var gi = 0; gi < slides.length; gi++) {
       var gim = slides[gi].querySelector('img');
       if (gim) imgs.push(gim);
     }
+    var readyN = 0;
+    function markReady() {
+      readyN++;
+      if (wloadEl) wloadEl.textContent = 'loading the playlist… ' + readyN + '/' + imgs.length;
+    }
     var allReady;
     try {
       allReady = Promise.all(imgs.map(function (im) {
-        if (im.complete && im.naturalWidth) return Promise.resolve();
-        if (im.decode) { try { return im.decode().then(function () {}, function () {}); } catch (e) {} }
+        if (im.complete && im.naturalWidth) { markReady(); return Promise.resolve(); }
+        if (im.decode) { try { return im.decode().then(markReady, markReady); } catch (e) {} }
         return new Promise(function (res) {
-          im.addEventListener('load', res, { once: true });
-          im.addEventListener('error', res, { once: true });
+          function f() { markReady(); res(); }
+          im.addEventListener('load', f, { once: true });
+          im.addEventListener('error', f, { once: true });
         });
       }));
     } catch (e) { allReady = Promise.resolve(); }
-    Promise.race([allReady, new Promise(function (res) { setTimeout(res, 2500); })]).then(function () {
+    Promise.race([allReady, new Promise(function (res) { setTimeout(res, 6000); })]).then(function () {
+      void wappEl.offsetHeight; // kunci style -> kompositor memegang layer sebelum tween pertama
       requestAnimationFrame(function () {
-        requestAnimationFrame(function () { tl.play(); });
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { tl.play(); });
+        });
       });
     });
   }
